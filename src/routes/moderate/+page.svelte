@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { coins, dateTime } from '#lib/format.ts';
+	import { goto } from '$app/navigation';
 	import { enhance, type SubmitFunction } from '$app/forms';
 	import type { PageProps } from './$types';
 
@@ -21,7 +22,7 @@
 
 <div class="head">
 	<h1>Moderation</h1>
-	<a href="/markets/new" class="go new-market">New market</a>
+	<button type="button" class="go" onclick={() => goto('/markets/new')}>New market</button>
 </div>
 {#if form?.error}<p class="error" role="alert">{form.error}</p>{/if}
 {#if form?.done}<p class="ok" role="status">{form.done}</p>{/if}
@@ -266,11 +267,6 @@
 		background: var(--fg);
 		color: var(--bg);
 		font-weight: var(--weight-strong);
-	}
-	.new-market {
-		display: inline-flex;
-		align-items: center;
-		text-decoration: none;
 	}
 	.quiet {
 		background: var(--card-2);

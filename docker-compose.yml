@@ -18,6 +18,8 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/clubpredict
       ORIGIN: https://${DOMAIN:-localhost}
+      # Proof uploads: 5 pieces of 5 MB plus form overhead. The adapter's default is 512K, which refuses a 682 KB picture with 413.
+      BODY_SIZE_LIMIT: 26M
       ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-}
       ALLOWED_EMAILS: ${ALLOWED_EMAILS:-}
       SMTP_URL: ${SMTP_URL:-}

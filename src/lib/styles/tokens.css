@@ -14,11 +14,12 @@
 	--brand: #2e5cb8;
 	/* Text-strength brand for links on --bg/--card (AA); --brand is for fills under white text. */
 	--brand-text: #274e9b;
-	--yes: #2eb873;
-	--no: #dd3c3c;
+	/* Yes is blue and No is pink, after Twitch. */
+	--yes: #3669f6;
+	--no: #ce2c8a;
 	/* Text-strength Yes/No: pass WCAG AA (4.5:1) on --card-2, unlike --yes/--no. */
-	--yes-text: #0e4e30;
-	--no-text: #861313;
+	--yes-text: #163ea8;
+	--no-text: #8f0f52;
 	--hover: #0000000d;
 
 	--font: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -44,10 +45,10 @@
 		/* SSE's primary is #3c8cdd; darkened so white button text passes AA. */
 		--brand: #2375c7;
 		--brand-text: #3c8cdd;
-		--yes: #1fad7e;
-		--no: #d92626;
-		--yes-text: #33cc85;
-		--no-text: #eb7070;
+		--yes: #3669f6;
+		--no: #ce2c8a;
+		--yes-text: #7a9bff;
+		--no-text: #ff7fbd;
 		--hover: #ffffff1a;
 	}
 }

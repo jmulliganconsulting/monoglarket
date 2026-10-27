@@ -1,7 +1,10 @@
 import { error, fail } from '@sveltejs/kit';
+import { join } from 'node:path';
+import { DATA_DIR } from '$app/env/private';
 import { prisma } from '#lib/server/db.ts';
 import { propose } from '../../markets/markets.ts';
 import { marketMessage } from '../../markets/messages.ts';
+import { discardProofs, proofsFromForm, type ProofInput } from '../../proofs/proofs.ts';
 
 // Only members an admin has granted a market to. Everything here is one market at a time.
 export async function load({ locals }) {
@@ -22,10 +25,14 @@ export const actions = {
 		const marketId = Number(form.get('marketId'));
 		const granted = await prisma.marketResolver.findUnique({ where: { marketId_userId: { marketId, userId: locals.user!.id } } });
 		if (!granted) error(403, 'That market has not been trusted to you');
+		const dir = join(DATA_DIR, 'resolution-proofs');
+		let proofs: ProofInput[] = [];
 		try {
-			await propose(prisma, { marketId, outcomeId: Number(form.get('outcomeId')), proposerId: locals.user!.id, evidence: String(form.get('evidence') ?? '') });
+			proofs = await proofsFromForm(form, dir);
+			await propose(prisma, { marketId, outcomeId: Number(form.get('outcomeId')), proposerId: locals.user!.id, evidence: String(form.get('evidence') ?? ''), proofs });
 		} catch (e) {
-			return fail(400, { error: marketMessage(e), marketId });
+			await discardProofs(dir, proofs);
+			return fail(400, { error: e instanceof Error && !('code' in e) ? e.message : marketMessage(e), marketId });
 		}
 		return { done: 'Resolved. Winners are paid, and the market can be disputed for 24 hours.' };
 	},

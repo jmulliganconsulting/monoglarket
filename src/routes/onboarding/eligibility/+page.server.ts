@@ -2,11 +2,12 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { prisma } from '#lib/server/db.ts';
 import { SESSION_COOKIE } from '#lib/server/session.ts';
 import { elsewhere, onboardingMessage, OnboardingError, saveEligibility } from '../../../onboarding/onboarding.ts';
+import { todayInNewYork } from '../../../onboarding/eligibility.ts';
 
 export function load({ locals }) {
 	const to = elsewhere(locals.user!, 'eligibility');
 	if (to) redirect(303, to);
-	return {};
+	return { thisYear: todayInNewYork().year };
 }
 
 export const actions = {

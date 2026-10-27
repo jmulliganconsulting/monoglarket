@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href="/sse-logo-mark.v3.svg" />
+	<link rel="icon" href="/sse-favicon.v1.svg" type="image/svg+xml" />
 	<link rel="manifest" href="/manifest.webmanifest" />
 	<meta name="theme-color" content="#111111" />
 	<!-- Link previews (Discord, Twitter/X, Slack, iMessage): the card uses these when a link is pasted. -->
@@ -92,7 +92,7 @@
 		<a href="/privacy">Privacy Policy</a>
 		<a href="/terms">Terms of Service</a>
 	</nav>
-	<p>© jmulligan2026 · Commit <code>{__GIT_COMMIT__}</code></p>
+	<p>© John Mulligan 2026 · Commit <code>{__GIT_COMMIT__}</code></p>
 </footer>
 
 <style>

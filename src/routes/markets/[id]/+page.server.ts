@@ -1,5 +1,4 @@
 import { error, fail } from '@sveltejs/kit';
-import { unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DATA_DIR } from '$app/env/private';
 import { prisma } from '#lib/server/db.ts';
@@ -14,7 +13,7 @@ import { fileReport, reportMessage } from '../../../reports/reports.ts';
 import { SOURCES } from '../../../resolvers/sources.ts';
 import { onBreak } from '../../../users/users.ts';
 import { tradeAllowed } from '../../../markets/limits.ts';
-import { MAX_PROOFS, parseLinks, saveProof, type ProofInput } from '../../../proofs/proofs.ts';
+import { discardProofs, proofsFromForm, type ProofInput } from '../../../proofs/proofs.ts';
 
 export async function load({ params, locals }) {
 	const id = Number(params.id);
@@ -194,25 +193,13 @@ export const actions = {
 	propose: async ({ request, locals, params }) => {
 		const form = await request.formData();
 		const dir = join(DATA_DIR, 'resolution-proofs');
-		const saved: string[] = [];
-		const files = form.getAll('proofFile').filter((f): f is File => f instanceof File && f.size > 0);
-		let proofs: ProofInput[];
+		let proofs: ProofInput[] = [];
 		try {
-			proofs = parseLinks(String(form.get('proofLinks') ?? ''));
-		} catch (e) {
-			return fail(400, { proposeError: e instanceof Error ? e.message : 'Check the links.' });
-		}
-		if (proofs.length + files.length > MAX_PROOFS) return fail(400, { proposeError: marketMessage({ code: 'too_many_proofs' }) });
-		try {
-			for (const file of files) {
-				const proof = await saveProof(dir, file);
-				if (proof.kind !== 'link') saved.push(proof.storedName);
-				proofs.push(proof);
-			}
+			proofs = await proofsFromForm(form, dir);
 			await propose(prisma, { marketId: Number(params.id), outcomeId: Number(form.get('outcomeId')), proposerId: locals.user!.id, evidence: String(form.get('evidence') ?? ''), proofs });
 		} catch (e) {
-			// Nothing is kept for a refused proposal: remove any picture or PDF we already saved.
-			await Promise.all(saved.map((name) => unlink(join(dir, name)).catch(() => {})));
+			// Nothing is kept for a refused proposal: remove any picture or PDF already saved.
+			await discardProofs(dir, proofs);
 			return fail(400, { proposeError: e instanceof Error && !('code' in e) ? e.message : marketMessage(e) });
 		}
 		return { proposed: true };

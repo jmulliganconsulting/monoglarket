@@ -6,5 +6,5 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#111111",
-  "icons": [{ "src": "/sse-logo-mark.v3.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+  "icons": [{ "src": "/sse-favicon.v1.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
 }

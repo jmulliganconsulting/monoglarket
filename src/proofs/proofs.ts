@@ -1,7 +1,7 @@
 // Proof behind a resolution proposal (vault "Resolution proof"): links, pictures and PDFs. Files are checked by type and
 // by file signature, saved under a random name, and served only by the /proofs route, which checks who can see the market.
 import { randomUUID } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 export const MAX_PROOF_BYTES = 5_000_000;
@@ -39,6 +39,25 @@ export async function saveProof(dir: string, file: File): Promise<ProofInput> {
 	const storedName = `${randomUUID()}.${spec.ext}`;
 	await writeFile(join(dir, storedName), bytes);
 	return { kind: spec.kind, storedName, originalName: file.name.slice(0, 200), mimeType: file.type, sizeBytes: bytes.length, label: file.name.slice(0, 80) };
+}
+
+/** The links and uploaded pictures or PDFs from a form, saved to dir. Keeps nothing when it throws. */
+export async function proofsFromForm(form: FormData, dir: string): Promise<ProofInput[]> {
+	const proofs = parseLinks(String(form.get('proofLinks') ?? ''));
+	const files = form.getAll('proofFile').filter((f): f is File => f instanceof File && f.size > 0);
+	if (proofs.length + files.length > MAX_PROOFS) throw new Error('Attach at most 5 pieces of proof.');
+	try {
+		for (const file of files) proofs.push(await saveProof(dir, file));
+	} catch (e) {
+		await discardProofs(dir, proofs);
+		throw e;
+	}
+	return proofs;
+}
+
+/** Removes the pictures and PDFs of a refused proposal. Links have nothing on disk. */
+export async function discardProofs(dir: string, proofs: ProofInput[]) {
+	await Promise.all(proofs.flatMap((p) => (p.kind === 'link' ? [] : [unlink(join(dir, p.storedName)).catch(() => {})])));
 }
 
 /** Only https links are kept. Throws for anything else, so a proof can never point at a page the browser would run. */

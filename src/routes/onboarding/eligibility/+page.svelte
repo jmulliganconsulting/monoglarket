@@ -3,7 +3,7 @@
 	import { COUNTRIES, CA_PROVINCES, US_STATES } from '#lib/regions.ts';
 	import type { ActionData, PageProps } from './$types';
 
-	let { form }: PageProps = $props();
+	let { data, form }: PageProps = $props();
 	const v = $derived((form as ActionData | undefined)?.values);
 	// Picked in the dropdown; until then the last submitted value, or the United States.
 	let picked = $state<string | null>(null);
@@ -21,7 +21,7 @@
 	{#if form?.error}<p class="error" role="alert">{form.error}</p>{/if}
 
 	<div class="row">
-		<label>Birth year<input name="birthYear" type="number" inputmode="numeric" autocomplete="bday-year" min="1900" max="2100" required value={v?.birthYear ?? ''} /></label>
+		<label>Birth year<input name="birthYear" type="number" inputmode="numeric" autocomplete="bday-year" min="1900" max={data.thisYear} required value={v?.birthYear ?? ''} /></label>
 	</div>
 
 	<BirthdayFields month={v?.birthMonth} day={v?.birthDay} checked={v?.birthdayRewards} />

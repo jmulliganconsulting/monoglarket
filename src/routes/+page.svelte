@@ -154,7 +154,7 @@
 				{@const m = entry[0]}
 				<li class:headliner={m.id === data.headlinerId} style:border-top={m.colorPrimary ? `4px solid ${m.colorPrimary}` : undefined}>
 					{#if m.id === data.headlinerId}<p class="tag">Headliner</p>{/if}
-					<MarketHeading src={m.imageFile ? `/market-images/${m.imageFile}` : null}>
+					<MarketHeading large={m.id === data.headlinerId} src={m.imageFile ? `/market-images/${m.imageFile}` : null}>
 						<h2><a href="/markets/{m.id}">{m.question}</a></h2>
 					</MarketHeading>
 					{#if data.decided}

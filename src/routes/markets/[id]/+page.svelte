@@ -18,6 +18,8 @@
 	// svelte-ignore state_referenced_locally
 	let series = $state(structuredClone(data.series));
 	let connected = $state(false);
+	// The picture is as tall as the header text, so it never adds height above the graph.
+	let headH = $state(0);
 	$effect(() => {
 		live = structuredClone(data.outcomes);
 		series = structuredClone(data.series);
@@ -156,10 +158,10 @@
 
 <svelte:head><title>{data.market.question} · Club Predictions</title></svelte:head>
 
-<header class="head">
+<header class="head" class:framed={!!data.market.imageFile} bind:clientHeight={headH} style:--pic="{headH}px">
 	<p class="meta">{data.market.creator ? `Proposed by ${data.market.creator}` : ''} · {data.market.currency}</p>
 	{#if data.market.questionGroupId}<p class="meta">Option of <a href="/questions/{data.market.questionGroupId}">a several-winner question</a>{data.market.optionLabel ? `: ${data.market.optionLabel}` : ''}</p>{/if}
-	<MarketHeading src={data.market.imageFile ? `/market-images/${data.market.imageFile}` : null}>
+	<MarketHeading large src={data.market.imageFile ? `/market-images/${data.market.imageFile}` : null}>
 		<h1>{data.market.question}</h1>
 	</MarketHeading>
 	<p class="status">{statusText} {#if connected}<span class="live">● Live</span>{/if}</p>
@@ -481,7 +483,30 @@
 		font-weight: var(--weight-strong);
 	}
 	.head {
+		position: relative;
 		margin-bottom: 16px;
+	}
+	.head.framed {
+		padding-right: var(--pic);
+	}
+	/* Square picture, out of the flow: its side is the header's height, so the header does not grow. */
+	.head :global(.logo.large) {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: var(--pic);
+		height: var(--pic);
+		border-radius: 12px;
+	}
+	@media (max-width: 600px) {
+		.head.framed {
+			padding-right: 0;
+		}
+		.head :global(.logo.large) {
+			position: static;
+			width: 128px;
+			height: 128px;
+		}
 	}
 	.head h1 {
 		margin: 4px 0 8px;

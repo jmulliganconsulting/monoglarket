@@ -19,7 +19,7 @@
 	<article class="card">
 		<h2>{m.question}</h2>
 		<p>{m.criteria}</p>
-		<form method="POST" action="?/resolve" onsubmit={confirmFirst}>
+		<form method="POST" action="?/resolve" enctype="multipart/form-data" onsubmit={confirmFirst}>
 			<input type="hidden" name="marketId" value={m.id} />
 			<label class="field">
 				Winner
@@ -30,6 +30,14 @@
 			<label class="field">
 				Evidence: a link, or a sentence. Everyone can read it.
 				<textarea name="evidence" rows="2" required maxlength="500"></textarea>
+			</label>
+			<label class="field">
+				Proof: pictures or PDFs, up to 5 pieces in all, 5 MB each
+				<input type="file" name="proofFile" multiple accept="image/png,image/jpeg,image/webp,application/pdf" />
+			</label>
+			<label class="field">
+				Proof links, one per line (https only). Add a caption after a bar: https://example.com | Final score
+				<textarea name="proofLinks" rows="2"></textarea>
 			</label>
 			<button class="go">Resolve</button>
 			{#if form?.error && form.marketId === m.id}<p class="error" role="alert">{form.error}</p>{/if}
