@@ -4,6 +4,7 @@
 	import type { LayoutProps } from './$types';
 	import VisitSummary from '#lib/VisitSummary.svelte';
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 
 	let { children, data }: LayoutProps = $props();
 
@@ -30,6 +31,17 @@
 	<link rel="icon" href="/sse-logo-mark.v3.svg" />
 	<link rel="manifest" href="/manifest.webmanifest" />
 	<meta name="theme-color" content="#111111" />
+	<!-- Link previews (Discord, Twitter/X, Slack, iMessage): the card uses these when a link is pasted. -->
+	<meta name="description" content="Forecast club events with play-money coins." />
+	<meta property="og:site_name" content="Club Predictions" />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="Club Predictions" />
+	<meta property="og:description" content="Forecast club events with play-money coins." />
+	<meta property="og:url" content="{page.url.origin}{page.url.pathname}" />
+	<meta property="og:image" content="{page.url.origin}/og-card.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <header>
@@ -75,6 +87,13 @@
 	<VisitSummary summary={data.summary} />
 {/if}
 <main>{@render children()}</main>
+<footer>
+	<nav class="legal-links" aria-label="Legal">
+		<a href="/privacy">Privacy Policy</a>
+		<a href="/terms">Terms of Service</a>
+	</nav>
+	<p>© jmulligan2026 · Commit <code>{__GIT_COMMIT__}</code></p>
+</footer>
 
 <style>
 	/* Offline (FR-29): the banner shows, and every green action button is paused so nothing is attempted without a connection. */
@@ -258,6 +277,31 @@
 		main {
 			padding-bottom: 16px;
 		}
+	}
+	/* Footer sits above the phone bottom nav, so it keeps the same clearance as main. */
+	footer {
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 16px 16px calc(88px + env(safe-area-inset-bottom));
+		border-top: 1px solid var(--border);
+		color: var(--muted);
+		font-size: 0.8125rem;
+	}
+	footer p {
+		margin: 8px 0 0;
+	}
+	footer a {
+		color: var(--fg-2);
+	}
+	.legal-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 16px;
+	}
+	.legal-links a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
 	}
 	:global(h1) {
 		font-size: 1.75rem;
