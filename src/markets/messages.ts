@@ -1,0 +1,50 @@
+// What a member reads when a market action fails. Codes come from markets.ts and ledger.ts.
+import { LedgerError } from '../ledger/ledger.ts';
+
+const messages: Record<string, string> = {
+	missing_text: 'Add a question and resolution criteria.',
+	bad_outcome_count: 'A market needs 2 to 10 outcomes.',
+	duplicate_option: 'Two options have the same name. Give each option its own name.',
+	auto_needs_admin: 'Only an admin can make an automatic answer final. Pick “a moderator confirms” instead.',
+	not_allowed:'Only moderators, admins and members a moderator has trusted with this market can propose a result.',
+	too_many_proofs: 'Attach at most 5 pieces of proof.',
+	bad_link: 'Links must start with https://.',
+	bad_subsidy: 'The subsidy must be a whole number.',
+	bad_spend_cap: 'The spend cap must be a whole number.',
+	bad_close: 'The close time must be in the future.',
+	not_pending: 'That has already been decided.',
+	not_found: 'That no longer exists.',
+	not_moderator: 'Only moderators and admins can do that.',
+	second_moderator_needed: 'Another moderator has to confirm this one.',
+	evidence_required: 'Add evidence: a link or a sentence.',
+	not_resolvable: 'This market can no longer be resolved.',
+	not_cancellable: 'This market can no longer be cancelled.',
+	not_resolved: 'This market has not been resolved yet.',
+	bad_outcome: 'Pick one of the market’s outcomes.',
+	price_moved: 'The price moved. Check the new quote and try again.',
+	market_closed: 'Trading has closed for this market.',
+	insufficient_balance: 'You don’t have enough balance.',
+	position_cap: 'You have reached the spend limit for this market.',
+	not_enough_shares: 'You don’t hold that many shares.',
+	too_small: 'That sale is too small to pay out a whole unit.',
+	bad_amount: 'Enter a positive amount.',
+	conflict_of_interest: 'A moderator with a position in a market can’t resolve it.',
+	market_locked: 'Trading is locked while this is happening, until it is resolved.',
+	already_locked: 'This market is already locked.',
+	reason_required: 'Give a reason of at least 5 characters. Members see it.',
+	not_editable: 'This market can no longer be changed in that way.',
+	too_few_outcomes: 'A market needs at least two options.',
+	bad_visibility: 'Pick a valid visibility. A group needs a group.',
+	dispute_closed: 'The dispute window for this result has closed.',
+	same_outcome: 'That is already the result.',
+	bad_colour: 'Colours must be a # and six hex digits.',
+	bad_lock_time: 'The lock time must be in the future and before the market closes.',
+	not_lockable: 'Only open markets can be locked.',
+	on_break: 'You’re on a break from trading. Payouts still arrive.',
+	bad_resolver: 'That automatic source isn’t set up.',
+	bad_date: 'Enter real days like 2027-06-01. The day it happened can’t be in the future.',
+};
+
+export function marketMessage(e: unknown): string {
+	return e instanceof LedgerError && messages[e.code] ? messages[e.code] : 'Something went wrong. Try again.';
+}
