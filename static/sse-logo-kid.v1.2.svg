@@ -1,0 +1,55 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 125" width="500" height="125">
+	<style>
+		tspan { white-space:pre } 
+		.s0 { fill: #86acc7 } 
+		.s1 { fill: #426e8c } 
+		.s2 { fill: #5289af } 
+		.s3 { fill: none;stroke: #426e8c;stroke-linecap: round;stroke-linejoin: round;stroke-width: 3 } 
+		.s4 { fill: none;stroke: #5289af;stroke-linecap: round;stroke-linejoin: round;stroke-width: 3 } 
+		.s5 { fill: none;stroke: #1f3547;stroke-linecap: round;stroke-linejoin: round;stroke-width: 3.5 } 
+		.t6 { font-size: 24px;fill: #f4f1e6;font-family: "' Chalkboard  SE'" } 
+		.t7 { font-size: 34px;fill: #f4f1e6;font-family: "' Chalkboard  SE'" } 
+		.t8 { font-size: 25px;fill: #e7e9ef;font-family: "' Chalkboard  SE'" } 
+		.t9 { font-size: 35px;fill: #e7e9ef;font-family: "' Chalkboard  SE'" } 
+		.s10 { fill: none;stroke: #5289af;stroke-linecap: round;stroke-width: 4 } 
+	</style>
+	<g>
+		<g>
+			<path class="s0" d="m66 9l52 23-55 20-51-23z"/>
+			<path class="s1" d="m14 32l50 20 2 63-50-23z"/>
+			<path class="s2" d="m67 51l49-18 4 55-55 25z"/>
+			<path fill-rule="evenodd" class="s3" d="m9 72l10-6-6 14 12-8"/>
+			<path fill-rule="evenodd" class="s4" d="m113 94l9-4-5 9"/>
+		</g>
+		<g>
+			<path class="s5" d="m62 6q28 10 52 22-26 11-53 21-26-11-51-21 27-12 52-22z"/>
+			<path fill-rule="evenodd" class="s5" d="m10 28q1 32 3 63 25 10 49 20 0-31-1-62"/>
+			<path fill-rule="evenodd" class="s5" d="m62 111q28-12 54-24-1-29-2-59"/>
+		</g>
+		<g>
+			<text id="S" style="transform: matrix(.94,-0.5,.139,.99,53.678,38.292);paint-order:stroke fill markers;stroke: #1f3547;stroke-width: 2;stroke-linejoin: round;">
+				<tspan x="0" y="0" class="t6">S
+</tspan>
+			</text>
+			<text id="S" style="transform: matrix(.978,.208,-0.208,.978,23.139,85.702);paint-order:stroke fill markers;stroke: #1f3547;stroke-width: 2;stroke-linejoin: round;">
+				<tspan x="0" y="0" class="t7">S
+</tspan>
+			</text>
+			<text id="E" style="transform: matrix(.985,-0.174,-0.174,-0.985,78.129,64.613);paint-order:stroke fill markers;stroke: #1f3547;stroke-width: 2;stroke-linejoin: round;">
+				<tspan x="0" y="0" class="t7">E
+</tspan>
+			</text>
+		</g>
+	</g>
+	<g>
+		<text id="Society of" transform="translate(135,48)">
+			<tspan x="0" y="0" class="t8">Society of
+</tspan>
+		</text>
+		<text id="Software Engineers" transform="translate(134,98)">
+			<tspan x="0" y="0" class="t9">Software Engineer</tspan><tspan  y="0" class="t9">s</tspan><tspan  y="0" class="t9">
+</tspan>
+		</text>
+	</g>
+	<path fill-rule="evenodd" class="s10" d="m140 110q100-6 180 2 80 8 158-6"/>
+</svg>
