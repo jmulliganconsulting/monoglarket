@@ -1,0 +1,1113 @@
+// Club Predictions schema. Design: vault notes "Data model" and "Ledger".
+// Portable on purpose (ADR-014): no enums, no @db.* types, no Json columns, no DB-level CHECKs.
+// Switching to SQLite = change `provider`, regenerate migrations. `npm run check:sqlite` proves it still validates.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// A major the member picked on onboarding screen 4. program = RIT program name, degree = BS, MS, ...
+model UserProgram {
+  id      Int    @id @default(autoincrement())
+  userId  Int    @map("user_id")
+  program String
+  degree  String
+  sort    Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, program, degree])
+  @@map("user_programs")
+}
+
+/// Who was turned away at signup (under 18). The member row is deleted; this is all we keep. Only an admin lifts it (vault "Signup and profile").
+model SignupBlock {
+  id          Int       @id @default(autoincrement())
+  email       String
+  reason      String
+  createdAt   DateTime  @default(now()) @map("created_at")
+  unblockedAt DateTime? @map("unblocked_at")
+  unblockedBy Int?      @map("unblocked_by")
+
+  @@index([email])
+  @@map("signup_blocks")
+}
+
+model Currency {
+  id              Int     @id @default(autoincrement())
+  code            String  @unique
+  name            String
+  decimals        Int     @default(0)
+  kind            String // 'internal' | 'external'
+  adapter         String?
+  config          String  @default("{}") // JSON text
+  active          Boolean @default(true)
+  /// Dabloons minted to each new member on first sign-in (internal currencies only; 0 = none).
+  signupGrant     Int     @default(0) @map("signup_grant")
+  /// Dabloons every member gets each week (internal currencies only; 0 = none). FR-15.
+  weeklyAllowance Int     @default(0) @map("weekly_allowance")
+
+  accounts     Account[]
+  transactions LedgerTransaction[]
+  markets      Market[]
+  adjustments  BalanceAdjustment[]
+
+  @@map("currencies")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  externalId   String?  @unique @map("external_id")
+  email        String?  @unique
+  displayName  String   @map("display_name")
+  role         String   @default("creator") // 'member' | 'creator' | 'moderator' | 'admin'
+  /// scrypt hash, set by the member after a Google sign-in; null = no password sign-in.
+  passwordHash String?  @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Onboarding (vault "Signup and profile"). Filled in screen by screen; onboardedAt is set on the last one.
+  username            String?            @unique
+  preferredName       String?            @map("preferred_name")
+  namePrefix          String?            @map("name_prefix")
+  firstName           String?            @map("first_name")
+  middleName          String?            @map("middle_name")
+  lastName            String?            @map("last_name")
+  nameSuffix          String?            @map("name_suffix")
+  pronouns            String?
+  pronounsPublic      Boolean            @default(false) @map("pronouns_public")
+  country             String?
+  state               String?
+  city                String?
+  termsAcceptedAt     DateTime?          @map("terms_accepted_at")
+  studentStatus       String?            @map("student_status") // 'current' | 'alum' | 'faculty' | 'none'
+  seniority           String? // 'incoming' | 'first' ... 'fifth' | 'bs_ms' | 'masters' | 'phd', current students only
+  onCoopTerm          Boolean            @default(false) @map("on_coop_term")
+  isTransfer          Boolean            @default(false) @map("is_transfer")
+  graduationTerm      String?            @map("graduation_term") // 'SPRING' | 'SUMMER' | 'FALL'
+  graduationYear      Int?               @map("graduation_year")
+  onboardingStep      Int                @default(0) @map("onboarding_step") // screens completed, 0..6
+  onboardedAt         DateTime?          @map("onboarded_at")
+  programs            UserProgram[]
+  questionGroups      QuestionGroup[]
+  /// Web push alerts on for this member (vault "Alerts"). Each phone or browser they turned them on for is a PushSubscription.
+  pushAlerts          Boolean            @default(false) @map("push_alerts")
+  pushSubscriptions   PushSubscription[]
+  /// Self-chosen break from trading (vault "Take a break"). Set by the member; only an admin can end it early.
+  breakUntil          DateTime?          @map("break_until")
+  /// Birthday for extra rewards (only saved when the member ticks the box). Set once; removable, never changed, never re-added (vault "Birthday").
+  birthMonth          Int?               @map("birth_month")
+  birthDay            Int?               @map("birth_day")
+  birthdaySetAt       DateTime?          @map("birthday_set_at")
+  birthdayRemovedAt   DateTime?          @map("birthday_removed_at")
+  /// Visit summary (vault "Visit summary"): when the member last signed in, and since when their summary is still unseen.
+  lastSignedInAt      DateTime?          @map("last_signed_in_at")
+  summarySince        DateTime?          @map("summary_since")
+  /// Primary officer badge (vault "Status badges"): set on the first sign-in while the SSE site lists them in a primary role; never cleared.
+  primaryOfficerSince DateTime?          @map("primary_officer_since")
+
+  positions        Position[]
+  trades           Trade[]
+  markets          Market[]
+  sessions         Session[]
+  discordAccounts  DiscordAccount[]
+  earnAwards       EarnAward[]
+  siteCheckins     SiteEventCheckin[]   @relation("checkedIn")
+  proposals        ResolutionProposal[]
+  auditEntries     AuditEntry[]
+  resolverGrants   MarketResolver[]
+  reports          Report[]             @relation("reporter")
+  subjectReports   Report[]             @relation("subject")
+  adjustments      BalanceAdjustment[]  @relation("adjusted")
+  adjustmentsMade  BalanceAdjustment[]  @relation("adjustedBy")
+  comments         MarketComment[]
+  groupMemberships GroupMember[]
+  notifications    Notification[]
+
+  @@map("users")
+}
+
+/// One sign-in attempt: a 6-digit code and a link token, both stored only as SHA-256 hashes.
+model LoginCode {
+  id        Int       @id @default(autoincrement())
+  email     String
+  codeHash  String    @map("code_hash")
+  tokenHash String    @unique @map("token_hash")
+  attempts  Int       @default(0)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([email, createdAt])
+  @@map("login_codes")
+}
+
+/// Signed-in browser. The cookie holds the raw token; only its SHA-256 hash is stored.
+model Session {
+  id        Int      @id @default(autoincrement())
+  tokenHash String   @unique @map("token_hash")
+  userId    Int      @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// Balance is a cache of the sum of ledger entries; only ledger.postTransaction changes it.
+model Account {
+  id            Int     @id @default(autoincrement())
+  ownerType     String  @map("owner_type") // 'user' | 'market' | 'house' | 'mint' | 'bridge' | 'earn' (ownerId = EARN_SOURCES in src/earn/earn.ts)
+  ownerId       Int     @default(0) @map("owner_id")
+  currencyId    Int     @map("currency_id")
+  balance       Int     @default(0)
+  allowNegative Boolean @default(false) @map("allow_negative")
+
+  currency Currency      @relation(fields: [currencyId], references: [id])
+  entries  LedgerEntry[]
+
+  @@unique([ownerType, ownerId, currencyId])
+  @@map("accounts")
+}
+
+model LedgerTransaction {
+  id             Int      @id @default(autoincrement())
+  kind           String
+  currencyId     Int      @map("currency_id")
+  idempotencyKey String   @unique @map("idempotency_key")
+  marketId       Int?     @map("market_id")
+  memo           String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  currency   Currency           @relation(fields: [currencyId], references: [id])
+  entries    LedgerEntry[]
+  trade      Trade?
+  adjustment BalanceAdjustment?
+
+  @@map("ledger_transactions")
+}
+
+/// Append-only. Never update or delete; correct mistakes with an 'adjustment' transaction.
+model LedgerEntry {
+  id            Int @id @default(autoincrement())
+  transactionId Int @map("transaction_id")
+  accountId     Int @map("account_id")
+  amount        Int // signed, minor units, never 0
+
+  transaction LedgerTransaction @relation(fields: [transactionId], references: [id])
+  account     Account           @relation(fields: [accountId], references: [id])
+
+  @@index([accountId])
+  @@map("ledger_entries")
+}
+
+model Market {
+  id                 Int       @id @default(autoincrement())
+  question           String
+  resolutionCriteria String    @map("resolution_criteria")
+  currencyId         Int       @map("currency_id")
+  b                  Float
+  subsidy            Int
+  spendCap           Int?      @map("spend_cap")
+  status             String    @default("draft") // see vault "Market lifecycle"
+  /// Null = no set close date: trading stays open until a moderator closes or resolves the market.
+  closeAt            DateTime? @map("close_at")
+  creatorId          Int?      @map("creator_id")
+  /// Scheduled automatic lock: trading pauses at this time (vault "Market lock"). Cleared once it fires.
+  lockAt             DateTime? @map("lock_at")
+  /// Market category (vault "Categories"). Optional: uncategorised markets show under All.
+  categoryId         Int?      @map("category_id")
+  /// The category tab's headliner, set by a moderator (vault "Categories and visuals"). Null/false = the most active market.
+  headliner          Boolean   @default(false)
+  /// Market look: colours and image (vault "Market visuals"). Image is a file name in DATA_DIR/market-images.
+  colorPrimary       String?   @map("color_primary")
+  colorSecondary     String?   @map("color_secondary")
+  imageFile          String?   @map("image_file")
+  /// Trading is paused while this is set. Set by a moderator, or by lockAt.
+  lockedAt           DateTime? @map("locked_at")
+  resolvedOutcomeId  Int?      @map("resolved_outcome_id")
+  /// Who set the current result; a re-resolution must come from someone else (vault "Resolution and payouts").
+  resolvedBy         Int?      @map("resolved_by")
+  /// Who can see it: 'public' (default), 'hidden' (moderators only), 'group' (members of groupId, and moderators).
+  visibility         String    @default("public")
+  groupId            Int?      @map("group_id")
+  /// Set on each option of a several-winner question (vault "ADR-020"). optionLabel is that option's name.
+  questionGroupId    Int?      @map("question_group_id")
+  optionLabel        String?   @map("option_label")
+  /// Set on each option of a date question: the option wins if the event happened on or before this day (UTC midnight).
+  optionDate         DateTime? @map("option_date")
+  /// Set with optionDate: 'on' wins if the event happened on that day, 'by' if it happened on or before it (UTC).
+  dateMatch          String?   @map("date_match")
+  /// Public reason shown on a cancelled market.
+  cancelReason       String?   @map("cancel_reason")
+  /// Soft delete (the ledger keeps every transaction). deleteReason is internal: admins only.
+  deletedAt          DateTime? @map("deleted_at")
+  deleteReason       String?   @map("delete_reason")
+  resolvedAt         DateTime? @map("resolved_at")
+  disputeUntil       DateTime? @map("dispute_until")
+  /// Key of a trusted external source in src/resolvers/sources.ts. Null = resolved by people only.
+  resolverSource     String?   @map("resolver_source")
+  /// How an automatic source's answer becomes the result (vault ADR-012): 'manual' (no source), 'auto_confirm' (a moderator
+  /// confirms it) or 'auto' (final at once; only an admin can approve a market this way).
+  resolutionMode     String    @default("manual") @map("resolution_mode")
+  /// Bumped by every write to the market; optimistic lock instead of SELECT ... FOR UPDATE (ADR-015).
+  version            Int       @default(0)
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  currency      Currency             @relation(fields: [currencyId], references: [id])
+  creator       User?                @relation(fields: [creatorId], references: [id])
+  outcomes      Outcome[]
+  positions     Position[]
+  trades        Trade[]
+  proposals     ResolutionProposal[]
+  resolvers     MarketResolver[]
+  reports       Report[]
+  comments      MarketComment[]
+  notifications Notification[]
+  group         UserGroup?           @relation(fields: [groupId], references: [id])
+  questionGroup QuestionGroup?       @relation(fields: [questionGroupId], references: [id])
+  category      Category?            @relation(fields: [categoryId], references: [id])
+
+  @@index([status, closeAt])
+  @@map("markets")
+}
+
+/// A several-winner question (vault "ADR-020"): one yes/no market per option, each resolved on its own.
+/// Not the same as UserGroup (visibility groups), which is what Market.groupId means.
+model QuestionGroup {
+  id                 Int       @id @default(autoincrement())
+  question           String
+  resolutionCriteria String    @map("resolution_criteria")
+  /// Null = no set close date (see Market.closeAt).
+  closeAt            DateTime? @map("close_at")
+  creatorId          Int?      @map("creator_id")
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  creator User?    @relation(fields: [creatorId], references: [id])
+  markets Market[]
+
+  @@map("question_groups")
+}
+
+model Outcome {
+  id          Int       @id @default(autoincrement())
+  marketId    Int       @map("market_id")
+  label       String
+  sort        Int
+  q           Decimal   @default(0) // total shares sold, 6 dp
+  /// Graph colour and image (vault "Market visuals"). Null = the default palette.
+  color       String?
+  imageFile   String?   @map("image_file")
+  /// Set when the option is an SSE member (a people market): the label is their name, and their SSE picture shows on it.
+  sseMemberId Int?      @map("sse_member_id")
+  /// A removed option stays in the table for the history; it is no longer priced or tradable.
+  removedAt   DateTime? @map("removed_at")
+
+  market    Market               @relation(fields: [marketId], references: [id])
+  sseMember SseMember?           @relation(fields: [sseMemberId], references: [id], onDelete: SetNull)
+  positions Position[]
+  trades    Trade[]
+  proposals ResolutionProposal[]
+
+  @@unique([marketId, sort])
+  @@map("outcomes")
+}
+
+model Position {
+  userId    Int     @map("user_id")
+  outcomeId Int     @map("outcome_id")
+  marketId  Int     @map("market_id")
+  shares    Decimal @default(0) // >= 0, enforced in markets.ts
+  netSpent  Int     @default(0) @map("net_spent")
+
+  user    User    @relation(fields: [userId], references: [id])
+  outcome Outcome @relation(fields: [outcomeId], references: [id])
+  market  Market  @relation(fields: [marketId], references: [id])
+
+  @@id([userId, outcomeId])
+  @@index([userId])
+  @@index([marketId])
+  @@map("positions")
+}
+
+model Trade {
+  id            Int      @id @default(autoincrement())
+  marketId      Int      @map("market_id")
+  userId        Int      @map("user_id")
+  outcomeId     Int      @map("outcome_id")
+  shares        Decimal // signed: + buy, - sell
+  /// Dabloons received (after the sale fee). Gross proceeds = amount + fee. Buys have fee 0.
+  amount        Int
+  /// Early-sale fee kept by the house (ADR-021). Paid into the house account in the same transaction.
+  fee           Int      @default(0)
+  probBefore    Float    @map("prob_before")
+  probAfter     Float    @map("prob_after")
+  transactionId Int      @unique @map("transaction_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  market      Market            @relation(fields: [marketId], references: [id])
+  user        User              @relation(fields: [userId], references: [id])
+  outcome     Outcome           @relation(fields: [outcomeId], references: [id])
+  transaction LedgerTransaction @relation(fields: [transactionId], references: [id])
+
+  @@index([marketId, createdAt])
+  @@map("trades")
+}
+
+/// "Outcome X won, here's the evidence". Moderators (or any member, as a request) propose; a moderator accepts or rejects (vault "Resolving markets").
+model ResolutionProposal {
+  id         Int       @id @default(autoincrement())
+  marketId   Int       @map("market_id")
+  outcomeId  Int       @map("outcome_id")
+  /// Null when the proposal came from a resolver source.
+  proposerId Int?      @map("proposer_id")
+  /// 'member' (a person asked or proposed) | 'resolver' (an external source, moderator confirms).
+  source     String    @default("member")
+  evidence   String
+  status     String    @default("pending") // 'pending' | 'accepted' | 'rejected' | 'superseded'
+  decidedAt  DateTime? @map("decided_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  market      Market                 @relation(fields: [marketId], references: [id])
+  outcome     Outcome                @relation(fields: [outcomeId], references: [id])
+  proposer    User?                  @relation(fields: [proposerId], references: [id])
+  /// Proof behind the proposal: links, pictures or files (vault "Resolution proof").
+  attachments ResolutionAttachment[]
+
+  @@index([marketId, status])
+  @@map("resolution_proposals")
+}
+
+/// One piece of proof on a resolution proposal (vault "Resolution proof"). A link keeps its https URL; a picture or
+/// file is saved under DATA_DIR/resolution-proofs with a random name and served only through /proofs/[id].
+model ResolutionAttachment {
+  id           Int      @id @default(autoincrement())
+  proposalId   Int      @map("proposal_id")
+  /// 'link' | 'image' | 'file'
+  kind         String
+  /// Short caption shown next to it, e.g. "Final scoreboard".
+  label        String   @default("")
+  /// https URL, for kind 'link' only.
+  url          String?
+  /// Random stored name, for kind 'image' and 'file' only.
+  storedName   String?  @map("stored_name")
+  originalName String?  @map("original_name")
+  mimeType     String?  @map("mime_type")
+  sizeBytes    Int?     @map("size_bytes")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  proposal ResolutionProposal @relation(fields: [proposalId], references: [id])
+
+  @@index([proposalId])
+  @@map("resolution_attachments")
+}
+
+/// Lets one trusted user resolve one market without the rest of the admin panel (vault "Auth and roles").
+model MarketResolver {
+  id        Int      @id @default(autoincrement())
+  marketId  Int      @map("market_id")
+  userId    Int      @map("user_id")
+  grantedBy Int      @map("granted_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  market Market @relation(fields: [marketId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([marketId, userId])
+  @@map("market_resolvers")
+}
+
+/// A member's complaint about a market, a resolution, or their own profile. Moderators and admins triage it.
+model Report {
+  id         Int       @id @default(autoincrement())
+  reporterId Int       @map("reporter_id")
+  kind       String // 'market' | 'resolution' | 'profile'
+  marketId   Int?      @map("market_id")
+  subjectId  Int?      @map("subject_id")
+  body       String
+  status     String    @default("open") // 'open' | 'upheld' | 'dismissed'
+  note       String    @default("")
+  handledBy  Int?      @map("handled_by")
+  handledAt  DateTime? @map("handled_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  reporter User    @relation("reporter", fields: [reporterId], references: [id])
+  subject  User?   @relation("subject", fields: [subjectId], references: [id])
+  market   Market? @relation(fields: [marketId], references: [id])
+
+  @@index([status, createdAt])
+  @@map("reports")
+}
+
+/// Every moderator action and every job that moves money on a market (NFR-07). actorId null = a scheduled job.
+model AuditEntry {
+  id        Int      @id @default(autoincrement())
+  actorId   Int?     @map("actor_id")
+  action    String
+  marketId  Int?     @map("market_id")
+  detail    String   @default("")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([marketId])
+  @@map("audit_log")
+}
+
+/// Mirror of one user on the SSE website (sse.rit.edu), refreshed by src/sse/sync.ts. Join to users on email.
+/// Sync overwrites only the columns it sets; columns added here for our own use survive each refresh.
+/// "Given" columns hold the SSE site's text untouched; the rest are our cleaned-up versions (src/sse/normalize.ts).
+model SseMember {
+  /// The SSE site's user id, so /api/user/{id}/profile there is one hop away.
+  id                 Int     @id @map("sse_user_id")
+  /// Lowercased as given (often @g.rit.edu; ritEmail() maps it). Not unique: a removed account and its re-signup share one.
+  email              String
+  /// cleanName(nameGiven): ASCII, single spaces, ALL CAPS / all lowercase title-cased.
+  name               String
+  nameGiven          String? @map("name_given")
+  /// Looks like a joke or placeholder ("The Ghost of John Renner", "A"); for review only (nameLooksFake).
+  nameSuspect        Boolean @default(false) @map("name_suspect")
+  /// Seed/test account on the SSE site (src/sse/test-accounts.ts); leave these out of anything member-facing.
+  isTestAccount      Boolean @default(false) @map("is_test_account")
+  graduationTerm     String? @map("graduation_term") // 'SPRING' | 'SUMMER' | 'FALL'
+  graduationYear     Int?    @map("graduation_year")
+  /// RIT term number for the graduation term, from api.rit.edu/api/terms.
+  graduationTermCode String? @map("graduation_term_code")
+  description        String?
+  coopSummary        String? @map("coop_summary")
+  majorGiven         String? @map("major_given")
+
+  linkedInGiven      String? @map("linked_in_given")
+  /// Profile slug only (no linkedin.com/in/); linkedInUrl() builds the URL.
+  resolvedLinkedIn   String? @map("resolved_linked_in")
+  linkedInValid      Boolean @default(false) @map("linked_in_valid")
+  /// LinkedIn's stable member id ("sub"), set once the member connects LinkedIn; survives slug changes.
+  linkedInId         String? @unique @map("linked_in_id")
+  /// How linkedInId got set: 'oauth' (the member signed in) or 'manual' (an admin, npm run sse:link).
+  linkedInLinkedVia  String? @map("linked_in_linked_via")
+  /// Slug set by an admin; wins over linkedInGiven in resolvedLinkedIn on every sync.
+  linkedInSlugManual String? @map("linked_in_slug_manual")
+  /// Discord's user id (snowflake), set once the member connects Discord (connectAccount in src/sse/accounts.ts); survives renames.
+  /// Mentor applications carry a self-typed discordUsername, which is only a hint.
+  discordId          String? @unique @map("discord_id")
+  discordUsername    String? @map("discord_username")
+  /// 'oauth' | 'manual', as for linkedInLinkedVia.
+  discordLinkedVia   String? @map("discord_linked_via")
+
+  gitHubGiven       String?   @map("git_hub_given")
+  /// Username with GitHub's own capitalisation (no github.com/).
+  resolvedGitHub    String?   @map("resolved_git_hub")
+  gitHubValid       Boolean   @default(false) @map("git_hub_valid")
+  /// GitHub's numeric user id; survives renames.
+  gitHubId          Int?      @map("git_hub_id")
+  gitHubCheckedAt   DateTime? @map("git_hub_checked_at")
+  /// GitHub's numeric user id (as text), set once the member connects GitHub (src/routes/account/github): proof they own the account,
+  /// unlike gitHubId, which only says gitHubGiven exists. Verified profile link = gitHubLinkedId == String(gitHubId).
+  gitHubLinkedId    String?   @unique @map("git_hub_linked_id")
+  /// Their GitHub username when they connected.
+  gitHubLinkedLogin String?   @map("git_hub_linked_login")
+  /// 'oauth' | 'manual', as for linkedInLinkedVia.
+  gitHubLinkedVia   String?   @map("git_hub_linked_via")
+
+  imageGiven     String?   @map("image_given")
+  /// File name under DATA_DIR/sse-images (sha256 of the bytes + extension); null = never fetched.
+  imageFile      String?   @map("image_file")
+  imageCheckedAt DateTime? @map("image_checked_at")
+  imageError     String?   @map("image_error")
+
+  /// All-time memberships as of membershipFetchedAt; the SSE site treats >= 1 as a member.
+  membershipCount     Int       @default(0) @map("membership_count")
+  isMember            Boolean   @default(false) @map("is_member")
+  /// Memberships in the current SSE term (Spring or Fall).
+  termMembershipCount Int       @default(0) @map("term_membership_count")
+  membershipFetchedAt DateTime  @map("membership_fetched_at")
+  isMentor            Boolean   @default(false) @map("is_mentor")
+  mentorExpiresAt     DateTime? @map("mentor_expires_at")
+  status              String    @default("guest") // 'officer' | 'mentor' | 'member' | 'guest', highest wins
+  syncedAt            DateTime  @map("synced_at")
+  /// The SSE profile's isOwner flag: true only when the viewer is this user, so always false for our anonymous sync.
+  isOwner             Boolean?  @map("is_owner")
+  /// Last /api/user/{id}/profile read (memberships detail); null = not yet.
+  profileFetchedAt    DateTime? @map("profile_fetched_at")
+  firstSeenAt         DateTime  @default(now()) @map("first_seen_at")
+  /// Gone from the SSE site's /api/user as of this time; cleared if they come back. Rows are never deleted.
+  removedAt           DateTime? @map("removed_at")
+
+  positions          SseOfficer[]
+  officerTerms       SseOfficerTerm[]
+  degrees            SseDegree[]
+  mentors            SseMentor[]
+  memberships        SseMembership[]
+  mentorApplications SseMentorApplication[]
+  discordAccounts    DiscordAccount[]
+  eventAttendance    SseEventAttendance[]
+  manualCheckins     ManualCheckin[]
+  outcomes           Outcome[]
+
+  @@index([email])
+  @@index([status])
+  @@map("sse_members")
+}
+
+/// Every officer / committee role the SSE site lists (/api/officer), past and present. Never deleted.
+model SseOfficer {
+  id           Int       @id @default(autoincrement())
+  sseOfficerId Int       @unique @map("sse_officer_id")
+  memberId     Int       @map("member_id")
+  positionId   Int?      @map("position_id")
+  title        String
+  isPrimary    Boolean   @default(false) @map("is_primary")
+  isActive     Boolean   @default(false) @map("is_active")
+  startDate    DateTime? @map("start_date")
+  endDate      DateTime? @map("end_date")
+  firstSeenAt  DateTime  @default(now()) @map("first_seen_at")
+  /// Gone from /api/officer as of this time; cleared if it comes back.
+  removedAt    DateTime? @map("removed_at")
+
+  member SseMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@map("sse_officers")
+}
+
+/// An officer position on the SSE site (/api/officer-positions), with whoever holds it now. Positions the site drops get removedAt;
+/// older retired ones (Branding Head, Winterball Head, ...) were never listed and survive only as SseOfficer.title. Never deleted.
+model SseOfficerPosition {
+  id               Int       @id @map("sse_position_id")
+  title            String
+  isPrimary        Boolean   @map("is_primary")
+  category         String? // 'PRIMARY_OFFICER' | 'COMMITTEE_HEAD' | 'SE_OFFICE'
+  isDefunct        Boolean   @default(false) @map("is_defunct")
+  email            String?
+  /// SseOfficer.sseOfficerId of the current holder; null = vacant.
+  currentOfficerId Int?      @map("current_officer_id")
+  firstSeenAt      DateTime  @default(now()) @map("first_seen_at")
+  syncedAt         DateTime  @map("synced_at")
+  removedAt        DateTime? @map("removed_at")
+
+  holders SseOfficerTerm[]
+
+  @@map("sse_officer_positions")
+}
+
+/// Who held each position in each RIT term, from two sources: the role's start/end dates on /api/officer (fromDates, recomputed every
+/// sync, so past terms are filled in) and the live current holder on /api/officer-positions (lastSeenAt; survives later edits to the dates).
+/// A row with neither was derived from dates the site has since changed. Never deleted.
+model SseOfficerTerm {
+  id           Int       @id @default(autoincrement())
+  term         String // "Fall 2026"
+  termCode     String?   @map("term_code") // RIT term number, "2261"
+  positionId   Int       @map("position_id")
+  sseOfficerId Int       @map("sse_officer_id")
+  memberId     Int       @map("member_id")
+  /// The role's dates cover at least a third of the term (termsServed in src/sse/sync.ts).
+  fromDates    Boolean   @default(false) @map("from_dates")
+  firstSeenAt  DateTime  @default(now()) @map("first_seen_at")
+  /// Last sync that saw this officer as the position's current holder; null = never (dates only).
+  lastSeenAt   DateTime? @map("last_seen_at")
+
+  position SseOfficerPosition @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  member   SseMember          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([term, positionId, sseOfficerId])
+  @@index([memberId])
+  @@map("sse_officer_terms")
+}
+
+/// A mentor record on the SSE site (/api/mentor lists active and inactive). Mentor ids are not user ids. Never deleted.
+model SseMentor {
+  id             Int       @id @map("sse_mentor_id")
+  memberId       Int       @map("member_id")
+  isActive       Boolean   @map("is_active")
+  expirationDate DateTime? @map("expiration_date")
+  firstSeenAt    DateTime  @default(now()) @map("first_seen_at")
+  removedAt      DateTime? @map("removed_at")
+
+  member SseMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@map("sse_mentors")
+}
+
+/// A mentor application (one per semester applied). The SSE site only shows each mentor's latest publicly
+/// (/api/mentor?detailed=true), so earlier ones exist here only if a sync saw them. Never deleted; status updates in place.
+model SseMentorApplication {
+  id                Int       @id @map("sse_application_id")
+  memberId          Int       @map("member_id")
+  semesterId        Int?      @map("semester_id")
+  semesterName      String?   @map("semester_name") // "Fall 2026"
+  status            String?
+  discordUsername   String?   @map("discord_username")
+  pronouns          String?
+  major             String?
+  yearLevel         String?   @map("year_level")
+  /// The site's JSON list of course codes, as given.
+  coursesJson       String?   @map("courses_json")
+  skillsText        String?   @map("skills_text")
+  toolsComfortable  String?   @map("tools_comfortable")
+  toolsLearning     String?   @map("tools_learning")
+  previousSemesters Int?      @map("previous_semesters")
+  whyMentor         String?   @map("why_mentor")
+  comments          String?
+  appliedAt         DateTime? @map("applied_at") // the site's createdAt
+  firstSeenAt       DateTime  @default(now()) @map("first_seen_at")
+  syncedAt          DateTime  @map("synced_at")
+
+  member SseMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@map("sse_mentor_applications")
+}
+
+/// One membership grant from a member's SSE profile (reason + date). Only the profile endpoint has these. Never deleted.
+model SseMembership {
+  id          Int       @id @map("sse_membership_id")
+  memberId    Int       @map("member_id")
+  reason      String
+  dateGiven   DateTime  @map("date_given")
+  firstSeenAt DateTime  @default(now()) @map("first_seen_at")
+  removedAt   DateTime? @map("removed_at")
+
+  member SseMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@map("sse_memberships")
+}
+
+/// One degree parsed from a member's free-text major (src/sse/majors.ts). Replaced when majorGiven changes.
+model SseDegree {
+  id       Int     @id @default(autoincrement())
+  memberId Int     @map("member_id")
+  sort     Int
+  degree   String // 'BS' | 'BFA' | 'MS' | 'PhD' | ...
+  /// RIT program name; null = no match in the lookup table (see given).
+  major    String?
+  given    String
+
+  member SseMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, sort])
+  @@map("sse_degrees")
+}
+
+/// A Discord account a member linked by signing in (Connect Discord, src/sse/discord.ts). One row per Discord account, kept after
+/// unlinking. SseMember.discordId points at the live one. Refreshed in full on every relink.
+/// A new OAuth scope: add it to DISCORD_SCOPES; its data goes in new columns or a table like DiscordConnection, raw JSON in rawUser if it's on /users/@me.
+model DiscordAccount {
+  /// Discord user id (snowflake).
+  id             String    @id @map("discord_id")
+  /// The local user who signed in, and the SSE member they matched (by email).
+  userId         Int       @map("user_id")
+  memberId       Int?      @map("member_id")
+  /// Space-separated scopes Discord actually granted (the member can untick some).
+  scopes         String
+  /// AES-256-GCM sealed with DISCORD_TOKEN_KEY (sealToken). Kept so linked roles (role_connections.write) can be pushed later
+  /// without asking members to relink; wiped on unlink.
+  accessToken    String?   @map("access_token")
+  refreshToken   String?   @map("refresh_token")
+  tokenExpiresAt DateTime? @map("token_expires_at")
+
+  // identify
+  username      String
+  globalName    String?  @map("global_name") // display name
+  avatar        String? // hash; discordAvatarUrl() builds the URL
+  banner        String?
+  accentColor   Int?     @map("accent_color")
+  locale        String?
+  mfaEnabled    Boolean? @map("mfa_enabled")
+  premiumType   Int?     @map("premium_type")
+  flags         Int?
+  publicFlags   Int?     @map("public_flags")
+  // email (null when the scope wasn't granted). Not the SSE/RIT email.
+  email         String?
+  emailVerified Boolean? @map("email_verified")
+  /// The whole /users/@me response, for fields without a column yet.
+  rawUser       Json     @map("raw_user")
+
+  firstLinkedAt DateTime  @default(now()) @map("first_linked_at")
+  linkedAt      DateTime  @map("linked_at")
+  /// Set when the member disconnects or links a different Discord account; cleared on relink.
+  unlinkedAt    DateTime? @map("unlinked_at")
+
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  member      SseMember?          @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  connections DiscordConnection[]
+
+  @@index([userId])
+  @@index([memberId])
+  @@map("discord_accounts")
+}
+
+/// A third-party account shown on the member's Discord profile (connections scope): GitHub, Steam, YouTube, ...
+/// Candidates for our own links where the type matches one we support (e.g. github -> SseMember.gitHubId).
+model DiscordConnection {
+  id           Int       @id @default(autoincrement())
+  discordId    String    @map("discord_id")
+  type         String // 'github' | 'steam' | 'twitch' | ... as Discord names it
+  externalId   String    @map("external_id") // the account's id on that service
+  name         String // the account's name on that service
+  verified     Boolean
+  revoked      Boolean   @default(false)
+  visibility   Int? // 0 = only the member, 1 = everyone
+  friendSync   Boolean?  @map("friend_sync")
+  showActivity Boolean?  @map("show_activity")
+  twoWayLink   Boolean?  @map("two_way_link")
+  raw          Json
+  firstSeenAt  DateTime  @default(now()) @map("first_seen_at")
+  /// Gone from the member's Discord connections at their last relink.
+  removedAt    DateTime? @map("removed_at")
+
+  account DiscordAccount @relation(fields: [discordId], references: [id], onDelete: Cascade)
+
+  @@unique([discordId, type, externalId])
+  @@map("discord_connections")
+}
+
+/// An event on the SSE site (/api/event: every field it publishes). Never deleted; events the site drops get removedAt.
+model SseEvent {
+  id                  String    @id @map("sse_event_id")
+  title               String
+  description         String?
+  date                DateTime
+  image               String?
+  /// The site's text untouched; location is cleanLocation(locationGiven) and places the parsed groups (src/sse/locations.ts).
+  locationGiven       String?   @map("location_given")
+  location            String?
+  attendanceEnabled   Boolean   @map("attendance_enabled")
+  grantsMembership    Boolean   @map("grants_membership")
+  /// File name under DATA_DIR/sse-images, as for SseMember.imageFile; null = not fetched (yet).
+  imageFile           String?   @map("image_file")
+  imageCheckedAt      DateTime? @map("image_checked_at")
+  imageError          String?   @map("image_error")
+  /// classifyEvent(title) in src/sse/categories.ts, rewritten every sync. Use categoryManual ?? category (likewise series).
+  category            String    @default("other")
+  series              String    @default("")
+  /// Set by an admin; never touched by the sync and always wins.
+  categoryManual      String?   @map("category_manual")
+  seriesManual        String?   @map("series_manual")
+  firstSeenAt         DateTime  @default(now()) @map("first_seen_at")
+  syncedAt            DateTime  @map("synced_at")
+  /// Last /api/event/{id}/attendance read; null = never.
+  attendanceFetchedAt DateTime? @map("attendance_fetched_at")
+  removedAt           DateTime? @map("removed_at")
+
+  places         SseEventPlace[]
+  attendance     SseEventAttendance[]
+  manualCheckins ManualCheckin[]
+  earnRules      EarnRule[]
+
+  autoCategory   EventCategory  @relation("auto", fields: [category], references: [key])
+  manualCategory EventCategory? @relation("manual", fields: [categoryManual], references: [key])
+
+  @@index([date])
+  @@index([category])
+  @@map("sse_events")
+}
+
+/// Kinds of event (src/sse/categories.ts CATEGORIES seeds new keys each sync; name/runBy edits here are kept).
+model EventCategory {
+  key         String  @id
+  name        String
+  /// SSE officer position that usually runs these (SseOfficerPosition.title), e.g. 'Talks Head'.
+  runBy       String? @map("run_by")
+  description String?
+  sort        Int     @default(50)
+
+  autoEvents   SseEvent[] @relation("auto")
+  manualEvents SseEvent[] @relation("manual")
+  earnRules    EarnRule[]
+
+  @@map("event_categories")
+}
+
+/// Canonical places parsed from an event's location, in the order written. Rewritten whenever the location changes.
+model SseEventPlace {
+  eventId String  @map("event_id")
+  sort    Int
+  /// 'The Lab' | 'The Temporary Lab' | 'Online' | a room code ('GOL-1400') | the cleaned venue text.
+  place   String
+  room    String?
+  role    String // 'at' | 'meet' (gather here first)
+
+  event SseEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, sort])
+  @@index([place])
+  @@map("sse_event_places")
+}
+
+/// A check-in recorded by the SSE site (/api/event/{id}/attendance). The site deletes check-ins outright; we set removedAt.
+/// Whether it earns sitecurrency is decided in src/earn/earn.ts (checkinCounts), not stored here.
+model SseEventAttendance {
+  id          Int       @id @map("sse_attendance_id")
+  eventId     String    @map("event_id")
+  memberId    Int       @map("member_id")
+  attendedAt  DateTime  @map("attended_at")
+  firstSeenAt DateTime  @default(now()) @map("first_seen_at")
+  removedAt   DateTime? @map("removed_at")
+
+  event  SseEvent  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  member SseMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, memberId])
+  @@index([memberId])
+  @@map("sse_event_attendance")
+}
+
+/// Our own record that a member attended an SSE event, from tracking other than the SSE site's (a sign-in sheet, a headcount).
+/// Kept apart from SseEventAttendance; pays from its own earn account. Never deleted; removedAt withdraws it.
+model ManualCheckin {
+  id        Int       @id @default(autoincrement())
+  eventId   String    @map("event_id")
+  memberId  Int       @map("member_id")
+  /// Where the record came from, e.g. 'sign-in sheet'.
+  source    String
+  note      String?
+  addedById Int?      @map("added_by_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  removedAt DateTime? @map("removed_at")
+
+  event  SseEvent  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  member SseMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, memberId])
+  @@map("manual_checkins")
+}
+
+/// An event run by this site, not the SSE. Never deleted; cancelledAt takes back what it paid.
+model SiteEvent {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  date        DateTime
+  location    String?
+  createdById Int?      @map("created_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  cancelledAt DateTime? @map("cancelled_at")
+
+  checkins  SiteEventCheckin[]
+  earnRules EarnRule[]
+
+  @@map("site_events")
+}
+
+/// Who attended a SiteEvent. Never deleted; removedAt takes back what it paid.
+model SiteEventCheckin {
+  id        Int       @id @default(autoincrement())
+  eventId   Int       @map("event_id")
+  userId    Int       @map("user_id")
+  addedById Int?      @map("added_by_id")
+  note      String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  removedAt DateTime? @map("removed_at")
+
+  event SiteEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User      @relation("checkedIn", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("site_event_checkins")
+}
+
+/// How much sitecurrency a thing is worth. Append-only: a change is a new row, so the history of rates is the table itself.
+/// The rule for an item is the newest one (by createdAt) whose effectiveFrom <= the item's date, preferring one for that exact event.
+/// Back-dating effectiveFrom re-prices items already paid: the next settle posts the difference (src/earn/earn.ts).
+model EarnRule {
+  id            Int      @id @default(autoincrement())
+  /// 'sse_membership' | 'sse_checkin' (also prices manual check-ins) | 'site_event'
+  kind          String
+  /// Weight for one SSE event (kind 'sse_checkin') or one site event (kind 'site_event'); all three null = the default for the kind.
+  /// Precedence: this event > this event's category (kind 'sse_checkin') > the default.
+  sseEventId    String?  @map("sse_event_id")
+  category      String?
+  siteEventId   Int?     @map("site_event_id")
+  amount        Int
+  effectiveFrom DateTime @map("effective_from")
+  note          String?
+  setById       Int?     @map("set_by_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  sseEvent      SseEvent?      @relation(fields: [sseEventId], references: [id])
+  eventCategory EventCategory? @relation(fields: [category], references: [key])
+  siteEvent     SiteEvent?     @relation(fields: [siteEventId], references: [id])
+  awards        EarnAward[]
+
+  @@index([kind, effectiveFrom])
+  @@map("earn_rules")
+}
+
+/// Audit of every translation into sitecurrency. One row per change in what an item has paid: its first payment, a re-price, a take-back.
+/// The item's total paid = sum(amount) over its rows; each row also records the target it was settling to and the rule behind it.
+model EarnAward {
+  id            Int      @id @default(autoincrement())
+  /// 'sse_membership' | 'sse_checkin' | 'manual_checkin' | 'site_event'; each pays from its own earn account.
+  source        String
+  /// SseMembership.id / SseEventAttendance.id / ManualCheckin.id / SiteEventCheckin.id
+  sourceId      String   @map("source_id")
+  seq           Int
+  userId        Int      @map("user_id")
+  currencyId    Int      @map("currency_id")
+  /// Signed change paid by this row.
+  amount        Int
+  /// What the item should have paid in total when this row was written. Less than the sum only if a take-back was capped by the balance.
+  target        Int
+  ruleId        Int?     @map("rule_id")
+  /// 'earned' | 'repriced' | 'removed' | 'not_counted', plus ' (capped)' when the member's balance couldn't cover a take-back.
+  reason        String
+  transactionId Int      @unique @map("transaction_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User      @relation(fields: [userId], references: [id])
+  rule EarnRule? @relation(fields: [ruleId], references: [id])
+
+  @@unique([source, sourceId, seq])
+  @@index([userId])
+  @@map("earn_awards")
+}
+
+/**
+ * Market categories, like Polymarket's tags. Admins add them; moderators pick one per market.
+ */
+model Category {
+  id      Int      @id @default(autoincrement())
+  key     String   @unique
+  name    String
+  sort    Int      @default(0)
+  /// Tab colour as #rrggbb (vault "Categories and visuals"). Null = the default button colour.
+  color   String?
+  markets Market[]
+
+  @@map("market_categories")
+}
+
+/**
+ * An admin added or removed dabloons from a member's balance. The private reason is for admins only; the public one (if any) is shown to the member.
+ */
+model BalanceAdjustment {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  currencyId    Int      @map("currency_id")
+  amount        Int // signed: + added, - removed
+  actorId       Int      @map("actor_id")
+  reasonPrivate String   @map("reason_private")
+  reasonPublic  String?  @map("reason_public")
+  transactionId Int      @unique @map("transaction_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user        User              @relation("adjusted", fields: [userId], references: [id])
+  actor       User              @relation("adjustedBy", fields: [actorId], references: [id])
+  currency    Currency          @relation(fields: [currencyId], references: [id])
+  transaction LedgerTransaction @relation(fields: [transactionId], references: [id])
+
+  @@index([userId])
+  @@map("balance_adjustments")
+}
+
+/**
+ * A member's comment on a market (FR-13). Moderators can hide one; hidden comments stay in the table, for the audit trail.
+ */
+model MarketComment {
+  id        Int       @id @default(autoincrement())
+  marketId  Int       @map("market_id")
+  userId    Int       @map("user_id")
+  body      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  hiddenAt  DateTime? @map("hidden_at")
+  hiddenBy  Int?      @map("hidden_by")
+
+  market Market @relation(fields: [marketId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([marketId, createdAt])
+  @@map("market_comments")
+}
+
+/**
+ * A season for the leaderboard: profit is counted from its start (FR-14). The newest season that has started is current.
+ */
+model Season {
+  id        Int      @id @default(autoincrement())
+  name      String
+  startsAt  DateTime @map("starts_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("seasons")
+}
+
+/**
+ * In-app notifications (FR-20, FR-24). Written by the jobs and by actions; shown in the bell in the header.
+ */
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  kind      String // 'resolved' | 'disputed' | 'closing' | 'overdue'
+  marketId  Int?      @map("market_id")
+  text      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  readAt    DateTime? @map("read_at")
+  /// When the alert went out as a web push (vault "Alerts"). Null = not sent yet (or the member has alerts off).
+  pushedAt  DateTime? @map("pushed_at")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  market Market? @relation(fields: [marketId], references: [id])
+
+  @@index([userId, readAt])
+  @@index([userId, kind, marketId])
+  @@map("notifications")
+}
+
+/// One phone or browser that receives web push alerts (vault "Alerts"). The push service's endpoint identifies it.
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+/**
+ * A group of members a market can be limited to (e.g. "Robotics team"). Admins manage them on /admin.
+ */
+model UserGroup {
+  id      Int           @id @default(autoincrement())
+  key     String        @unique
+  name    String
+  members GroupMember[]
+  markets Market[]
+
+  @@map("user_groups")
+}
+
+model GroupMember {
+  groupId Int @map("group_id")
+  userId  Int @map("user_id")
+
+  group UserGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, userId])
+  @@map("group_members")
+}
+
+/**
+ * Site settings an admin can change (e.g. how long a resolved market stays on the home page).
+ */
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}
