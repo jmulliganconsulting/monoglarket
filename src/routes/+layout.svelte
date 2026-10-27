@@ -1,0 +1,267 @@
+<script lang="ts">
+	import { coins } from '#lib/format.ts';
+	import '#lib/styles/tokens.css';
+	import type { LayoutProps } from './$types';
+	import VisitSummary from '#lib/VisitSummary.svelte';
+	import { onMount } from 'svelte';
+
+	let { children, data }: LayoutProps = $props();
+
+	// Choosing a link closes the More menu.
+	const closeMenu = (e: MouseEvent) => {
+		if ((e.target as HTMLElement).closest('a')) (e.currentTarget as HTMLElement).closest('details')?.removeAttribute('open');
+	};
+
+	// Service worker for installing the app (FR-28). Registered once in the browser; it doesn't cache pages.
+	onMount(() => {
+		if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+		// Offline: show the banner and pause the trade and send buttons (vault "Mobile experience").
+		const setOffline = () => document.documentElement.toggleAttribute('data-offline', !navigator.onLine);
+		setOffline();
+		addEventListener('online', setOffline);
+		addEventListener('offline', setOffline);
+	});
+
+	// Saved pages belong to the member who signed in: forget them when they sign out.
+	const clearSavedPages = () => navigator.serviceWorker?.controller?.postMessage('signed-out');
+</script>
+
+<svelte:head>
+	<link rel="icon" href="/sse-logo-mark.v3.svg" />
+	<link rel="manifest" href="/manifest.webmanifest" />
+	<meta name="theme-color" content="#111111" />
+</svelte:head>
+
+<header>
+	<a href="/" class="brand"><img src="/sse-logo-kid.v3.svg" alt="Club Predictions" height="40" /></a>
+	<p class="offline-note" role="status">You're offline. Showing what was saved on this device; trading is paused until you reconnect.</p>
+	{#if data.user}
+		<a href="/portfolio" class="balance" aria-label="Balance: {coins(data.coins)} {data.coinCode}"><img src="/sse-coin.svg" alt="" width="28" height="28" />{coins(data.coins)}</a>
+		<form method="POST" action="/logout" onsubmit={clearSavedPages}>
+			<a href="/account">{data.user.displayName}</a>
+			<button>Sign out</button>
+		</form>
+	{/if}
+</header>
+{#if data.user && data.onboarded}
+	<!-- Phone: three main tabs and More. Desktop: the same, with More as a dropdown. The menu closes when a link is chosen. -->
+	<nav aria-label="Main">
+		<a href="/">Markets</a>
+		<a href="/portfolio">Portfolio</a>
+		<a href="/notifications" class="alerts">Alerts{#if data.unread}<span class="count" aria-label="{data.unread} unread">{data.unread}</span>{/if}</a>
+		{#if data.canModerate}<a href="/moderate">Manage markets</a>{/if}
+		{#if data.isAdmin}<a href="/admin">Admin</a>{/if}
+		<details class="more">
+			<summary>More</summary>
+			<div class="panel" onclick={closeMenu} role="presentation">
+				<section>
+					<h3>Browse</h3>
+					<a href="/history">History</a>
+					<a href="/leaderboard">Leaderboard</a>
+					<a href="/activity">Activity</a>
+				</section>
+				{#if data.canModerate || data.canResolve}
+					<section>
+						<h3>Staff</h3>
+						{#if data.canModerate}<a href="/markets/new">New market</a>{/if}
+						{#if data.canResolve}<a href="/resolve">Resolve</a>{/if}
+					</section>
+				{/if}
+			</div>
+		</details>
+	</nav>
+{/if}
+{#if data.summary}
+	<VisitSummary summary={data.summary} />
+{/if}
+<main>{@render children()}</main>
+
+<style>
+	/* Offline (FR-29): the banner shows, and every green action button is paused so nothing is attempted without a connection. */
+	.offline-note {
+		display: none;
+		margin: 8px 0 0;
+		font-weight: 600;
+	}
+	:global([data-offline]) .offline-note {
+		display: block;
+	}
+	:global([data-offline] .go) {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+	/* Phone-first (vault: Mobile experience). Look follows vault: Design reference. */
+	:global(body) {
+		margin: 0;
+		background: var(--bg);
+		color: var(--fg);
+		font-family: var(--font);
+		font-weight: var(--weight);
+		line-height: 1.5;
+	}
+	header {
+		height: 56px;
+		display: flex;
+		align-items: center;
+		padding: 0 16px;
+		padding-top: env(safe-area-inset-top);
+		border-bottom: 1px solid var(--border);
+		font-weight: var(--weight-strong);
+		font-size: 1.125rem;
+	}
+	header a {
+		color: inherit;
+		text-decoration: none;
+	}
+	header .brand img {
+		display: block;
+		height: 40px;
+		width: auto;
+	}
+	header .balance {
+		margin-left: auto;
+		margin-right: 16px;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-variant-numeric: tabular-nums;
+		font-size: 1rem;
+	}
+	header .balance img {
+		width: 28px;
+		height: 28px;
+	}
+	header form {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 0.875rem;
+		font-weight: var(--weight);
+		color: var(--fg-2);
+	}
+	header button {
+		height: 44px;
+		padding: 0 12px;
+		border: 0;
+		border-radius: var(--radius-pill);
+		background: var(--card-2);
+		color: var(--fg);
+		font: inherit;
+		cursor: pointer;
+	}
+	main {
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 16px;
+		padding-bottom: calc(88px + env(safe-area-inset-bottom));
+	}
+	/* Bottom nav on phones; every item is a 44 px tap target (NFR-09). */
+	nav {
+		position: fixed;
+		inset: auto 0 0 0;
+		display: flex;
+		justify-content: space-around;
+		background: var(--card);
+		border-top: 1px solid var(--border);
+		padding-bottom: env(safe-area-inset-bottom);
+		z-index: 10;
+	}
+	nav > a,
+	nav summary {
+		flex: 1;
+		min-height: 44px;
+		display: grid;
+		place-items: center;
+		color: var(--fg-2);
+		font-size: 0.8125rem;
+		text-decoration: none;
+		cursor: pointer;
+		list-style: none;
+	}
+	nav summary::-webkit-details-marker {
+		display: none;
+	}
+	.count {
+		display: inline-block;
+		min-width: 1.4em;
+		margin-left: 4px;
+		padding: 0 5px;
+		border-radius: var(--radius-pill);
+		background: var(--fg);
+		color: var(--bg);
+		font-size: 0.75rem;
+		font-weight: var(--weight-strong);
+		text-align: center;
+	}
+	.more {
+		flex: 1;
+		display: flex;
+		justify-content: center;
+	}
+	/* The More panel opens above the bar on phones, and below the bar on desktop. */
+	.panel {
+		position: absolute;
+		right: 8px;
+		bottom: calc(100% + 8px);
+		width: min(280px, calc(100vw - 16px));
+		max-height: 70vh;
+		overflow: auto;
+		background: var(--card);
+		border-radius: var(--radius-card);
+		box-shadow: var(--shadow-card);
+		padding: 8px 12px;
+		display: grid;
+		gap: 8px;
+	}
+	.panel section {
+		display: grid;
+	}
+	.panel h3 {
+		margin: 8px 0 2px;
+		font-size: 0.75rem;
+		color: var(--muted);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.panel a {
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+		color: var(--fg);
+		text-decoration: none;
+	}
+	@media (min-width: 768px) {
+		nav {
+			position: static;
+			justify-content: flex-start;
+			gap: 8px;
+			max-width: 1100px;
+			margin: 0 auto;
+			border: 0;
+			padding: 0 16px;
+		}
+		nav > a,
+		nav summary {
+			flex: none;
+			padding: 0 12px;
+		}
+		.more {
+			flex: none;
+			position: relative;
+		}
+		.panel {
+			right: 0;
+			top: calc(100% + 4px);
+			bottom: auto;
+		}
+		main {
+			padding-bottom: 16px;
+		}
+	}
+	:global(h1) {
+		font-size: 1.75rem;
+		font-weight: var(--weight-strong);
+		margin: 8px 0 16px;
+	}
+</style>

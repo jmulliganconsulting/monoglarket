@@ -1,0 +1,53 @@
+/* Colours from sse.rit.edu's theme (read 2026-10-26); shape, type and motion from polymarket.us.
+   Sources: vault examples/SSE brand and style + Polymarket style tokens + Design reference.
+   Dark is the main look; light follows the phone setting (vault: Mobile experience). */
+:root {
+	color-scheme: light dark;
+
+	--bg: #cdd5e4;
+	--card: #bac6de;
+	--card-2: #afbacf;
+	--border: #1b22321f;
+	--fg: #1b2232;
+	--fg-2: #303a50;
+	--muted: #47536b;
+	--brand: #2e5cb8;
+	/* Text-strength brand for links on --bg/--card (AA); --brand is for fills under white text. */
+	--brand-text: #274e9b;
+	--yes: #2eb873;
+	--no: #dd3c3c;
+	/* Text-strength Yes/No: pass WCAG AA (4.5:1) on --card-2, unlike --yes/--no. */
+	--yes-text: #0e4e30;
+	--no-text: #861313;
+	--hover: #0000000d;
+
+	--font: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	--font-display: 'Instrument Sans Condensed', 'Arial Narrow', var(--font);
+	--weight: 480;
+	--weight-strong: 580;
+
+	--radius-pill: 12px;
+	--radius-card: 20px;
+	--shadow-card: 0 0 0 1px var(--border), 0 1px 1px -0.5px #0000001f, 0 3px 3px -1.5px #0000001f;
+	--ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #0c101d;
+		--card: #141c34;
+		--card-2: #1e263e;
+		--border: #e7e9ef26;
+		--fg: #e7e9ef;
+		--fg-2: #c2c9d6;
+		--muted: #94a0b8;
+		/* SSE's primary is #3c8cdd; darkened so white button text passes AA. */
+		--brand: #2375c7;
+		--brand-text: #3c8cdd;
+		--yes: #1fad7e;
+		--no: #d92626;
+		--yes-text: #33cc85;
+		--no-text: #eb7070;
+		--hover: #ffffff1a;
+	}
+}
