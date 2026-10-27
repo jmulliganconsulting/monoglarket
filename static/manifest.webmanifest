@@ -1,0 +1,10 @@
+{
+  "name": "Club Predictions",
+  "short_name": "Predictions",
+  "description": "Forecast club events with play-money coins.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
+  "icons": [{ "src": "/sse-logo-mark.v3.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
