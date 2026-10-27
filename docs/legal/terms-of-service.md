@@ -3,9 +3,11 @@
 **Effective date:** October 27, 2026
 **Last updated:** October 27, 2026
 
+> **Independent site, not affiliated with SSE.** Club Predictions is independently owned and operated by John Mulligan Consulting LLC. It is not affiliated with, endorsed by, sponsored by, or operated by the Society of Software Engineers at the Rochester Institute of Technology ("SSE") or the Rochester Institute of Technology ("RIT"). References to SSE or RIT on this site are for identification only.
+
 pelease no sue me por favor gracias supercell
 
-These Terms of Service ("Terms") govern your access to and use of Club Predictions (the "Service"), a play-money prediction market run by the Society of Software Engineers at the Rochester Institute of Technology ("SSE," "we," "us," or "our"). By creating an account, signing in, or using the Service, you agree to these Terms and to the [Privacy Policy](privacy-policy.md). If you do not agree, do not use the Service.
+These Terms of Service ("Terms") govern your access to and use of Club Predictions (the "Service"), a play-money prediction market independently owned and operated by John Mulligan Consulting LLC ("we," "us," or "our"). By creating an account, signing in, or using the Service, you agree to these Terms and to the [Privacy Policy](privacy-policy.md). If you do not agree, do not use the Service.
 
 ## 1. Play money only. No real money, ever.
 
@@ -97,9 +99,13 @@ These Terms of Service ("Terms") govern your access to and use of Club Predictio
 
 8.4 **Copyright (DMCA) notices.** If you believe content on the Service infringes your copyright, send a written notice to [DMCA agent name, mailing address, email] that includes: your contact details; identification of the work; identification of the infringing material and where it appears; a statement that you have a good-faith belief the use is not authorized; a statement, under penalty of perjury, that the information in the notice is accurate and that you are the owner or authorized to act for the owner; and your physical or electronic signature. We may terminate the accounts of repeat infringers.
 
-## 9. Club ownership and intellectual property
+8.5 **Comments.** Members may post comments on markets that are open to comments. Comments are limited in length and in how often you can post them, as shown in the Service. Each comment is shown publicly with your display name. Comments are your content under Section 8.1 and must follow Sections 6 and 8.
 
-The Service, its design, code, logos, and the SSE name and marks are owned by SSE or its licensors. You may not use them without written permission, except to use the Service as intended. Club logos and marks may not be used to suggest that a member, post, or market is endorsed by RIT or SSE.
+8.6 **Moderation of comments.** Comments are not financial advice and do not affect a market's price or how it resolves. We or a moderator may hide any comment at any time, with or without notice, and every hide is recorded in an audit log. Hidden comments stay in our records and remain visible to moderators. The Service does not currently let you delete your own comments, so contact us at [contact email] if you want a comment removed.
+
+## 9. Ownership and intellectual property
+
+The Service, its design, code, and the Club Predictions name and logos are owned by John Mulligan Consulting LLC or its licensors. You may not use them without written permission, except to use the Service as intended. Other names and marks, including those of SSE and RIT, belong to their respective owners. Their use on the Service does not mean that a member, post, or market is endorsed by SSE or RIT.
 
 ## 10. Termination
 
@@ -109,17 +115,26 @@ The Service, its design, code, logos, and the SSE name and marks are owned by SS
 
 10.3 When an account closes, play money on it is forfeited, and you lose any future right to it. Sections 1, 4.5, 9, 11, 12, 13, and 14 survive termination.
 
+10.4 We reserve the right, at our sole discretion and at any time, to:
+
+- terminate, suspend, or restrict your access to all or part of the Service, with or without notice;
+- modify, amend, or replace these Terms, as described in Section 15;
+- change, merge, lock, restrict, re-verify, or close accounts, including changing usernames, display names, linked sign-in methods, and currency or ledger records, to correct errors, respond to suspected misuse, or enforce these Terms; and
+- take any other lawful action to enforce these Terms or protect the Service, its members, or the law, including preserving evidence, cooperating with law enforcement, and seeking injunctive relief or damages where the law allows.
+
+We are not required to give a reason for these actions, although we will make a reasonable effort to tell you about a suspension or closure as described in Section 6.2.
+
 ## 11. Disclaimers
 
 THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, SECURE, ERROR-FREE, OR THAT ANY DATA, PRICE, OR RESULT WILL BE ACCURATE. SOME JURISDICTIONS DO NOT ALLOW CERTAIN DISCLAIMERS, SO SOME OF THESE MAY NOT APPLY TO YOU.
 
 ## 12. Limitation of liability
 
-TO THE FULLEST EXTENT PERMITTED BY LAW, SSE, RIT, AND THEIR OFFICERS, MENTORS, VOLUNTEERS, AND AGENTS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF PLAY MONEY, PROFITS, DATA, OR GOODWILL, ARISING OUT OF OR RELATED TO THE SERVICE. OUR TOTAL LIABILITY FOR ALL CLAIMS RELATING TO THE SERVICE WILL NOT EXCEED ONE HUNDRED U.S. DOLLARS (US$100). Because play money has no monetary value, no amount of play money is recoverable in cash. Nothing in these Terms excludes liability that cannot be excluded under New York or federal law.
+TO THE FULLEST EXTENT PERMITTED BY LAW, JOHN MULLIGAN CONSULTING LLC AND ITS MEMBERS, OFFICERS, EMPLOYEES, AND AGENTS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF PLAY MONEY, PROFITS, DATA, OR GOODWILL, ARISING OUT OF OR RELATED TO THE SERVICE. OUR TOTAL LIABILITY FOR ALL CLAIMS RELATING TO THE SERVICE WILL NOT EXCEED ONE HUNDRED U.S. DOLLARS (US$100). Because play money has no monetary value, no amount of play money is recoverable in cash. Nothing in these Terms excludes liability that cannot be excluded under New York or federal law.
 
 ## 13. Indemnity
 
-You agree to defend and hold harmless SSE, RIT, and their officers, mentors, volunteers, and agents from claims arising from your content, your breach of these Terms, or your misuse of the Service, except where a claim arises from our own gross negligence or willful misconduct.
+You agree to defend and hold harmless John Mulligan Consulting LLC and its members, officers, employees, and agents from claims arising from your content, your breach of these Terms, or your misuse of the Service, except where a claim arises from our own gross negligence or willful misconduct.
 
 ## 14. Governing law and disputes
 
@@ -158,6 +173,5 @@ You agree that clicking an acceptance button, checking a box, or signing in to t
 
 ## 18. Contact
 
-Society of Software Engineers, Golisano College of Computing and Information Sciences, Rochester Institute of Technology, GOL-1670, Rochester, NY 14623.
+John Mulligan Consulting LLC, [mailing address]
 Email: [contact email]
-Website: https://sse.rit.edu
