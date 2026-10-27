@@ -1,0 +1,1901 @@
+{
+	"note": "Every distinct title and location on sse.rit.edu/api/event as of 2026-10-26, with the result we want. Checked by fixtures.test.ts.",
+	"titles": {
+		"Harris visit": {
+			"category": "company",
+			"series": "L3Harris"
+		},
+		"General Meeting": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"Board Game Night": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"RapDev": {
+			"category": "project",
+			"series": "RapDev"
+		},
+		"What is Webpack?": {
+			"category": "talk",
+			"series": "What is Webpack"
+		},
+		"Chili Cookoff": {
+			"category": "social",
+			"series": "Chili Cookoff"
+		},
+		"Superb Owl Party": {
+			"category": "social",
+			"series": "Superb Owl"
+		},
+		"Intuit Talk!": {
+			"category": "company",
+			"series": "Intuit"
+		},
+		"Intro to Prog. Web Apps": {
+			"category": "talk",
+			"series": "Intro to Prog. Web Apps"
+		},
+		"Elixir Talk": {
+			"category": "talk",
+			"series": "Elixir Talk"
+		},
+		"Sardines III": {
+			"category": "social",
+			"series": "Sardines"
+		},
+		"Resume Workshop": {
+			"category": "career",
+			"series": "Resume Workshop"
+		},
+		"Intuit Meet and Greet": {
+			"category": "company",
+			"series": "Intuit"
+		},
+		"261 Review Session": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"Mock Interviews": {
+			"category": "career",
+			"series": "Mock Interviews"
+		},
+		"UTC Aerospace talk": {
+			"category": "company",
+			"series": "UTC Aerospace"
+		},
+		"Cimpress Talk": {
+			"category": "company",
+			"series": "Cimpress"
+		},
+		"Constant Contact Talk!": {
+			"category": "company",
+			"series": "Constant Contact"
+		},
+		"BAE Systems Talk!": {
+			"category": "company",
+			"series": "BAE Systems"
+		},
+		"CoverMyMeds Talk!": {
+			"category": "company",
+			"series": "CoverMyMeds"
+		},
+		"SWEN-262 Review": {
+			"category": "academic",
+			"series": "SWEN-262 review"
+		},
+		"Lockheed Martin Talk": {
+			"category": "company",
+			"series": "Lockheed Martin"
+		},
+		"History Talk - CANCELLED": {
+			"category": "talk",
+			"series": "History Talk"
+		},
+		"PowerPoint Karaoke": {
+			"category": "social",
+			"series": "PowerPoint Karaoke"
+		},
+		"Docker: A whale of a time": {
+			"category": "talk",
+			"series": "Docker: A whale of a time"
+		},
+		"Trampolining With WiC": {
+			"category": "social",
+			"series": "Trampolining With WiC"
+		},
+		"SSE History Talk": {
+			"category": "talk",
+			"series": "History Talk"
+		},
+		"Welcome Back Game Night": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"How to Clang your Dragon": {
+			"category": "talk",
+			"series": "How to Clang your Dragon"
+		},
+		"LaserTag IS BACK!": {
+			"category": "social",
+			"series": "Laser Tag"
+		},
+		"SWEN 261 Review": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"SWEN 262 Review": {
+			"category": "academic",
+			"series": "SWEN-262 review"
+		},
+		"CS 1 Review": {
+			"category": "academic",
+			"series": "CS1 review"
+		},
+		"Programming Languages ": {
+			"category": "talk",
+			"series": "Programming Languages"
+		},
+		"CS 2 Review Session": {
+			"category": "academic",
+			"series": "CS2 review"
+		},
+		"Vim Talk": {
+			"category": "talk",
+			"series": "Vim Talk"
+		},
+		"SWEN-250 Review": {
+			"category": "academic",
+			"series": "SWEN-250 review"
+		},
+		"Box Fort": {
+			"category": "social",
+			"series": "Box Fort"
+		},
+		"Rob Talk on Bitcoin ": {
+			"category": "talk",
+			"series": "Rob Talk on Bitcoin"
+		},
+		"Talk on Android Studio": {
+			"category": "talk",
+			"series": "Talk on Android Studio"
+		},
+		"Star Wars Night": {
+			"category": "social",
+			"series": "Star Wars Night"
+		},
+		"What Could Go Wrong?": {
+			"category": "other",
+			"series": "What Could Go Wrong"
+		},
+		"Table Flipping": {
+			"category": "social",
+			"series": "Table Flipping"
+		},
+		"SSE & SE Spring Picnic": {
+			"category": "social",
+			"series": "SSE & SE Spring Picnic"
+		},
+		"Graduation": {
+			"category": "social",
+			"series": "Graduation"
+		},
+		"Intuit Ice Cream Social": {
+			"category": "company",
+			"series": "Intuit"
+		},
+		"Rust Fundamentals": {
+			"category": "talk",
+			"series": "Rust Fundamentals"
+		},
+		"Simone Center Talk": {
+			"category": "talk",
+			"series": "Simone Center Talk"
+		},
+		"The Heist": {
+			"category": "social",
+			"series": "The Heist"
+		},
+		"Welcome Back BBQ": {
+			"category": "social",
+			"series": "Welcome Back BBQ"
+		},
+		"Hubspot talk": {
+			"category": "company",
+			"series": "HubSpot"
+		},
+		"Docker Talk": {
+			"category": "talk",
+			"series": "Docker Talk"
+		},
+		"Christian Newman Talk": {
+			"category": "talk",
+			"series": "Christian Newman Talk"
+		},
+		"CS APX Practice Exam 1": {
+			"category": "academic",
+			"series": "CS review"
+		},
+		"Mock Technical Interviews": {
+			"category": "career",
+			"series": "Mock Interviews"
+		},
+		"Clean-up Party": {
+			"category": "lab",
+			"series": "Clean-up Party"
+		},
+		"Malachowsky Resume Talk": {
+			"category": "career",
+			"series": "Resume Workshop"
+		},
+		"BAE Systems": {
+			"category": "company",
+			"series": "BAE Systems"
+		},
+		"SWEN-261 Practice Exam 1": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"CS 1 Practice Exam 1": {
+			"category": "academic",
+			"series": "CS1 review"
+		},
+		"CS 2 Practice Exam 1": {
+			"category": "academic",
+			"series": "CS2 review"
+		},
+		"Constant Contact Visit": {
+			"category": "company",
+			"series": "Constant Contact"
+		},
+		"Willow Tree Talk": {
+			"category": "company",
+			"series": "WillowTree"
+		},
+		"Black Baud Company Visit": {
+			"category": "company",
+			"series": "Blackbaud"
+		},
+		"Microsoft Visit": {
+			"category": "company",
+			"series": "Microsoft"
+		},
+		"CoreOs": {
+			"category": "company",
+			"series": "CoreOS"
+		},
+		"Trials in JS land w Jesse": {
+			"category": "talk",
+			"series": "Trials in JS land w Jesse"
+		},
+		"PLZ": {
+			"category": "other",
+			"series": "PLZ"
+		},
+		"SSE Wears Tinfoil Hats": {
+			"category": "social",
+			"series": "Wears Tinfoil Hats"
+		},
+		"Biofeedback Talk": {
+			"category": "talk",
+			"series": "Biofeedback Talk"
+		},
+		"Google Resume review": {
+			"category": "company",
+			"series": "Google"
+		},
+		"Game Night!": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"Pumpkin Carving": {
+			"category": "social",
+			"series": "Pumpkin Carving"
+		},
+		"Brochure Update": {
+			"category": "lab",
+			"series": "Brochure Update"
+		},
+		"Meneely Rants at the SSE": {
+			"category": "talk",
+			"series": "Meneely Rants at the SSE"
+		},
+		"GraphQL Talk": {
+			"category": "talk",
+			"series": "GraphQL Talk"
+		},
+		"HacktoberFestathon": {
+			"category": "social",
+			"series": "HacktoberFestathon"
+		},
+		"Meet Prof. Mkaouer": {
+			"category": "talk",
+			"series": "Meet Prof. Mkaouer"
+		},
+		"Sardines": {
+			"category": "social",
+			"series": "Sardines"
+		},
+		"CS 2 Practice Exam 2": {
+			"category": "academic",
+			"series": "CS2 review"
+		},
+		"CS APX Practice Exam 2": {
+			"category": "academic",
+			"series": "CS review"
+		},
+		"CS 1 Practice Exam 2": {
+			"category": "academic",
+			"series": "CS1 review"
+		},
+		"Machine Learning Talk": {
+			"category": "talk",
+			"series": "Machine Learning Talk"
+		},
+		"SWEN-261 Practice Exam 2": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"Grades and GPA Talk": {
+			"category": "talk",
+			"series": "Grades and GPA Talk"
+		},
+		"Micro Talks": {
+			"category": "talk",
+			"series": "Micro Talks"
+		},
+		"Holiday Movie Night": {
+			"category": "social",
+			"series": "Holiday Movie Night"
+		},
+		"Winter Ball": {
+			"category": "social",
+			"series": "Winter Ball"
+		},
+		"Martinez Talk": {
+			"category": "talk",
+			"series": "Martinez Talk"
+		},
+		"Git/GitHub Talk": {
+			"category": "talk",
+			"series": "Git/GitHub Talk"
+		},
+		"Laser Tag with the CSC": {
+			"category": "social",
+			"series": "Laser Tag"
+		},
+		"CS APX Practice Final": {
+			"category": "academic",
+			"series": "CS review"
+		},
+		"SWEN-261 Practice Final": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"CS 1 Practice Final": {
+			"category": "academic",
+			"series": "CS1 review"
+		},
+		"CS 2 Practice Final": {
+			"category": "academic",
+			"series": "CS2 review"
+		},
+		"Board Game Night :)": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"Learn How To Vim Talk": {
+			"category": "talk",
+			"series": "Learn How To Vim Talk"
+		},
+		"Hubspot Tech Talk": {
+			"category": "company",
+			"series": "HubSpot"
+		},
+		"Watching \"The Internship\"": {
+			"category": "social",
+			"series": "Watching \"The Internship\""
+		},
+		"Career Fair Makeup Talk ": {
+			"category": "career",
+			"series": "Career Fair Makeup Talk"
+		},
+		"Superb Owl Watching Party": {
+			"category": "social",
+			"series": "Superb Owl"
+		},
+		"Fast Enterprises Talk": {
+			"category": "company",
+			"series": "FAST Enterprises"
+		},
+		"Bank of America": {
+			"category": "company",
+			"series": "Bank of America"
+		},
+		"Willowtree": {
+			"category": "company",
+			"series": "WillowTree"
+		},
+		"Intuit Talk": {
+			"category": "company",
+			"series": "Intuit"
+		},
+		"Meet Prof. Hawker": {
+			"category": "talk",
+			"series": "Meet Prof. Hawker"
+		},
+		"Review Session CS1 Exam1": {
+			"category": "academic",
+			"series": "CS1 review"
+		},
+		"Review Session CS2 Exam1": {
+			"category": "academic",
+			"series": "CS2 review"
+		},
+		"Review SWEN261 Exam1": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"Meet Professor Wang": {
+			"category": "talk",
+			"series": "Meet Professor Wang"
+		},
+		"Command Line Productivity": {
+			"category": "talk",
+			"series": "Command Line Productivity"
+		},
+		"Paychex Talk": {
+			"category": "company",
+			"series": "Paychex"
+		},
+		"Past, Present and Future": {
+			"category": "other",
+			"series": "Past, Present and Future"
+		},
+		"SSE Bowling! (Finally)": {
+			"category": "social",
+			"series": "Bowling"
+		},
+		"Review Session CS2 Exam2": {
+			"category": "academic",
+			"series": "CS2 review"
+		},
+		"BAE Talk": {
+			"category": "company",
+			"series": "BAE Systems"
+		},
+		"Open Skate": {
+			"category": "social",
+			"series": "Open Skate"
+		},
+		"Review SWEN261 Exam 2": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"Review Session CS1 Exam2": {
+			"category": "academic",
+			"series": "CS1 review"
+		},
+		"Paxos": {
+			"category": "talk",
+			"series": "Paxos"
+		},
+		"Arts & Crafts": {
+			"category": "social",
+			"series": "Arts & Crafts"
+		},
+		"Spring Picnic!": {
+			"category": "social",
+			"series": "Spring Picnic"
+		},
+		"Video Game Night !": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"CS 1 Final Review": {
+			"category": "academic",
+			"series": "CS1 review"
+		},
+		"CS 2 Final Review": {
+			"category": "academic",
+			"series": "CS2 review"
+		},
+		"261 Review": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"Board Game Night 🎲": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"Microsoft Talk": {
+			"category": "company",
+			"series": "Microsoft"
+		},
+		"Git Talk": {
+			"category": "talk",
+			"series": "Git Talk"
+		},
+		"Bowling 🎳": {
+			"category": "social",
+			"series": "Bowling"
+		},
+		"Hubspot Talk": {
+			"category": "company",
+			"series": "HubSpot"
+		},
+		"Albert's Talk": {
+			"category": "talk",
+			"series": "Albert's Talk"
+		},
+		"Amazing Maize Maze 🌽": {
+			"category": "social",
+			"series": "Amazing Maize Maze"
+		},
+		"Air Force Research Talk": {
+			"category": "company",
+			"series": "Air Force Research Lab"
+		},
+		"Sardines 🐟": {
+			"category": "social",
+			"series": "Sardines"
+		},
+		"Perfecting Your Résumé": {
+			"category": "career",
+			"series": "Resume Workshop"
+		},
+		"CS1 Review Session": {
+			"category": "academic",
+			"series": "CS1 review"
+		},
+		"CS2 Review Session": {
+			"category": "academic",
+			"series": "CS2 review"
+		},
+		"SWEN-261 Review Session": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"WillowTree Tech Talk": {
+			"category": "company",
+			"series": "WillowTree"
+		},
+		"Constant Contact Talk": {
+			"category": "company",
+			"series": "Constant Contact"
+		},
+		"BAE Systems Inc Talk": {
+			"category": "company",
+			"series": "BAE Systems"
+		},
+		"BlackBaud Info Session": {
+			"category": "company",
+			"series": "Blackbaud"
+		},
+		"Intro to Bash Talk": {
+			"category": "talk",
+			"series": "Intro to Bash Talk"
+		},
+		"Professor Mkaour's Talk": {
+			"category": "talk",
+			"series": "Professor Mkaour's Talk"
+		},
+		"Red Barn Climbing 🎈": {
+			"category": "social",
+			"series": "Red Barn Climbing"
+		},
+		"Cloud Checkr Visit/Talk": {
+			"category": "company",
+			"series": "CloudCheckr"
+		},
+		"Video Game Night 🎮👾🕹": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"PowerPoint Karaoke 🎤": {
+			"category": "social",
+			"series": "PowerPoint Karaoke"
+		},
+		"Darien Lake 🎢🎡": {
+			"category": "social",
+			"series": "Darien Lake"
+		},
+		"Pumpkin Paint and Carve🎃": {
+			"category": "social",
+			"series": "Pumpkin Paint and Carve"
+		},
+		"Scary Movie Night 👻": {
+			"category": "social",
+			"series": "Scary Movie Night"
+		},
+		"Sauce Off Talk": {
+			"category": "talk",
+			"series": "Sauce Off Talk"
+		},
+		"Movie Night🎥🎬🎫🎦📽🍿🎞": {
+			"category": "social",
+			"series": "Movie Night"
+		},
+		"Website Series Part 1": {
+			"category": "project",
+			"series": "Website Series"
+		},
+		"Election Begins": {
+			"category": "election",
+			"series": "Election Begins"
+		},
+		"Ice Skating ⛸": {
+			"category": "social",
+			"series": "Ice Skating"
+		},
+		"Ballots Close": {
+			"category": "election",
+			"series": "Ballots Close"
+		},
+		"Harris Visit": {
+			"category": "company",
+			"series": "L3Harris"
+		},
+		"Hockey 🏒": {
+			"category": "social",
+			"series": "Hockey"
+		},
+		"Table Flipin (╯°□°）╯︵ ┻━┻": {
+			"category": "social",
+			"series": "Table Flipping"
+		},
+		"SSE General Meeting": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"How to Give A Talk": {
+			"category": "talk",
+			"series": "How to Give A Talk"
+		},
+		"SWEN-250 Review Session": {
+			"category": "academic",
+			"series": "SWEN-250 review"
+		},
+		"Harris Talk": {
+			"category": "company",
+			"series": "L3Harris"
+		},
+		"Resume Talk": {
+			"category": "career",
+			"series": "Resume Workshop"
+		},
+		"FAST Enterprises Talk": {
+			"category": "company",
+			"series": "FAST Enterprises"
+		},
+		"WillowTree Talk": {
+			"category": "company",
+			"series": "WillowTree"
+		},
+		"Movie Night": {
+			"category": "social",
+			"series": "Movie Night"
+		},
+		"Phone Power v1.0": {
+			"category": "talk",
+			"series": "Phone Power"
+		},
+		"Phone Power v2.0": {
+			"category": "talk",
+			"series": "Phone Power"
+		},
+		"Javascript Talk with Wade": {
+			"category": "talk",
+			"series": "Javascript Talk with Wade"
+		},
+		"Nominations Open": {
+			"category": "election",
+			"series": "Nominations Open"
+		},
+		"Lab Cleaning": {
+			"category": "lab",
+			"series": "Lab Cleaning"
+		},
+		"Open House": {
+			"category": "outreach",
+			"series": "Open House"
+		},
+		"CS1 Exam 2 Review": {
+			"category": "academic",
+			"series": "CS1 review"
+		},
+		"CS2 Exam 2 Review Session": {
+			"category": "academic",
+			"series": "CS2 review"
+		},
+		"SWEN-262 Review Session": {
+			"category": "academic",
+			"series": "SWEN-262 review"
+		},
+		"Vim Talk with Gavriel": {
+			"category": "talk",
+			"series": "Vim Talk with Gavriel"
+		},
+		"Nominations Close": {
+			"category": "election",
+			"series": "Nominations Close"
+		},
+		"Gen. Meet. W/ SPEECHES": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"VOTING OPENS": {
+			"category": "election",
+			"series": "VOTING OPENS"
+		},
+		"Voting Ends": {
+			"category": "election",
+			"series": "Voting Ends"
+		},
+		"Swag Blowout and Auction": {
+			"category": "social",
+			"series": "Swag Blowout and Auction"
+		},
+		"End of Semester BBQ": {
+			"category": "social",
+			"series": "End of Semester BBQ"
+		},
+		"Imagine RIT": {
+			"category": "outreach",
+			"series": "Imagine RIT"
+		},
+		"First General Meeting!": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"The Heist & BBQ": {
+			"category": "social",
+			"series": "The Heist & BBQ"
+		},
+		"Microsoft": {
+			"category": "company",
+			"series": "Microsoft"
+		},
+		"Intuit Tech Talk/Workshop": {
+			"category": "company",
+			"series": "Intuit"
+		},
+		"L3Harris": {
+			"category": "company",
+			"series": "L3Harris"
+		},
+		"Air Force Research": {
+			"category": "company",
+			"series": "Air Force Research Lab"
+		},
+		"Physics Review Session": {
+			"category": "academic",
+			"series": "Physics review"
+		},
+		"HubSpot": {
+			"category": "company",
+			"series": "HubSpot"
+		},
+		"Corning": {
+			"category": "company",
+			"series": "Corning"
+		},
+		"SWEN 250 Review Session": {
+			"category": "academic",
+			"series": "SWEN-250 review"
+		},
+		"CS APX Review Session": {
+			"category": "academic",
+			"series": "CS review"
+		},
+		"WillowTree": {
+			"category": "company",
+			"series": "WillowTree"
+		},
+		"Constant Contact": {
+			"category": "company",
+			"series": "Constant Contact"
+		},
+		"FAST Enterprise": {
+			"category": "company",
+			"series": "FAST Enterprises"
+		},
+		"SWEN 261 Review Session": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"Using LinkedIn for Jobs": {
+			"category": "career",
+			"series": "Using LinkedIn for Jobs"
+		},
+		"Trivia": {
+			"category": "social",
+			"series": "Trivia"
+		},
+		"React Talk": {
+			"category": "talk",
+			"series": "React Talk"
+		},
+		"R&D in Software Projects": {
+			"category": "talk",
+			"series": "R&D in Software Projects"
+		},
+		"(Un)Talent Show": {
+			"category": "social",
+			"series": "(Un)Talent Show"
+		},
+		"Open Source Framework": {
+			"category": "talk",
+			"series": "Open Source Framework"
+		},
+		"IPKeys Power Partner": {
+			"category": "company",
+			"series": "IPKeys"
+		},
+		"RUST Talk!": {
+			"category": "talk",
+			"series": "RUST Talk"
+		},
+		"Cloud Technologies Talk": {
+			"category": "talk",
+			"series": "Cloud Technologies Talk"
+		},
+		"Laser Tag": {
+			"category": "social",
+			"series": "Laser Tag"
+		},
+		"Hacktoberfest Event": {
+			"category": "social",
+			"series": "Hacktoberfest Event"
+		},
+		"Neural Network Talk!": {
+			"category": "talk",
+			"series": "Neural Network Talk"
+		},
+		"MicroTalks!": {
+			"category": "talk",
+			"series": "MicroTalks"
+		},
+		"Meet with NSA!": {
+			"category": "company",
+			"series": "NSA"
+		},
+		"Powr Meet n Greet": {
+			"category": "company",
+			"series": "Powr"
+		},
+		"Powerpoint Karaoke": {
+			"category": "social",
+			"series": "PowerPoint Karaoke"
+		},
+		"Unity Talk": {
+			"category": "talk",
+			"series": "Unity Talk"
+		},
+		"Winter Crafts": {
+			"category": "social",
+			"series": "Winter Crafts"
+		},
+		"261 Exam 2 Review Session": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"Meneely Talk": {
+			"category": "talk",
+			"series": "Meneely Talk"
+		},
+		"Snowball Fight": {
+			"category": "social",
+			"series": "Snowball Fight"
+		},
+		"Frontend Talk": {
+			"category": "talk",
+			"series": "Frontend Talk"
+		},
+		"Board Game Night!": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"Hockey Game Night": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"Refactoring Talk": {
+			"category": "talk",
+			"series": "Refactoring Talk"
+		},
+		"Superb Owl!": {
+			"category": "social",
+			"series": "Superb Owl"
+		},
+		"Hubspot": {
+			"category": "company",
+			"series": "HubSpot"
+		},
+		"NDA Career Dev Event!": {
+			"category": "career",
+			"series": "NDA Career Dev Event"
+		},
+		"Air Force Research Lab": {
+			"category": "company",
+			"series": "Air Force Research Lab"
+		},
+		"Resume Talk ": {
+			"category": "career",
+			"series": "Resume Workshop"
+		},
+		"Mock Interview Talk": {
+			"category": "career",
+			"series": "Mock Interviews"
+		},
+		"SWEN 262 Review Session": {
+			"category": "academic",
+			"series": "SWEN-262 review"
+		},
+		"Narwhal Systems": {
+			"category": "company",
+			"series": "Narwhal Systems"
+		},
+		"SMP": {
+			"category": "project",
+			"series": "SMP"
+		},
+		"SSE Movie Night": {
+			"category": "social",
+			"series": "Movie Night"
+		},
+		"Randstad Talk": {
+			"category": "company",
+			"series": "Randstad"
+		},
+		"Fast Enterprises": {
+			"category": "company",
+			"series": "FAST Enterprises"
+		},
+		"Expensify": {
+			"category": "company",
+			"series": "Expensify"
+		},
+		"Free Popcorn!": {
+			"category": "social",
+			"series": "Free Popcorn"
+		},
+		"Gartner": {
+			"category": "company",
+			"series": "Gartner"
+		},
+		"First General Meeting!!!": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"Ask Us Anything!": {
+			"category": "social",
+			"series": "Ask Us Anything"
+		},
+		"Projects Cleanout": {
+			"category": "lab",
+			"series": "Projects Cleanout"
+		},
+		"Career Mentoring ": {
+			"category": "career",
+			"series": "Career Mentoring"
+		},
+		"Officer Meeting ": {
+			"category": "officer",
+			"series": "Officer Meeting"
+		},
+		"Career Mentoring": {
+			"category": "career",
+			"series": "Career Mentoring"
+		},
+		"General Meeting!": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"Online Mentoring ": {
+			"category": "academic",
+			"series": "Online Mentoring"
+		},
+		"Virtual Game Night! ": {
+			"category": "social",
+			"series": "Game Night"
+		},
+		"Officer Meeting": {
+			"category": "officer",
+			"series": "Officer Meeting"
+		},
+		"Week 4 - General Meeting!": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"Constant Contact Visit! ": {
+			"category": "company",
+			"series": "Constant Contact"
+		},
+		"Week 5 - General Meeting!": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"Online Mentoring": {
+			"category": "academic",
+			"series": "Online Mentoring"
+		},
+		"Open House #1": {
+			"category": "outreach",
+			"series": "Open House"
+		},
+		"Datadog Virtual OpenHouse": {
+			"category": "company",
+			"series": "Datadog"
+		},
+		"Week 6 - General Meeting!": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"HubSpot Visit": {
+			"category": "company",
+			"series": "HubSpot"
+		},
+		"ProjectBCI Weekly Meeting": {
+			"category": "project",
+			"series": "ProjectBCI Weekly Meeting"
+		},
+		"Week 7 - General Meeting!": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"Open House #2": {
+			"category": "outreach",
+			"series": "Open House"
+		},
+		"Open House #3": {
+			"category": "outreach",
+			"series": "Open House"
+		},
+		"Winter Zoom Party": {
+			"category": "social",
+			"series": "Winter Zoom Party"
+		},
+		"AR w/ HookBang": {
+			"category": "company",
+			"series": "HookBang"
+		},
+		"Austin McChord Visit": {
+			"category": "company",
+			"series": "Austin McChord Visit"
+		},
+		"Cards Against Humanity": {
+			"category": "social",
+			"series": "Cards Against Humanity"
+		},
+		"March Open House": {
+			"category": "outreach",
+			"series": "Open House"
+		},
+		"April Open House": {
+			"category": "outreach",
+			"series": "Open House"
+		},
+		"Scott Hawker's Talk": {
+			"category": "talk",
+			"series": "Scott Hawker's Talk"
+		},
+		"Shantanav's Talk": {
+			"category": "talk",
+			"series": "Shantanav's Talk"
+		},
+		"Red Argyle Visit": {
+			"category": "company",
+			"series": "Red Argyle"
+		},
+		"Moog Inc. Company Visit": {
+			"category": "company",
+			"series": "Moog"
+		},
+		"Freddy Rondon's Talk": {
+			"category": "talk",
+			"series": "Freddy Rondon's Talk"
+		},
+		"Wic talk": {
+			"category": "talk",
+			"series": "Wic talk"
+		},
+		"Intermediate Git": {
+			"category": "talk",
+			"series": "Intermediate Git"
+		},
+		"SSE Jackbox Night": {
+			"category": "social",
+			"series": "Jackbox Night"
+		},
+		"The Linux Command Line": {
+			"category": "talk",
+			"series": "The Linux Command Line"
+		},
+		"Mock Interviews Day 1": {
+			"category": "career",
+			"series": "Mock Interviews"
+		},
+		"Mock Interviews Day 2": {
+			"category": "career",
+			"series": "Mock Interviews"
+		},
+		"[Redacted] Night": {
+			"category": "social",
+			"series": "[Redacted] Night"
+		},
+		"Fast Trivia Night": {
+			"category": "social",
+			"series": "Fast Trivia Night"
+		},
+		"IOMaxis Rust Talk": {
+			"category": "company",
+			"series": "IOMaxis"
+		},
+		"GCIS 123 Review Session": {
+			"category": "academic",
+			"series": "GCIS-123 review"
+		},
+		"Tech Committee Meeting": {
+			"category": "officer",
+			"series": "Tech Committee Meeting"
+		},
+		"Intro to Docker": {
+			"category": "talk",
+			"series": "Intro to Docker"
+		},
+		"SSE Jeopardy": {
+			"category": "social",
+			"series": "Jeopardy"
+		},
+		"SSE @ ImagineRIT": {
+			"category": "outreach",
+			"series": "Imagine RIT"
+		},
+		"MicroTalks": {
+			"category": "talk",
+			"series": "MicroTalks"
+		},
+		"Mafia Night": {
+			"category": "social",
+			"series": "Mafia Night"
+		},
+		"Hridiza's Talk - Writing a Raytracer Workshop": {
+			"category": "talk",
+			"series": "Hridiza's Talk - Writing a Raytracer Workshop"
+		},
+		"Brain Games": {
+			"category": "social",
+			"series": "Brain Games"
+		},
+		"Karaoke": {
+			"category": "social",
+			"series": "Karaoke"
+		},
+		"Superb Owl": {
+			"category": "social",
+			"series": "Superb Owl"
+		},
+		"Esports: A Career & An Experience ": {
+			"category": "career",
+			"series": "Esports: A Career & An Experience"
+		},
+		"Ariels Talk": {
+			"category": "talk",
+			"series": "Ariels Talk"
+		},
+		"Pre-Career Fair Resume Workshop": {
+			"category": "career",
+			"series": "Resume Workshop"
+		},
+		"SWEN261 Review Session": {
+			"category": "academic",
+			"series": "SWEN-261 review"
+		},
+		"GCIS123 Review Session": {
+			"category": "academic",
+			"series": "GCIS-123 review"
+		},
+		"GCIS124 Review Session": {
+			"category": "academic",
+			"series": "GCIS-124 review"
+		},
+		"SWEN250 Review Session": {
+			"category": "academic",
+			"series": "SWEN-250 review"
+		},
+		"Benco Dental Company Talk": {
+			"category": "company",
+			"series": "Benco Dental"
+		},
+		"M&T ": {
+			"category": "company",
+			"series": "M&T Bank"
+		},
+		"Power Point Karaoke": {
+			"category": "social",
+			"series": "PowerPoint Karaoke"
+		},
+		"Family Feud": {
+			"category": "social",
+			"series": "Family Feud"
+		},
+		"Primary Officer + Dept Meeting": {
+			"category": "officer",
+			"series": "Primary Officer + Dept Meeting"
+		},
+		"CSH x SSE Cookout": {
+			"category": "social",
+			"series": "CSH x SSE Cookout"
+		},
+		"GCCIS Club Fair": {
+			"category": "outreach",
+			"series": "GCCIS Club Fair"
+		},
+		"General Meeting & Funny Fauna Friday": {
+			"category": "general_meeting",
+			"series": "General Meeting"
+		},
+		"Talk: Introduction to Git": {
+			"category": "talk",
+			"series": "Talk: Introduction to Git"
+		},
+		"GCIS 123 Exam 1 Review Session": {
+			"category": "academic",
+			"series": "GCIS-123 review"
+		},
+		"Resume Review with Malachowsky": {
+			"category": "career",
+			"series": "Resume Workshop"
+		},
+		"Film Appreciation Night": {
+			"category": "social",
+			"series": "Film Appreciation Night"
+		},
+		"GCIS 127 Exam Review 1": {
+			"category": "academic",
+			"series": "GCIS-127 review"
+		},
+		"Elevator Pitch Talk": {
+			"category": "career",
+			"series": "Elevator Pitch Talk"
+		},
+		"Bagels Before Business": {
+			"category": "social",
+			"series": "Bagels Before Business"
+		},
+		"Music Appreciation Night": {
+			"category": "social",
+			"series": "Music Appreciation Night"
+		},
+		"Funny Fauna Trivia": {
+			"category": "social",
+			"series": "Funny Fauna Trivia"
+		},
+		"How to Drive a Big Truck": {
+			"category": "talk",
+			"series": "How to Drive a Big Truck"
+		},
+		"John’s CDL Talk: Driving a Big Truck": {
+			"category": "talk",
+			"series": "John’s CDL Talk: Driving a Big Truck"
+		},
+		"GCIS 127 Exam Review 2": {
+			"category": "academic",
+			"series": "GCIS-127 review"
+		},
+		"Hexcasting with David Altman": {
+			"category": "talk",
+			"series": "Hexcasting with David Altman"
+		},
+		"Ikea Night / Album Appreciation": {
+			"category": "social",
+			"series": "Ikea Night / Album Appreciation"
+		},
+		"WeTheHobby Talk": {
+			"category": "talk",
+			"series": "WeTheHobby Talk"
+		},
+		"Halloween Party": {
+			"category": "social",
+			"series": "Halloween Party"
+		},
+		"New CampusLife Club Orientation": {
+			"category": "outreach",
+			"series": "New CampusLife Club Orientation"
+		},
+		"Paychex ViSE Talk": {
+			"category": "company",
+			"series": "Paychex"
+		}
+	},
+	"locations": [
+		{
+			"location": "SSE Lab",
+			"date": "2017-01-25",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "GOL-2400",
+			"date": "2017-01-25",
+			"places": [
+				"GOL-2400"
+			]
+		},
+		{
+			"location": "The Lab",
+			"date": "2017-02-01",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "GOL-1400 (Auditorium)",
+			"date": "2017-02-05",
+			"places": [
+				"GOL-1400"
+			]
+		},
+		{
+			"location": "The lab",
+			"date": "2017-02-08",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "GOL-1550",
+			"date": "2017-02-25",
+			"places": [
+				"GOL-1550"
+			]
+		},
+		{
+			"location": "GOL-1435",
+			"date": "2017-03-04",
+			"places": [
+				"GOL-1435"
+			]
+		},
+		{
+			"location": "Altitude Trampoline Park (Meet in SSE Lab)",
+			"date": "2017-03-24",
+			"places": [
+				"Altitude Trampoline Park",
+				"The Lab [meet]"
+			]
+		},
+		{
+			"location": "Lab",
+			"date": "2017-04-04",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "SSE Lab / LaserTron",
+			"date": "2017-04-07",
+			"places": [
+				"The Lab",
+				"LaserTron"
+			]
+		},
+		{
+			"location": "GOL 1400",
+			"date": "2017-04-09",
+			"places": [
+				"GOL-1400"
+			]
+		},
+		{
+			"location": "GOL 1435",
+			"date": "2017-04-09",
+			"places": [
+				"GOL-1435"
+			]
+		},
+		{
+			"location": "GOL 1445",
+			"date": "2017-04-09",
+			"places": [
+				"GOL-1445"
+			]
+		},
+		{
+			"location": "Golisano Atrium",
+			"date": "2017-04-23",
+			"places": [
+				"Golisano Atrium"
+			]
+		},
+		{
+			"location": "GOL-1455",
+			"date": "2017-05-04",
+			"places": [
+				"GOL-1455"
+			]
+		},
+		{
+			"location": "Tiger Statue",
+			"date": "2017-05-12",
+			"places": [
+				"Tiger Statue"
+			]
+		},
+		{
+			"location": "UPDATED: Steven's Pavilion @ Veterans Memorial Park",
+			"date": "2017-05-14",
+			"places": [
+				"Stevens Pavilion, Veterans Memorial Park"
+			]
+		},
+		{
+			"location": "Field House",
+			"date": "2017-05-20",
+			"places": [
+				"Field House"
+			]
+		},
+		{
+			"location": "GOL-1520",
+			"date": "2017-09-07",
+			"places": [
+				"GOL-1520"
+			]
+		},
+		{
+			"location": "Golisano's North Lawn",
+			"date": "2017-09-09",
+			"places": [
+				"Golisano's North Lawn"
+			]
+		},
+		{
+			"location": "SSE & Team Rooms",
+			"date": "2017-09-24",
+			"places": [
+				"The Lab",
+				"Team Rooms"
+			]
+		},
+		{
+			"location": "Mento Lab",
+			"date": "2017-09-24",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "1520/SSE Lab",
+			"date": "2017-09-28",
+			"places": [
+				"GOL-1520",
+				"The Lab"
+			]
+		},
+		{
+			"location": "GOL-1400",
+			"date": "2017-10-01",
+			"places": [
+				"GOL-1400"
+			]
+		},
+		{
+			"location": "GOL-1445",
+			"date": "2017-10-01",
+			"places": [
+				"GOL-1445"
+			]
+		},
+		{
+			"location": "SSE",
+			"date": "2017-10-06",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "SSE LaB",
+			"date": "2017-10-16",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "Outside Goli",
+			"date": "2017-10-21",
+			"places": [
+				"Outside Goli"
+			]
+		},
+		{
+			"location": "GOL 1670, the lab",
+			"date": "2017-10-25",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "GOL 1670",
+			"date": "2017-11-08",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "Atrium",
+			"date": "2017-12-03",
+			"places": [
+				"Golisano Atrium"
+			]
+		},
+		{
+			"location": "TBD (time also TBD)",
+			"date": "2017-12-09",
+			"places": []
+		},
+		{
+			"location": "GOL-1670(SSE Lab)",
+			"date": "2018-01-24",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "SSE Lab / Team Rooms",
+			"date": "2018-02-03",
+			"places": [
+				"The Lab",
+				"Team Rooms"
+			]
+		},
+		{
+			"location": "GOL-1670",
+			"date": "2018-02-13",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "GOL-1610",
+			"date": "2018-02-17",
+			"places": [
+				"GOL-1610"
+			]
+		},
+		{
+			"location": "meet at the SSE Lab",
+			"date": "2018-03-22",
+			"places": [
+				"The Lab [meet]"
+			]
+		},
+		{
+			"location": "Meet @ the SSE Lab",
+			"date": "2018-03-30",
+			"places": [
+				"The Lab [meet]"
+			]
+		},
+		{
+			"location": "meet at the SSE lab",
+			"date": "2018-04-07",
+			"places": [
+				"The Lab [meet]"
+			]
+		},
+		{
+			"location": "Steven's Pavilion @ Veterans Memorial Park",
+			"date": "2018-04-21",
+			"places": [
+				"Stevens Pavilion, Veterans Memorial Park"
+			]
+		},
+		{
+			"location": "Grass patch outside the Northern exit of GOL",
+			"date": "2018-09-08",
+			"places": [
+				"Grass patch outside the Northern exit of GOL"
+			]
+		},
+		{
+			"location": "Gol-1690",
+			"date": "2018-09-20",
+			"places": [
+				"GOL-1690"
+			]
+		},
+		{
+			"location": "Meet in the Lab",
+			"date": "2018-10-12",
+			"places": [
+				"The Lab [meet]"
+			]
+		},
+		{
+			"location": "Darien Lake",
+			"date": "2018-10-27",
+			"places": [
+				"Darien Lake"
+			]
+		},
+		{
+			"location": "Society of Saucy Engineers",
+			"date": "2018-11-06",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "GOL Atrium",
+			"date": "2018-12-02",
+			"places": [
+				"Golisano Atrium"
+			]
+		},
+		{
+			"location": "GOL-1670 (Gene Polisseni Center)",
+			"date": "2018-12-07",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "GOL-1670 & GOL-1400",
+			"date": "2019-02-03",
+			"places": [
+				"The Lab",
+				"GOL-1400"
+			]
+		},
+		{
+			"location": "GOL-1650",
+			"date": "2019-02-11",
+			"places": [
+				"GOL-1650"
+			]
+		},
+		{
+			"location": "GOL- 1610",
+			"date": "2019-03-31",
+			"places": [
+				"GOL-1610"
+			]
+		},
+		{
+			"location": "Stevens Pavilion",
+			"date": "2019-04-20",
+			"places": [
+				"Stevens Pavilion, Veterans Memorial Park"
+			]
+		},
+		{
+			"location": "GOL -1550",
+			"date": "2019-08-29",
+			"places": [
+				"GOL-1550"
+			]
+		},
+		{
+			"location": "Orange 1350",
+			"date": "2019-09-18",
+			"places": [
+				"Orange 1350"
+			]
+		},
+		{
+			"location": "Gracies Field        ",
+			"date": "2019-11-24",
+			"places": [
+				"Gracies Field"
+			]
+		},
+		{
+			"location": "Lovin Cup @ Park Point",
+			"date": "2020-02-04",
+			"places": [
+				"Lovin Cup @ Park Point"
+			]
+		},
+		{
+			"location": "Online",
+			"date": "2020-08-20",
+			"places": [
+				"Online"
+			]
+		},
+		{
+			"location": "GOL-1670 OR online",
+			"date": "2020-08-31",
+			"places": [
+				"The Lab",
+				"Online"
+			]
+		},
+		{
+			"location": "Zoom",
+			"date": "2020-09-07",
+			"places": [
+				"Online"
+			]
+		},
+		{
+			"location": "In the lab! (GOL-1650)",
+			"date": "2020-09-28",
+			"places": [
+				"GOL-1650"
+			]
+		},
+		{
+			"location": "virtual",
+			"date": "2020-12-06",
+			"places": [
+				"Online"
+			]
+		},
+		{
+			"location": "http://sse.rit.edu/go/dockertalk",
+			"date": "2021-02-19",
+			"places": [
+				"Online"
+			]
+		},
+		{
+			"location": "Gol-1670",
+			"date": "2021-09-21",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "GOL -1670",
+			"date": "2022-01-27",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "SSE Lab - GOL-1670",
+			"date": "2026-01-28",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "Revolution Chinese",
+			"date": "2026-02-01",
+			"places": [
+				"Revolution Chinese"
+			]
+		},
+		{
+			"location": "lab",
+			"date": "2026-02-08",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "sse",
+			"date": "2026-02-12",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "The (Temporary) Lab",
+			"date": "2026-02-20",
+			"places": [
+				"The Temporary Lab"
+			]
+		},
+		{
+			"location": "GOL-1610",
+			"date": "2026-02-24",
+			"places": [
+				"The Temporary Lab"
+			]
+		},
+		{
+			"location": "GOL-1400 (Large Lecture Hall/Auditorium)",
+			"date": "2026-02-27",
+			"places": [
+				"GOL-1400"
+			]
+		},
+		{
+			"location": "GOL-2690",
+			"date": "2026-02-28",
+			"places": [
+				"GOL-2690"
+			]
+		},
+		{
+			"location": "Liberal Arts Hall A250",
+			"date": "2026-02-28",
+			"places": [
+				"Liberal Arts Hall A250"
+			]
+		},
+		{
+			"location": "Webb Auditorium (Booth 1350)",
+			"date": "2026-03-23",
+			"places": [
+				"Webb Auditorium"
+			]
+		},
+		{
+			"location": "Gol - 1670",
+			"date": "2026-03-26",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "University Services Center (087USC) - USC-1100 Conference Room",
+			"date": "2026-08-24",
+			"places": [
+				"USC-1100"
+			]
+		},
+		{
+			"location": "USC-1100 Conference Room",
+			"date": "2026-08-28",
+			"places": [
+				"USC-1100"
+			]
+		},
+		{
+			"location": "Behind Gracie's - South Grill",
+			"date": "2026-08-28",
+			"places": [
+				"Behind Gracie's - South Grill"
+			]
+		},
+		{
+			"location": "The Lab (GOL-1670)",
+			"date": "2026-09-04",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "Tha Lab",
+			"date": "2026-09-23",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "Lab!",
+			"date": "2026-09-25",
+			"places": [
+				"The Lab"
+			]
+		},
+		{
+			"location": "CYB-1710,1720,1730",
+			"date": "2026-10-07",
+			"places": [
+				"CYB-1710",
+				"CYB-1720",
+				"CYB-1730"
+			]
+		},
+		{
+			"location": "",
+			"date": "2026-10-07",
+			"places": []
+		},
+		{
+			"location": "SHED 4300",
+			"date": "2026-10-27",
+			"places": [
+				"SHED-4300"
+			]
+		}
+	]
+}
