@@ -1,0 +1,4 @@
+# Set DOMAIN in .env (e.g. predict.myclub.org) for automatic HTTPS; defaults to localhost.
+{$DOMAIN:localhost} {
+	reverse_proxy app:3000
+}

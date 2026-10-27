@@ -1,0 +1,55 @@
+# Dev: `npm run db:up` starts only db. Production: `docker compose up -d --build` starts everything.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: clubpredict
+    ports: ["${POSTGRES_PORT:-5434}:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/clubpredict
+      ORIGIN: https://${DOMAIN:-localhost}
+      ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-}
+      ALLOWED_EMAILS: ${ALLOWED_EMAILS:-}
+      SMTP_URL: ${SMTP_URL:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      GOOGLE_SIGNIN_ENABLED: ${GOOGLE_SIGNIN_ENABLED:-true}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
+      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET:-}
+      SSE_API_URL: ${SSE_API_URL:-}
+      SSE_SYNC_MINUTES: ${SSE_SYNC_MINUTES:-15}
+      RIT_API_KEY: ${RIT_API_KEY:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      DATA_DIR: /app/data
+    volumes:
+      - app_data:/app/data
+    depends_on:
+      db: { condition: service_healthy }
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports: ["${HTTP_PORT:-80}:80", "${HTTPS_PORT:-443}:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [app]
+    restart: unless-stopped
+
+volumes:
+  app_data: {}
+  pgdata: {}
+  caddy_data: {}

@@ -1,0 +1,8 @@
+node_modules
+build
+data
+.svelte-kit
+src/generated
+.env
+.env.*
+.claude
