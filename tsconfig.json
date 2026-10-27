@@ -1,0 +1,11 @@
+{
+	"extends": "$app/tsconfig",
+	"compilerOptions": {
+		"strict": true,
+		"types": ["$app/types", "node"],
+		// core modules and tests run directly under Node 24 type stripping
+		"allowImportingTsExtensions": true,
+		"erasableSyntaxOnly": true
+	},
+	"include": ["src", "prisma", "vite.config.ts", "prisma.config.ts"]
+}

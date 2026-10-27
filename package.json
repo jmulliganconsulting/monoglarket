@@ -1,0 +1,52 @@
+{
+  "name": "club-predictions",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "db:up": "docker compose up -d db",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "generate": "prisma generate",
+    "postinstall": "prisma generate",
+    "check:sqlite": "T=$(mktemp -d) && sed 's/provider = \"postgresql\"/provider = \"sqlite\"/' prisma/schema.prisma > $T/schema.prisma && prisma validate --schema $T/schema.prisma",
+    "test": "node --test --test-concurrency=1 \"src/**/*.test.ts\"",
+    "typecheck": "npm run check",
+    "db:seed": "node prisma/seed.ts",
+    "sse:link": "node scripts/sse-link.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "@tabler/icons-svelte": "3.50.0",
+    "marked": "^18.1.2",
+    "nodemailer": "10.2.1",
+    "web-push": "3.6.7"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-node": "^6.0.0",
+    "@sveltejs/kit": "^3.0.0",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@types/node": "^24",
+    "@types/nodemailer": "8.0.2",
+    "@types/web-push": "3.6.4",
+    "prisma": "7.10.1",
+    "svelte": "^5.57.1",
+    "svelte-check": "^4.6.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.0"
+  },
+  "version": "0.0.1",
+  "imports": {
+    "#lib": "./src/lib/index.js",
+    "#lib/*": "./src/lib/*"
+  }
+}
