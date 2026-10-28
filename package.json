@@ -22,7 +22,8 @@
     "typecheck": "npm run check",
     "db:seed": "node prisma/seed.ts",
     "sse:link": "node scripts/sse-link.ts",
-    "sse:sync": "node --env-file-if-exists=.env scripts/sse-sync.ts"
+    "sse:sync": "node --env-file-if-exists=.env scripts/sse-sync.ts",
+    "sse:alumni": "node --env-file-if-exists=.env scripts/sse-alumni.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
