@@ -4,7 +4,7 @@
 	let { data, form }: PageProps = $props();
 </script>
 
-<svelte:head><title>Sign in · MonoGlarket</title></svelte:head>
+<svelte:head><title>Sign in · Monoglarket</title></svelte:head>
 
 <h1>Sign in</h1>
 {#if form?.error}

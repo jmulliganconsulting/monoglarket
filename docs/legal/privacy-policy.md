@@ -1,13 +1,13 @@
-# MonoGlarket Privacy Policy
+# Monoglarket Privacy Policy
 
 **Effective date:** October 27, 2026
 **Last updated:** October 27, 2026
 
-> **Unofficial site, not affiliated with SSE or Polymarket.** MonoGlarket (Unofficial SSE Polymarket) is not officially associated with, endorsed by, sponsored by, or operated by the Society of Software Engineers at the Rochester Institute of Technology ("SSE"), the Rochester Institute of Technology ("RIT"), or Polymarket. References to SSE, RIT, or Polymarket on this site are for identification only.
+> **Unofficial site, not affiliated with SSE or Polymarket.** Monoglarket (Unofficial SSE Polymarket) is not officially associated with, endorsed by, sponsored by, or operated by the Society of Software Engineers at the Rochester Institute of Technology ("SSE"), the Rochester Institute of Technology ("RIT"), or Polymarket. References to SSE, RIT, or Polymarket on this site are for identification only.
 
 i don't want to get sued please speed i need this
 
-This Privacy Policy explains what personal information MonoGlarket (the "Service") collects, how we use and share it, how long we keep it, and the choices you have. The Service is independently owned and operated by John Mulligan, doing business as John Mulligan Consulting ("we," "us," or "our"). It is a play-money prediction market for club members. It is not a payment service, and we do not sell personal information.
+This Privacy Policy explains what personal information Monoglarket (the "Service") collects, how we use and share it, how long we keep it, and the choices you have. The Service is independently owned and operated by John Mulligan, doing business as John Mulligan Consulting ("we," "us," or "our"). It is a play-money prediction market for club members. It is not a payment service, and we do not sell personal information.
 
 This policy covers the Service only. It does not cover the SSE website's public pages, RIT systems, or third-party services you choose to connect. Those have their own privacy policies.
 

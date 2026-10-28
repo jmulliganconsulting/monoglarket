@@ -1,6 +1,6 @@
 {
-  "name": "MonoGlarket",
-  "short_name": "MonoGlarket",
+  "name": "Monoglarket",
+  "short_name": "Monoglarket",
   "description": "Forecast club events with play-money coins.",
   "start_url": "/",
   "display": "standalone",

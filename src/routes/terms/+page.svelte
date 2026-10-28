@@ -6,7 +6,7 @@
 	const html = marked.parse(terms.replace(/\(privacy-policy\.md\)/g, '(/privacy)')) as string;
 </script>
 
-<svelte:head><title>Terms of Service · MonoGlarket</title></svelte:head>
+<svelte:head><title>Terms of Service · Monoglarket</title></svelte:head>
 
 <article class="legal">{@html html}</article>
 

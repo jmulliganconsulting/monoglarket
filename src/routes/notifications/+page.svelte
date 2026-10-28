@@ -36,7 +36,7 @@
 	}
 </script>
 
-<svelte:head><title>Alerts · MonoGlarket</title></svelte:head>
+<svelte:head><title>Alerts · Monoglarket</title></svelte:head>
 
 <h1>Alerts</h1>
 {#if data.pushReady}

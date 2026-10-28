@@ -8,7 +8,7 @@
 	};
 </script>
 
-<svelte:head><title>Resolve · MonoGlarket</title></svelte:head>
+<svelte:head><title>Resolve · Monoglarket</title></svelte:head>
 
 <h1>Resolve</h1>
 <p class="meta">Markets an admin has trusted to you. Your result is final at once, but it can still be disputed for 24 hours.</p>

@@ -1,13 +1,13 @@
-# MonoGlarket Terms of Service
+# Monoglarket Terms of Service
 
 **Effective date:** October 27, 2026
 **Last updated:** October 27, 2026
 
-> **Unofficial site, not affiliated with SSE or Polymarket.** MonoGlarket (Unofficial SSE Polymarket) is independently owned and operated by John Mulligan, doing business as John Mulligan Consulting. It is not affiliated with, endorsed by, sponsored by, or operated by the Society of Software Engineers at the Rochester Institute of Technology ("SSE"), the Rochester Institute of Technology ("RIT"), or Polymarket. References to SSE, RIT, or Polymarket on this site are for identification only.
+> **Unofficial site, not affiliated with SSE or Polymarket.** Monoglarket (Unofficial SSE Polymarket) is independently owned and operated by John Mulligan, doing business as John Mulligan Consulting. It is not affiliated with, endorsed by, sponsored by, or operated by the Society of Software Engineers at the Rochester Institute of Technology ("SSE"), the Rochester Institute of Technology ("RIT"), or Polymarket. References to SSE, RIT, or Polymarket on this site are for identification only.
 
 pelease no sue me por favor gracias supercell
 
-These Terms of Service ("Terms") govern your access to and use of MonoGlarket (the "Service"), a play-money prediction market independently owned and operated by John Mulligan, doing business as John Mulligan Consulting ("we," "us," or "our"). By creating an account, signing in, or using the Service, you agree to these Terms and to the [Privacy Policy](privacy-policy.md). If you do not agree, do not use the Service.
+These Terms of Service ("Terms") govern your access to and use of Monoglarket (the "Service"), a play-money prediction market independently owned and operated by John Mulligan, doing business as John Mulligan Consulting ("we," "us," or "our"). By creating an account, signing in, or using the Service, you agree to these Terms and to the [Privacy Policy](privacy-policy.md). If you do not agree, do not use the Service.
 
 ## 1. Play money only. No real money, ever.
 
@@ -105,7 +105,7 @@ These Terms of Service ("Terms") govern your access to and use of MonoGlarket (t
 
 ## 9. Ownership and intellectual property
 
-The Service, its design, code, and the MonoGlarket name and logos are owned by John Mulligan, doing business as John Mulligan Consulting, or its licensors. You may not use them without written permission, except to use the Service as intended. Other names and marks, including those of SSE, RIT, and Polymarket, belong to their respective owners. Their use on the Service does not mean that a member, post, or market is endorsed by SSE, RIT, or Polymarket.
+The Service, its design, code, and the Monoglarket name and logos are owned by John Mulligan, doing business as John Mulligan Consulting, or its licensors. You may not use them without written permission, except to use the Service as intended. Other names and marks, including those of SSE, RIT, and Polymarket, belong to their respective owners. Their use on the Service does not mean that a member, post, or market is endorsed by SSE, RIT, or Polymarket.
 
 ## 10. Termination
 

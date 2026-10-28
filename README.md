@@ -1,4 +1,4 @@
-# MonoGlarket
+# Monoglarket
 
 Unofficial SSE Polymarket. Self-hosted, play-money prediction market for a school club, not affiliated with SSE, RIT, or Polymarket. SvelteKit + Prisma + Postgres. Design docs live in the Obsidian vault `~/Documents/obsidian/Club Predictions` (start at **Home**, then **Implementation plan**).
 

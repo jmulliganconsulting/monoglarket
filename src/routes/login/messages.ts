@@ -8,7 +8,7 @@ export const authMessages: Record<string, string> = {
 	wrong_password: "That email and password don't match. Forgot it? Sign in another way and set a new one on your account page.",
 	weak_password: 'Use at least 8 characters.',
 	google_failed: "Google sign-in didn't work. Try again.",
-	blocked: "This account can't use MonoGlarket. Contact a club admin.",
+	blocked: "This account can't use Monoglarket. Contact a club admin.",
 	link_expired: 'That link has expired or was already used. Sign in again to get a new one.',
 };
 

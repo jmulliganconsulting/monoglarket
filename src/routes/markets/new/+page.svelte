@@ -14,7 +14,7 @@
 	const lockAt = $derived(lockLocal && !Number.isNaN(Date.parse(lockLocal)) ? new Date(lockLocal).toISOString() : '');
 </script>
 
-<svelte:head><title>New market · MonoGlarket</title></svelte:head>
+<svelte:head><title>New market · Monoglarket</title></svelte:head>
 
 <h1>Propose a market</h1>
 <p class="lede">A moderator approves it before anyone can trade. Currency: {data.currency}.</p>

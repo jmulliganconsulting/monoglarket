@@ -8,7 +8,7 @@
 	const when = (d: Date) => d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 </script>
 
-<svelte:head><title>Portfolio · MonoGlarket</title></svelte:head>
+<svelte:head><title>Portfolio · Monoglarket</title></svelte:head>
 
 <h1>Portfolio</h1>
 

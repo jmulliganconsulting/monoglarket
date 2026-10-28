@@ -6,7 +6,7 @@
 	const when = (d: Date | null) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '');
 </script>
 
-<svelte:head><title>History · MonoGlarket</title></svelte:head>
+<svelte:head><title>History · Monoglarket</title></svelte:head>
 
 <h1>History</h1>
 <p class="meta">Every decided market, newest first: resolved, and cancelled with the reason.</p>

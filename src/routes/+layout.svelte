@@ -37,9 +37,9 @@
 	
 	<!-- Link previews (Discord, Twitter/X, Slack, iMessage): the card uses these when a link is pasted. -->
 	<meta name="description" content="Forecast club events with play-money coins." />
-	<meta property="og:site_name" content="MonoGlarket" />
+	<meta property="og:site_name" content="Monoglarket" />
 	<meta property="og:type" content="website" />
-	<meta property="og:title" content="MonoGlarket" />
+	<meta property="og:title" content="Monoglarket" />
 	<meta property="og:description" content="Forecast club events with play-money coins." />
 	<meta property="og:url" content="{page.url.origin}{page.url.pathname}" />
 	<meta property="og:image" content="{page.url.origin}/og-card.png" />
@@ -49,7 +49,7 @@
 </svelte:head>
 
 <header>
-	<a href="/" class="brand"><img src="/sse-logo-kid.v3.svg" alt="MonoGlarket" height="40" /></a>
+	<a href="/" class="brand"><img src="/sse-logo-kid.v3.svg" alt="Monoglarket" height="40" /></a>
 	<p class="offline-note" role="status">You're offline. Showing what was saved on this device; trading is paused until you reconnect.</p>
 	{#if data.user}
 		<a href="/portfolio" class="balance" aria-label="Balance: {coins(data.coins)} {data.coinCode}"><img src="/sse-coin.svg" alt="" width="28" height="28" />{coins(data.coins)}</a>
@@ -95,7 +95,7 @@
 	<div class="foot">
 		<div class="notice">
 			<p>Copyright © {new Date().getFullYear()} - John Mulligan Consulting. All Rights Reserved.</p>
-			<p class="build">MonoGlarket is an unofficial site, not affiliated with or endorsed by SSE, RIT, or Polymarket.</p>
+			<p class="build">Monoglarket is an unofficial site, not affiliated with or endorsed by SSE, RIT, or Polymarket.</p>
 		</div>
 		<div class="links">
 			<nav class="legal-links" aria-label="Legal">

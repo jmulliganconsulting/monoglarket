@@ -9,7 +9,7 @@
 	const hasRole = $derived(data.badges.some((b) => b.group === 'site' || b.group === 'official'));
 </script>
 
-<svelte:head><title>{data.name} · MonoGlarket</title></svelte:head>
+<svelte:head><title>{data.name} · Monoglarket</title></svelte:head>
 
 <header class="head">
 	<h1>{data.name}{#if data.seniority}<span class="seniority"> · {data.seniority}</span>{/if}</h1>

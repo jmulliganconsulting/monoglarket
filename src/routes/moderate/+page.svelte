@@ -18,7 +18,7 @@
 	};
 </script>
 
-<svelte:head><title>Moderate · MonoGlarket</title></svelte:head>
+<svelte:head><title>Moderate · Monoglarket</title></svelte:head>
 
 <div class="head">
 	<h1>Moderation</h1>

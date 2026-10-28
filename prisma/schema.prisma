@@ -1,4 +1,4 @@
-// MonoGlarket schema. Design: vault notes "Data model" and "Ledger".
+// Monoglarket schema. Design: vault notes "Data model" and "Ledger".
 // Portable on purpose (ADR-014): no enums, no @db.* types, no Json columns, no DB-level CHECKs.
 // Switching to SQLite = change `provider`, regenerate migrations. `npm run check:sqlite` proves it still validates.
 

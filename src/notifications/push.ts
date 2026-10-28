@@ -31,7 +31,7 @@ export async function sendPendingPushes(prisma: PrismaClient, send: PushSender, 
 	let pruned = 0;
 	for (const n of pending) {
 		if (n.user.pushAlerts) {
-			const payload = JSON.stringify({ title: 'MonoGlarket', body: n.text, url: n.marketId ? `/markets/${n.marketId}` : '/notifications' });
+			const payload = JSON.stringify({ title: 'Monoglarket', body: n.text, url: n.marketId ? `/markets/${n.marketId}` : '/notifications' });
 			for (const device of n.user.pushSubscriptions) {
 				try {
 					await send(device, payload);

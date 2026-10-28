@@ -5,7 +5,7 @@ import type { PrismaClient } from '../db/db.ts';
 
 test('signed-in pages get their own title and the site card', async () => {
 	const html = await previewPage(null as unknown as PrismaClient, new URL('https://club.example/leaderboard'));
-	assert.ok(html.includes('<meta property="og:title" content="Leaderboard · MonoGlarket" />'));
+	assert.ok(html.includes('<meta property="og:title" content="Leaderboard · Monoglarket" />'));
 	assert.ok(html.includes('content="https://club.example/og-card.png"'));
 });
 

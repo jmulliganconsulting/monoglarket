@@ -35,7 +35,7 @@
 	const discordMessage = $derived(DISCORD_MESSAGES[page.url.searchParams.get('discord') ?? '']);
 </script>
 
-<svelte:head><title>Account · MonoGlarket</title></svelte:head>
+<svelte:head><title>Account · Monoglarket</title></svelte:head>
 
 <div class="card">
 	<h1>{data.hasPassword || form?.saved ? 'Change password' : 'Set a password'}</h1>

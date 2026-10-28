@@ -54,7 +54,7 @@
 	const whenAt = $derived(whenLocal && !Number.isNaN(Date.parse(whenLocal)) ? new Date(whenLocal).toISOString() : '');
 </script>
 
-<svelte:head><title>{data.question} · MonoGlarket</title></svelte:head>
+<svelte:head><title>{data.question} · Monoglarket</title></svelte:head>
 
 <header class="head">
 	<p class="meta">{data.isDate ? 'Date question' : 'Several-winner question'}{data.creator ? ` · proposed by ${data.creator}` : ''}</p>

@@ -77,7 +77,7 @@ export function marketSvg(c: Card): string {
 	const title = wrap(c.question, 36, 3).map((line, i) => `<text x="60" y="${150 + i * 64}" font-size="52" font-weight="700" fill="#f5f5f5">${esc(line)}</text>`);
 	return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="Helvetica, Arial, sans-serif">
 <rect width="1200" height="630" fill="#111111"/>
-<text x="60" y="80" font-size="28" fill="#9a9a9a">MonoGlarket</text>
+<text x="60" y="80" font-size="28" fill="#9a9a9a">Monoglarket</text>
 ${title.join('\n')}
 ${[0.25, 0.5, 0.75].map((g) => `<line x1="${x0}" x2="${x0 + w}" y1="${y(g)}" y2="${y(g)}" stroke="#2a2a2a" stroke-width="2"/>`).join('')}
 ${paths.join('\n')}
@@ -92,7 +92,7 @@ export function renderPng(svg: string): Uint8Array<ArrayBuffer> {
 
 function page(meta: { title: string; description: string; url: string; image: string }): string {
 	const tags = [
-		['og:site_name', 'MonoGlarket'],
+		['og:site_name', 'Monoglarket'],
 		['og:type', 'website'],
 		['og:title', meta.title],
 		['og:description', meta.description],
@@ -133,7 +133,7 @@ const TITLES: Record<string, string> = {
 export async function previewPage(prisma: PrismaClient, url: URL): Promise<string> {
 	const title = TITLES[url.pathname];
 	const generic = {
-		title: title ? `${title} · MonoGlarket` : 'MonoGlarket',
+		title: title ? `${title} · Monoglarket` : 'Monoglarket',
 		description: 'Forecast club events with play-money coins.',
 		url: `${url.origin}${url.pathname}`,
 		image: `${url.origin}/og-card.png`,

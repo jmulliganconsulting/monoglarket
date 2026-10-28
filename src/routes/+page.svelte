@@ -92,7 +92,7 @@
 	);
 </script>
 
-<svelte:head><title>MonoGlarket</title></svelte:head>
+<svelte:head><title>Monoglarket</title></svelte:head>
 
 <h1>{data.decided ? 'Decided markets' : 'Open markets'}</h1>
 

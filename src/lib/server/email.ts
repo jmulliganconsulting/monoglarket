@@ -5,7 +5,7 @@ import { MAIL_FROM, SMTP_URL } from '$app/env/private';
 const transport = SMTP_URL ? nodemailer.createTransport(SMTP_URL) : null;
 
 export async function sendLoginEmail(to: string, code: string, linkUrl: string) {
-	const subject = `${code} is your MonoGlarket sign-in code`;
+	const subject = `${code} is your Monoglarket sign-in code`;
 	const text = `Your sign-in code is ${code}\n\nOr open this link to sign in:\n${linkUrl}\n\nThe code and link work once and expire in 15 minutes. If you didn't ask to sign in, ignore this email.`;
 	if (!transport) {
 		console.log(`\n[dev email] to ${to}\n${subject}\n${text}\n`);

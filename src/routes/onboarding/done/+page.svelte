@@ -6,7 +6,7 @@
 	let { data, form }: PageProps = $props();
 </script>
 
-<svelte:head><title>You're in · MonoGlarket</title></svelte:head>
+<svelte:head><title>You're in · Monoglarket</title></svelte:head>
 
 <p class="step">Step 6 of 6</p>
 <h1>You're in</h1>

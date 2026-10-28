@@ -6,7 +6,7 @@
 	const prefix = $derived(v?.prefix ?? '');
 </script>
 
-<svelte:head><title>Your name · MonoGlarket</title></svelte:head>
+<svelte:head><title>Your name · Monoglarket</title></svelte:head>
 
 <p class="step">Step 2 of 6</p>
 <h1>Your name</h1>

@@ -8,7 +8,7 @@ export const variables = defineEnvVars({
 	ALLOWED_EMAIL_DOMAINS: { schema: list, description: 'Comma-separated email domains allowed to sign in; "*" allows anyone (dev only)' },
 	ALLOWED_EMAILS: { schema: list, description: 'Comma-separated extra emails allowed to sign in' },
 	SMTP_URL: { schema: optional, description: 'smtp(s)://user:pass@host:port; unset = print emails to the console' },
-	MAIL_FROM: { schema: (v) => v || 'MonoGlarket <no-reply@localhost>', description: 'From address for sign-in emails' },
+	MAIL_FROM: { schema: (v) => v || 'Monoglarket <no-reply@localhost>', description: 'From address for sign-in emails' },
 	GOOGLE_SIGNIN_ENABLED: { schema: (v) => v !== 'false', description: 'Set to false to hide Google sign-in even when the client ID and secret are set' },
 	GOOGLE_CLIENT_ID: { schema: optional, description: 'Google OAuth client ID; unset = no "Sign in with Google" button' },
 	GOOGLE_CLIENT_SECRET: { schema: optional, description: 'Google OAuth client secret' },

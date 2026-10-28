@@ -65,6 +65,8 @@
 
 	const pct = (p: number) => `${Math.round(p * 100)}%`;
 	const when = dateTime;
+	// The headline chance: Yes on a yes/no market, otherwise whichever outcome leads.
+	const lead = $derived(live.find((o) => live.length === 2 && side(o.label) === 'yes') ?? live.reduce((a, b) => (b.probability > a.probability ? b : a), live[0]));
 	const side = (label: string) => ({ yes: 'yes', no: 'no' })[label.trim().toLowerCase()] ?? '';
 	// An outcome's own colour wins. Otherwise Yes/No keep the house colours, then the market's primary and secondary, then a palette.
 	const palette = ['#4f7cff', '#f5a524', '#14b8a6', '#e11d48', '#8b5cf6', '#84cc16', '#06b6d4', '#f97316', '#64748b', '#d946ef'];
@@ -156,7 +158,7 @@
 		let resolving = $state(false);
 </script>
 
-<svelte:head><title>{data.market.question} · MonoGlarket</title></svelte:head>
+<svelte:head><title>{data.market.question} · Monoglarket</title></svelte:head>
 
 <header class="head" class:framed={!!data.market.imageFile} bind:clientHeight={headH} style:--pic="{headH}px">
 	<p class="meta">{data.market.creator ? `Proposed by ${data.market.creator}` : ''} · {data.market.currency}</p>
@@ -164,6 +166,9 @@
 	<MarketHeading large src={data.market.imageFile ? `/market-images/${data.market.imageFile}` : null}>
 		<h1>{data.market.question}</h1>
 	</MarketHeading>
+	{#if lead && !data.market.resolvedOutcomeId}
+		<p class="chance {side(lead.label)}"><strong>{pct(lead.probability)}</strong> {side(lead.label) === 'yes' ? 'chance of Yes' : live.filter((o) => o.probability === lead.probability).length > 1 ? 'each, tied for the lead' : `${lead.label} leads`}</p>
+	{/if}
 	<p class="status">{statusText} {#if connected}<span class="live">● Live</span>{/if}</p>
 	{#if data.market.deleted}<p class="notice" role="status">Deleted. Only admins can see this market.</p>{/if}
 	{#if data.market.visibility !== 'public' && data.canModerate}<p class="meta">Visibility: {data.market.visibility === 'hidden' ? 'hidden from members' : 'limited to a group'}</p>{/if}
@@ -255,7 +260,7 @@
 	</section>
 
 	<div class="body">
-		<section class="card">
+		<section class="card chart">
 			<h2>Chance over time</h2>
 			<div class="plot">
 			<svg viewBox="0 0 {W} {H}" role="img" aria-label="Chance of each outcome over time" preserveAspectRatio="none" onpointermove={onHover} onpointerdown={onHover} onpointerleave={() => (hoverT = null)}>
@@ -508,8 +513,26 @@
 			height: 128px;
 		}
 	}
+	/* Questions run long: smaller than a page title on phones. */
 	.head h1 {
 		margin: 4px 0 8px;
+		font-size: clamp(1.5rem, 5vw, 2.25rem);
+	}
+	.chance {
+		margin: 0 0 8px;
+		color: var(--fg-2);
+	}
+	.chance strong {
+		font-family: var(--font-display);
+		font-stretch: var(--stretch-display);
+		font-size: 3rem;
+		line-height: 1;
+		font-weight: 650;
+		font-variant-numeric: tabular-nums;
+		color: var(--fg);
+	}
+	.chance.yes strong {
+		color: var(--yes-text);
 	}
 	.meta,
 	.status {
@@ -838,8 +861,31 @@
 		color: inherit;
 	}
 
-	/* Buying sits below the chart and the rest of the page, so the chart leads. */
+	/* Phone: the chart, then trading, then the rest. Desktop: trading sticks to the right of the chart. */
 	.trade {
 		order: 1;
+	}
+	@media (max-width: 899px) {
+		.body {
+			display: contents;
+		}
+		.body > :not(.chart) {
+			order: 2;
+		}
+	}
+	@media (min-width: 900px) {
+		.layout {
+			grid-template-columns: minmax(0, 1fr) 360px;
+			align-items: start;
+		}
+		.trade {
+			grid-column: 2;
+			grid-row: 1;
+			position: sticky;
+			top: 16px;
+			/* Many outcomes: the panel scrolls itself so Buy stays reachable. */
+			max-height: calc(100vh - 32px);
+			overflow-y: auto;
+		}
 	}
 </style>

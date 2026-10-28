@@ -22,7 +22,7 @@
 	];
 </script>
 
-<svelte:head><title>School · MonoGlarket</title></svelte:head>
+<svelte:head><title>School · Monoglarket</title></svelte:head>
 
 <p class="step">Step 3 of 6</p>
 <h1>Your school</h1>

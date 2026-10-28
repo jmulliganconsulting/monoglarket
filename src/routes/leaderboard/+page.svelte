@@ -11,7 +11,7 @@
 	const current = $derived(data.boards.find((b) => b.key === data.board)?.label ?? '');
 </script>
 
-<svelte:head><title>Leaderboard · MonoGlarket</title></svelte:head>
+<svelte:head><title>Leaderboard · Monoglarket</title></svelte:head>
 
 <h1>Leaderboard</h1>
 <p class="meta">{current}. Ranked by {data.unit}.</p>
