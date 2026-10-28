@@ -3,7 +3,7 @@
 	import '#lib/styles/tokens.css';
 	import type { LayoutProps } from './$types';
 	import VisitSummary from '#lib/VisitSummary.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { page } from '$app/state';
 
 	let { children, data }: LayoutProps = $props();
@@ -23,9 +23,77 @@
 		addEventListener('offline', setOffline);
 	});
 
+	const REPO = 'https://github.com/jmulliganconsulting/monoglarket';
+
+	// Main links in bar order: everyone's pages first, then staff pages.
+	const links = $derived([
+		{ href: '/', text: 'Markets' },
+		{ href: '/portfolio', text: 'Portfolio' },
+		{ href: '/notifications', text: 'Alerts' },
+		{ href: '/leaderboard', text: 'Leaderboard' },
+		{ href: '/history', text: 'History' },
+		{ href: '/activity', text: 'Activity' },
+		...(data.canModerate ? [{ href: '/moderate', text: 'Manage markets' }, { href: '/markets/new', text: 'New market' }] : []),
+		...(data.canResolve ? [{ href: '/resolve', text: 'Resolve' }] : []),
+		...(data.isAdmin ? [{ href: '/admin', text: 'Admin' }] : [])
+	]);
+
+	// Priority nav: measure each link's natural width once, then show as many as fit and put the rest in More.
+	// Server render shows the three phone tabs until the browser measures.
+	let nav = $state<HTMLElement>();
+	let shown = $state(3);
+	let measuring = $state(false);
+	let widths: number[] = [];
+	let moreWidth = 0;
+
+	const fit = () => {
+		if (!nav) return;
+		const style = getComputedStyle(nav);
+		const gap = parseFloat(style.columnGap) || 0;
+		const room = nav.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+		if (widths.reduce((sum, w) => sum + w + gap, -gap) <= room) return (shown = widths.length);
+		let used = moreWidth;
+		let n = 0;
+		while (n < widths.length && used + gap + widths[n] <= room) used += gap + widths[n++];
+		shown = n;
+	};
+
+	// Only the latest call measures: an older one could resume after the bar already shrank and record too few links.
+	let run = 0;
+	const measure = async () => {
+		const id = ++run;
+		shown = Infinity;
+		measuring = true;
+		await tick();
+		if (id !== run) return;
+		if (nav) {
+			widths = [...nav.querySelectorAll(':scope > a')].map((a) => a.getBoundingClientRect().width);
+			moreWidth = nav.querySelector('summary')?.getBoundingClientRect().width ?? 0;
+		}
+		measuring = false;
+		fit();
+	};
+
+	// Re-measure when the links or the unread badge change, and once the web fonts arrive.
+	$effect(() => {
+		void [links, data.unread];
+		measure();
+	});
+	onMount(() => void document.fonts?.ready.then(measure));
+	$effect(() => {
+		if (!nav) return;
+		const observer = new ResizeObserver(fit);
+		observer.observe(nav);
+		return () => observer.disconnect();
+	});
+
 	// Saved pages belong to the member who signed in: forget them when they sign out.
 	const clearSavedPages = () => navigator.serviceWorker?.controller?.postMessage('signed-out');
 </script>
+
+{#snippet label(link: { href: string; text: string })}
+	{link.text}{#if link.href === '/notifications' && data.unread}<span class="count" aria-label="{data.unread} unread">{data.unread}</span>{/if}
+{/snippet}
 
 <svelte:head>
 	<link rel="icon" href={data.dev ? '/sse-favicon.dev.svg' : '/sse-favicon.v1.svg'} type="image/svg+xml" />
@@ -60,31 +128,21 @@
 	{/if}
 </header>
 {#if data.user && data.onboarded}
-	<!-- Phone: three main tabs and More. Desktop: the same, with More as a dropdown. The menu closes when a link is chosen. -->
-	<nav aria-label="Main">
-		<a href="/">Markets</a>
-		<a href="/portfolio">Portfolio</a>
-		<a href="/notifications" class="alerts">Alerts{#if data.unread}<span class="count" aria-label="{data.unread} unread">{data.unread}</span>{/if}</a>
-		{#if data.canModerate}<a href="/moderate">Manage markets</a>{/if}
-		{#if data.isAdmin}<a href="/admin">Admin</a>{/if}
-		<details class="more">
-			<summary>More</summary>
-			<div class="panel" onclick={closeMenu} role="presentation">
-				<section>
-					<h3>Browse</h3>
-					<a href="/history">History</a>
-					<a href="/leaderboard">Leaderboard</a>
-					<a href="/activity">Activity</a>
-				</section>
-				{#if data.canModerate || data.canResolve}
-					<section>
-						<h3>Staff</h3>
-						{#if data.canModerate}<a href="/markets/new">New market</a>{/if}
-						{#if data.canResolve}<a href="/resolve">Resolve</a>{/if}
-					</section>
-				{/if}
-			</div>
-		</details>
+	<!-- Every link sits in the bar in order; the ones that don't fit move into More (bottom bar on phones, dropdown on desktop). -->
+	<nav aria-label="Main" bind:this={nav} data-measuring={measuring || undefined}>
+		{#each links.slice(0, shown) as link (link.href)}
+			<a href={link.href}>{@render label(link)}</a>
+		{/each}
+		{#if measuring || shown < links.length}
+			<details class="more">
+				<summary>More</summary>
+				<div class="panel" onclick={closeMenu} role="presentation">
+					{#each links.slice(shown) as link (link.href)}
+						<a href={link.href}>{@render label(link)}</a>
+					{/each}
+				</div>
+			</details>
+		{/if}
 	</nav>
 {/if}
 {#if data.summary}
@@ -94,15 +152,18 @@
 <footer>
 	<div class="foot">
 		<div class="notice">
-			<p>Copyright © {new Date().getFullYear()} - John Mulligan Consulting. All Rights Reserved.</p>
-			<p class="build">Monoglarket is an unofficial site, not affiliated with or endorsed by SSE, RIT, or Polymarket.</p>
+			<p>Copyright © {new Date().getFullYear()} John Mulligan Consulting. All Rights Reserved.</p>
+			<p class="build">Monoglmarket is an unofficial site, not affiliated with or endorsed by the <a href="https://sse.rit.edu/"><abbr title="Society of Software Engineering">SSE</abbr></a>, <a href="https://rit.edu/"><abbr title="Rochester Institute of Technology">RIT</abbr></a>, or <a href="https://polymarket.com/">Polymarket</a>.</p>
 		</div>
 		<div class="links">
-			<nav class="legal-links" aria-label="Legal">
+			<nav class="legal-links" aria-label="Footer">
 				<a href="/privacy">Privacy Policy</a>
 				<a href="/terms">Terms of Service</a>
+				<a href={REPO}>Source on GitHub</a>
 			</nav>
-			<p class="build">Commit <code>{__GIT_COMMIT__}</code></p>
+			<p class="build">
+				Commit {#if __GIT_COMMIT__ === 'unknown'}<code>{__GIT_COMMIT__}</code>{:else}<a href="{REPO}/commit/{__GIT_COMMIT__.replace('-dirty', '')}"><code>{__GIT_COMMIT__}</code></a>{/if}
+			</p>
 		</div>
 	</div>
 </footer>
@@ -223,6 +284,19 @@
 		cursor: pointer;
 		list-style: none;
 	}
+	/* While measuring, links take their natural width and the bar hides the overflow instead of scrolling the page. */
+	nav[data-measuring] {
+		overflow: hidden;
+	}
+	nav[data-measuring] > a,
+	nav[data-measuring] summary {
+		flex: none;
+		padding: 0 12px;
+		white-space: nowrap;
+	}
+	nav[aria-label='Main'] > a {
+		white-space: nowrap;
+	}
 	nav summary::-webkit-details-marker {
 		display: none;
 	}
@@ -257,16 +331,6 @@
 		padding: 8px 12px;
 		display: grid;
 		gap: 8px;
-	}
-	.panel section {
-		display: grid;
-	}
-	.panel h3 {
-		margin: 8px 0 2px;
-		font-size: 0.75rem;
-		color: var(--muted);
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
 	}
 	.panel a {
 		min-height: 44px;

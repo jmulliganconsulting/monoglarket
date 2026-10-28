@@ -62,6 +62,35 @@ const currency = await prisma.currency.findFirstOrThrow({ where: { kind: 'intern
 const admin = await signIn('sim-admin');
 await prisma.user.update({ where: { id: admin.id }, data: { role: 'admin' } });
 const bots = await Promise.all(Array.from({ length: BOTS }, (_, i) => signIn(`sim-bot${String(i + 1).padStart(2, '0')}`)));
+// Roles so the leaderboard shows every name colour. Applied by name, so bots from earlier runs get them too.
+// Bots match their SSE row by email, as real members do; the row's id is the negated user id so it can't hit a real SSE id.
+type Persona = { studentStatus: string; seniority?: string; primary?: boolean; sse?: { status: string; isMentor?: boolean } };
+const PERSONAS: Persona[] = [
+	{ studentStatus: 'current', seniority: 'fourth', primary: true, sse: { status: 'officer' } }, // president
+	{ studentStatus: 'faculty', primary: true, sse: { status: 'se_staff' } }, // department chair
+	{ studentStatus: 'current', seniority: 'third', sse: { status: 'officer' } },
+	{ studentStatus: 'current', seniority: 'second', sse: { status: 'member', isMentor: true } },
+	{ studentStatus: 'alum', sse: { status: 'member' } },
+	{ studentStatus: 'faculty' },
+	{ studentStatus: 'current', seniority: 'phd' },
+	{ studentStatus: 'faculty', sse: { status: 'se_staff' } },
+	{ studentStatus: 'faculty', sse: { status: 'member', isMentor: true } },
+	{ studentStatus: 'current', seniority: 'masters', sse: { status: 'member' } },
+	{ studentStatus: 'current', seniority: 'fifth' },
+	{ studentStatus: 'current', seniority: 'first', sse: { status: 'member' } },
+	{ studentStatus: 'current', seniority: 'bs_ms' },
+	{ studentStatus: 'current', seniority: 'incoming' },
+];
+for (const [i, bot] of bots.entries()) {
+	const p = PERSONAS[i % PERSONAS.length];
+	for (const u of await prisma.user.findMany({ where: { displayName: bot.name }, select: { id: true, email: true } })) {
+		await prisma.user.update({ where: { id: u.id }, data: { studentStatus: p.studentStatus, seniority: p.seniority ?? null, primaryOfficerSince: p.primary ? new Date() : null } });
+		const sse = p.sse && { email: u.email!, name: bot.name, isTestAccount: true, status: p.sse.status, isMentor: !!p.sse.isMentor, isMember: true, membershipCount: 1, membershipFetchedAt: new Date(), syncedAt: new Date(), removedAt: null };
+		if (sse) await prisma.sseMember.upsert({ where: { id: -u.id }, create: { id: -u.id, ...sse }, update: sse });
+		else await prisma.sseMember.deleteMany({ where: { id: -u.id } });
+	}
+}
+
 // A resolver with a position can't resolve that market (the app's rule), so the resolver never trades.
 const resolver = await signIn('sim-resolver');
 for (const b of [...bots, resolver]) await grant(prisma, b.id, currency.id, 1000, `sim-grant:${b.id}:${tag}`);

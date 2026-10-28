@@ -1,11 +1,11 @@
 import { prisma } from '#lib/server/db.ts';
 import { BOARDS, board, type BoardKey } from '../../leaderboard/boards.ts';
-import { roleColour, statusBadges } from '../../badges/badges.ts';
+import { roleColour, seniorityBadge, seniorityColour, statusBadges } from '../../badges/badges.ts';
 import { ritEmail } from '../../sse/normalize.ts';
 
 /** Picture, badges and name colour per member. Two queries for the whole page; SSE rows match on the @rit.edu form, as sseMemberForEmail does. */
 async function cards(ids: number[]) {
-	const users = await prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, role: true, email: true, primaryOfficerSince: true } });
+	const users = await prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, role: true, email: true, primaryOfficerSince: true, studentStatus: true, seniority: true, onCoopTerm: true } });
 	const plain = (email: string) => ritEmail(email.trim().toLowerCase());
 	const emails = users.flatMap((u) => (u.email ? [plain(u.email), plain(u.email).replace(/@rit\.edu$/, '@g.rit.edu')] : []));
 	const sse = await prisma.sseMember.findMany({ where: { email: { in: emails }, removedAt: null }, select: { email: true, imageFile: true, status: true, isMentor: true, isMember: true, membershipCount: true } });
@@ -14,7 +14,7 @@ async function cards(ids: number[]) {
 		users.map((u) => {
 			const member = (u.email && byEmail.get(plain(u.email))) || null;
 			const badges = statusBadges(u, member);
-			return [u.id, { image: member?.imageFile ?? null, badges, colour: roleColour(badges) }] as const;
+			return [u.id, { image: member?.imageFile ?? null, badges, seniority: seniorityBadge(u), colour: roleColour(badges) ?? seniorityColour(u) }] as const;
 		}),
 	);
 }
@@ -36,6 +36,6 @@ export async function load({ url }) {
 		current: current && { code: current.code, name: current.name },
 		seasons,
 		season,
-		rows: result.rows.map((r) => ({ ...r, image: null, badges: [], colour: undefined, ...people.get(r.id) })),
+		rows: result.rows.map((r) => ({ ...r, image: null, badges: [], seniority: null, colour: undefined, ...people.get(r.id) })),
 	};
 }

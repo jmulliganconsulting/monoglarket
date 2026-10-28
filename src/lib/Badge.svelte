@@ -1,6 +1,6 @@
 <script lang="ts">
 	// One badge (vault "How badges are drawn"). Full: pill with icon and label. Compact: icon-only chip, label on hover and for screen readers.
-	import { IconArrowsExchange, IconBackpack, IconBook, IconBulb, IconGavel, IconIdBadge2, IconSchool, IconSettings, IconShield } from '@tabler/icons-svelte';
+	import { IconArrowsExchange, IconBackpack, IconBook, IconBulb, IconGavel, IconIdBadge2, IconBriefcase, IconBuilding, IconChalkboard, IconCrown, IconSchool, IconSettings, IconShield, IconStairs } from '@tabler/icons-svelte';
 	import type { Badge } from '../badges/badges.ts';
 
 	let { badge, compact = false }: { badge: Badge; compact?: boolean } = $props();
@@ -14,16 +14,22 @@
 		backpack: IconBackpack,
 		book: IconBook,
 		transfer: IconArrowsExchange,
+		crown: IconCrown,
+		building: IconBuilding,
+		stairs: IconStairs,
+		briefcase: IconBriefcase,
+		chalkboard: IconChalkboard,
 	};
+	const ring = $derived(badge.ring ? `inset 0 0 0 0.5px ${badge.ring}` : undefined);
 	const Icon = $derived(badge.icon ? ICON[badge.icon as keyof typeof ICON] : undefined);
 </script>
 
 {#if compact}
-	<span class="chip" class:outline={badge.outline} class:filled={!!badge.colour} style:background={badge.colour} title={badge.label} role="img" aria-label={badge.label}>
+	<span class="chip" class:outline={badge.outline} class:filled={!!badge.colour} style:background={badge.colour} style:box-shadow={ring} title={badge.label} role="img" aria-label={badge.label}>
 		{#if Icon}<Icon size={14} stroke={2} aria-hidden="true" />{/if}
 	</span>
 {:else}
-	<span class="pill" class:outline={badge.outline} class:filled={!!badge.colour} style:background={badge.colour}>
+	<span class="pill" class:outline={badge.outline} class:filled={!!badge.colour} style:background={badge.colour} style:box-shadow={ring}>
 		{#if Icon}<Icon size={16} stroke={2} aria-hidden="true" />{/if}
 		{badge.label}
 	</span>

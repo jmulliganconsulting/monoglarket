@@ -55,6 +55,7 @@
 									<a href="/users/{r.id}" style:color={r.colour}>{r.name}</a>
 									{#if r.username}<span class="meta">@{r.username}</span>{/if}
 									{#each r.badges.slice(0, 2) as b (b.label)}<Badge badge={b} compact />{/each}
+									{#if r.seniority}<Badge badge={r.seniority} compact />{/if}
 								</span>
 							</div>
 						</td>

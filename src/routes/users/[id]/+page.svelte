@@ -12,18 +12,30 @@
 <svelte:head><title>{data.name} · Monoglarket</title></svelte:head>
 
 <header class="head">
-	<h1>{data.name}{#if data.seniority}<span class="seniority"> · {data.seniority}</span>{/if}</h1>
-	<p class="meta">
-		{#if data.username}@{data.username} · {/if}{#if data.pronouns}{data.pronouns} · {/if}Joined {joined(data.joined)}
-		{#if data.isYou}· <a href="/account">This is you. Edit your account</a>{/if}
-	</p>
+	<div>
+		<h1>{data.name}{#if data.seniority}<span class="seniority"><span class="dot">·</span>{data.seniority}</span>{/if}</h1>
+		<p class="meta">
+			{#if data.username}@{data.username}<span class="dot">·</span>{/if}{#if data.pronouns}{data.pronouns}<span class="dot">·</span>{/if}Joined {joined(data.joined)}
+		</p>
+	</div>
+	<div class="corner">
+		{#if data.isYou}<a class="edit" href="/account">Edit</a>{/if}
+		{#if data.image}
+			<img class="pfp" src="/sse-images/{data.image}" alt="" />
+		{:else}
+			<span class="pfp initial" aria-hidden="true">{data.name.charAt(0)}</span>
+		{/if}
+	</div>
 </header>
 
 <section class="card">
 	<h2>Badges</h2>
 	<ul class="badges" aria-label="Badges">
 		{#if !hasRole}<li><Badge badge={{ label: 'Guest', group: 'official' }} /></li>{/if}
-		{#each data.badges as b (b.label)}<li><Badge badge={b} /></li>{/each}
+		{#each data.badges.filter((b) => b.group === 'official' || b.group === 'school') as b (b.label)}<li><Badge badge={b} /></li>{/each}
+	</ul>
+	<ul class="badges" aria-label="Site roles and achievements">
+		{#each data.badges.filter((b) => b.group === 'site' || b.group === 'achievement') as b (b.label)}<li><Badge badge={b} /></li>{/each}
 	</ul>
 </section>
 
@@ -62,11 +74,49 @@
 </section>
 
 <style>
+	.head {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 12px;
+		margin-bottom: 24px;
+	}
 	.head h1 {
 		margin-bottom: 4px;
 	}
 	.head p {
 		margin: 0;
+	}
+	.dot {
+		margin: 0 8px;
+	}
+	.corner {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex: none;
+	}
+	.edit {
+		padding: 6px 16px;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-pill);
+		color: var(--fg);
+		text-decoration: none;
+		font-weight: var(--weight-strong);
+	}
+	.pfp {
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+	.initial {
+		display: grid;
+		place-items: center;
+		background: var(--card-2);
+		color: var(--muted);
+		font-size: 1.5rem;
+		font-weight: var(--weight-strong);
 	}
 	.card {
 		background: var(--card);
