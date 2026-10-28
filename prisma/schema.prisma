@@ -1,4 +1,4 @@
-// Club Predictions schema. Design: vault notes "Data model" and "Ledger".
+// MonoGlarket schema. Design: vault notes "Data model" and "Ledger".
 // Portable on purpose (ADR-014): no enums, no @db.* types, no Json columns, no DB-level CHECKs.
 // Switching to SQLite = change `provider`, regenerate migrations. `npm run check:sqlite` proves it still validates.
 
@@ -403,7 +403,7 @@ model ResolutionAttachment {
   sizeBytes    Int?     @map("size_bytes")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  proposal ResolutionProposal @relation(fields: [proposalId], references: [id])
+  proposal ResolutionProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
 
   @@index([proposalId])
   @@map("resolution_attachments")
@@ -545,6 +545,7 @@ model SseMember {
   degrees            SseDegree[]
   mentors            SseMentor[]
   memberships        SseMembership[]
+  alumni             SseAlumni[]
   mentorApplications SseMentorApplication[]
   discordAccounts    DiscordAccount[]
   eventAttendance    SseEventAttendance[]
@@ -634,6 +635,33 @@ model SseMentor {
 
   @@index([memberId])
   @@map("sse_mentors")
+}
+
+/// An alumni listing from the SSE site (/api/alumni, public). Never deleted; vanished listings get removedAt.
+/// Term strings are as given ("Fall 2020", or "Unknown"). memberId is the SSE member with the same email, if any.
+/// Crediting (by status) reads from here; nothing credits yet.
+model SseAlumni {
+  id            Int       @id @map("sse_alumni_id")
+  memberId      Int?      @map("member_id")
+  name          String
+  email         String
+  linkedIn      String?   @map("linked_in")
+  gitHub        String?   @map("git_hub")
+  description   String?
+  imageKey      String?   @map("image_key")
+  startDate     String    @map("start_date")
+  endDate       String    @map("end_date")
+  quote         String?
+  previousRoles String?   @map("previous_roles")
+  firstSeenAt   DateTime  @default(now()) @map("first_seen_at")
+  lastSeenAt    DateTime  @default(now()) @map("last_seen_at")
+  removedAt     DateTime? @map("removed_at")
+
+  member SseMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@index([memberId])
+  @@index([email])
+  @@map("sse_alumni")
 }
 
 /// A mentor application (one per semester applied). The SSE site only shows each mentor's latest publicly

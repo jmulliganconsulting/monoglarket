@@ -8,7 +8,7 @@ export const variables = defineEnvVars({
 	ALLOWED_EMAIL_DOMAINS: { schema: list, description: 'Comma-separated email domains allowed to sign in; "*" allows anyone (dev only)' },
 	ALLOWED_EMAILS: { schema: list, description: 'Comma-separated extra emails allowed to sign in' },
 	SMTP_URL: { schema: optional, description: 'smtp(s)://user:pass@host:port; unset = print emails to the console' },
-	MAIL_FROM: { schema: (v) => v || 'Club Predictions <no-reply@localhost>', description: 'From address for sign-in emails' },
+	MAIL_FROM: { schema: (v) => v || 'MonoGlarket <no-reply@localhost>', description: 'From address for sign-in emails' },
 	GOOGLE_SIGNIN_ENABLED: { schema: (v) => v !== 'false', description: 'Set to false to hide Google sign-in even when the client ID and secret are set' },
 	GOOGLE_CLIENT_ID: { schema: optional, description: 'Google OAuth client ID; unset = no "Sign in with Google" button' },
 	GOOGLE_CLIENT_SECRET: { schema: optional, description: 'Google OAuth client secret' },
@@ -28,4 +28,5 @@ export const variables = defineEnvVars({
 	VAPID_PRIVATE_KEY: { schema: optional, description: 'Web push private key, kept secret' },
 	VAPID_SUBJECT: { schema: optional, description: 'mailto: or https: contact for the push service, e.g. mailto:club@example.edu' },
 	SSE_SYNC_MINUTES:{ schema: (v) => Math.max(1, Number(v) || 15), description: 'Minutes between SSE roster syncs (default 15)' },
+	APP_ENV: { schema: (v) => (v === 'dev' ? 'dev' : 'prod'), description: '"dev" marks the site as a development site (banner, tinted colours, dev favicon); anything else is prod' },
 });

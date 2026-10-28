@@ -27,7 +27,7 @@ test('membership count goes on the Member label; seniority is text, not a badge'
 test('school badges: current student, transfer, then each major', () => {
   const labels = schoolBadges({ studentStatus: 'current', isTransfer: true }, [{ program: 'Software Engineering', degree: 'BS' }]).map((b) => b.label);
   assert.deepEqual(labels, ['Current student', 'Transfer student', 'Software Engineering · BS']);
-  assert.deepEqual(schoolBadges({ studentStatus: 'alum', isTransfer: false }, []), []);
+  assert.deepEqual(schoolBadges({ studentStatus: 'alum', isTransfer: false }, []).map((b) => b.label), ['Alum']);
 });
 
 test('primary officers get the gold badge above the other official roles', () => {

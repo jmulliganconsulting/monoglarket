@@ -1,11 +1,13 @@
-# Club Predictions Privacy Policy
+# MonoGlarket Privacy Policy
 
 **Effective date:** October 27, 2026
 **Last updated:** October 27, 2026
 
+> **Unofficial site, not affiliated with SSE or Polymarket.** MonoGlarket (Unofficial SSE Polymarket) is not officially associated with, endorsed by, sponsored by, or operated by the Society of Software Engineers at the Rochester Institute of Technology ("SSE"), the Rochester Institute of Technology ("RIT"), or Polymarket. References to SSE, RIT, or Polymarket on this site are for identification only.
+
 i don't want to get sued please speed i need this
 
-This Privacy Policy explains what personal information Club Predictions (the "Service") collects, how we use and share it, how long we keep it, and the choices you have. The Service is operated by the Society of Software Engineers at the Rochester Institute of Technology ("SSE," "we," "us," or "our"). It is a play-money prediction market for club members. It is not a payment service, and we do not sell personal information.
+This Privacy Policy explains what personal information MonoGlarket (the "Service") collects, how we use and share it, how long we keep it, and the choices you have. The Service is independently owned and operated by John Mulligan, doing business as John Mulligan Consulting ("we," "us," or "our"). It is a play-money prediction market for club members. It is not a payment service, and we do not sell personal information.
 
 This policy covers the Service only. It does not cover the SSE website's public pages, RIT systems, or third-party services you choose to connect. Those have their own privacy policies.
 
@@ -117,7 +119,7 @@ We use encryption in transit (HTTPS/TLS), store passwords as salted scrypt hashe
 
 ## 7. Where information is stored
 
-The Service runs on servers in the United States, operated by SSE and RIT. If you use the Service from outside the United States, you consent to your information being transferred to and processed in the United States.
+The Service runs on servers in the United States. If you use the Service from outside the United States, you consent to your information being transferred to and processed in the United States.
 
 ## 8. Your choices and rights
 
@@ -143,16 +145,16 @@ The Service is for adults. Our onboarding requires users to be 18 or older. We d
 
 - **Data security.** We maintain reasonable administrative, technical, and physical safeguards for private information, as required by New York General Business Law Section 899-bb (SHIELD Act). The safeguards are described in Section 6.
 - **Breach notification.** If we discover a security breach of private information of a New York resident, we will notify the affected person, the New York State Attorney General, the Department of State, and the Division of State Police, and where required, consumer reporting agencies, as required by New York General Business Law Section 899-aa.
-- **Social Security numbers.** The Service does not collect Social Security numbers. Please do not send them to us.
+- **Social Security numbers.** The Service does not collect Social Security numbers. PLEASE DO NOT SEND US YOUR SOCIAL SECURITY NUMBER.
 - **Minors.** Because the Service is limited to adults, we do not knowingly collect personal information from anyone under 18, including under New York's Child Data Protection Act.
-- **Complaints.** If you have a complaint about how we handle your information, contact us first at [privacy contact email]. You may also contact the New York State Attorney General's Bureau of Internet and Technology.
+- **Complaints.** If you have a complaint about how we handle your information, contact us first at privacy@jmulligan191.com. You may also contact the New York State Attorney General's Bureau of Internet and Technology.
 
 ## 11. Changes to this policy
 
-We may update this policy. If the change is material, we will tell members by email or in the Service before it takes effect. We will post the updated policy with a new "Last updated" date.
+We may update this policy. If the change is material, we will notify users of the Service before it takes effect. We will post the updated policy with a new "Last updated" date.
 
 ## 12. Contact
 
-Society of Software Engineers, Golisano College of Computing and Information Sciences, Rochester Institute of Technology, GOL-1670, Rochester, NY 14623.
-Privacy contact: [privacy contact email]
-Website: https://sse.rit.edu
+John Mulligan. 
+Privacy contact: privacy@jmulligan191.com
+Website: https://jmulligan191.com/

@@ -52,6 +52,7 @@ export function seniorityLabel(seniority: string | null): string | null {
 export function schoolBadges(user: { studentStatus: string | null; isTransfer: boolean }, programs: { program: string; degree: string }[]): Badge[] {
   const out: Badge[] = [];
   if (user.studentStatus === 'current') out.push({ label: 'Current student', group: 'school', colour: '#e67e22', icon: 'backpack' });
+  if (user.studentStatus === 'alum') out.push({ label: 'Alum', group: 'school', colour: '#2a9859', icon: 'school' });
   if (user.isTransfer) out.push({ label: 'Transfer student', group: 'school', colour: '#e67e22', icon: 'transfer' });
   for (const p of programs) out.push({ label: `${p.program} · ${p.degree}`, group: 'school', colour: '#e67e22', icon: 'book' });
   return out;

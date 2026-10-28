@@ -11,7 +11,7 @@
 	const regions = $derived(country === 'US' ? US_STATES : country === 'CA' ? CA_PROVINCES : null);
 </script>
 
-<svelte:head><title>Eligibility · Club Predictions</title></svelte:head>
+<svelte:head><title>Eligibility · MonoGlarket</title></svelte:head>
 
 <p class="step">Step 1 of 6</p>
 <h1>Before you start</h1>

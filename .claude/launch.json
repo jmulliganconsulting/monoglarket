@@ -13,6 +13,15 @@
         "--strictPort"
       ],
       "port": 5173
+    },
+    {
+      "name": "dev-site",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "APP_ENV=dev DATABASE_URL=postgresql://postgres:postgres@localhost:5434/clubpredict_dev npm run dev -- --port 5174 --strictPort"
+      ],
+      "port": 5174
     }
   ]
 }

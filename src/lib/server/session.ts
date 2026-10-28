@@ -1,20 +1,23 @@
 import type { Cookies } from '@sveltejs/kit';
 import { dev } from '$app/env';
-import { ALLOWED_EMAIL_DOMAINS, ALLOWED_EMAILS, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_SIGNIN_ENABLED, LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_TOKEN_KEY } from '$app/env/private';
+import { ALLOWED_EMAIL_DOMAINS, ALLOWED_EMAILS, APP_ENV, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_SIGNIN_ENABLED, LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_TOKEN_KEY } from '$app/env/private';
 import { discordTokenKey, type DiscordApp } from '../../sse/discord.ts';
 import { SESSION_TTL_MS, type Allowlist } from '../../auth/auth.ts';
 
-export const SESSION_COOKIE = 'session';
+// Cookies ignore the port on localhost, so the dev site gets its own names: a dev sign-in can't replace or read a live session.
+const cookieName = (name: string) => (APP_ENV === 'dev' ? `${name}_dev` : name);
+
+export const SESSION_COOKIE = cookieName('session');
 // Remembers which email the code was sent to, so the email never goes in a URL.
-export const PENDING_EMAIL_COOKIE = 'login_email';
+export const PENDING_EMAIL_COOKIE = cookieName('login_email');
 // OAuth state for Google sign-in (CSRF check on the callback).
-export const GOOGLE_STATE_COOKIE = 'google_state';
+export const GOOGLE_STATE_COOKIE = cookieName('google_state');
 // Same, for the account page's Connect LinkedIn.
-export const LINKEDIN_STATE_COOKIE = 'linkedin_state';
+export const LINKEDIN_STATE_COOKIE = cookieName('linkedin_state');
 // And Connect Discord.
-export const DISCORD_STATE_COOKIE = 'discord_state';
+export const DISCORD_STATE_COOKIE = cookieName('discord_state');
 // And Connect GitHub.
-export const GITHUB_STATE_COOKIE = 'github_state';
+export const GITHUB_STATE_COOKIE = cookieName('github_state');
 
 export const googleEnabled = GOOGLE_SIGNIN_ENABLED && !!GOOGLE_CLIENT_ID && !!GOOGLE_CLIENT_SECRET;
 

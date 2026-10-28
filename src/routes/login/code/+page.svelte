@@ -4,7 +4,7 @@
 	let { data, form }: PageProps = $props();
 </script>
 
-<svelte:head><title>Enter code · Club Predictions</title></svelte:head>
+<svelte:head><title>Enter code · MonoGlarket</title></svelte:head>
 
 <h1>Check your email</h1>
 <p>We sent a code to <strong>{data.email}</strong>. Type it here, or tap the link in the email.</p>

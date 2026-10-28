@@ -1,6 +1,6 @@
 import type { Handle, ServerInit } from '@sveltejs/kit/hooks';
 import { checkRequest, type Verdict } from './ratelimit/ratelimit.ts';
-import { DATA_DIR, GITHUB_TOKEN, RIT_API_KEY, SITE_CURRENCY, SSE_API_URL, SSE_SYNC_MINUTES, VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY, VAPID_SUBJECT } from '$app/env/private';
+import { APP_ENV, DATA_DIR, GITHUB_TOKEN, RIT_API_KEY, SITE_CURRENCY, SSE_API_URL, SSE_SYNC_MINUTES, VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY, VAPID_SUBJECT } from '$app/env/private';
 import { sendPendingPushes, webPushSender } from './notifications/push.ts';
 import { getSession } from './auth/auth.ts';
 import { prisma } from '#lib/server/db.ts';
@@ -13,6 +13,7 @@ import { runResolvers } from './resolvers/resolvers.ts';
 import { startHub } from './live/hub.ts';
 import { runNotifications } from './notifications/notify.ts';
 import { runAllowance } from './allowance/allowance.ts';
+import { isPreviewBot, previewPage } from './previews/previews.ts';
 
 // Keep the SSE mirror fresh, then pay out sitecurrency for what it (and our own event records) show. One timer per process: Vite dev re-runs init on reload.
 export const init: ServerInit = () => {
@@ -59,7 +60,7 @@ export const init: ServerInit = () => {
 };
 
 // Pages anyone can reach without signing in.
-const PUBLIC = ['/login', '/health', '/favicon.ico', '/terms', '/privacy'];
+const PUBLIC = ['/login', '/health', '/favicon.ico', '/robots.txt', '/terms', '/privacy', '/share'];
 
 // Every response carries the rate-limit headers (vault ADR-026), including redirects and 429s.
 function withLimit(res: Response, v: Verdict): Response {
@@ -84,8 +85,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const path = event.url.pathname;
 	const verdict = checkRequest(user ? `u:${user.id}` : `ip:${event.getClientAddress()}`, path);
 	if (!verdict.allowed) return withLimit(new Response('Too many requests. Wait and try again.', { status: 429, headers: { 'Retry-After': String(verdict.resetSeconds) } }), verdict);
-	if (!user && !PUBLIC.some((p) => path === p || path.startsWith(p + '/'))) return withLimit(redirectTo('/login'), verdict);
+	if (!user && !PUBLIC.some((p) => path === p || path.startsWith(p + '/'))) {
+		// Link preview bots get the public card for the page instead of the login redirect (see previews/previews.ts).
+		if (isPreviewBot(event.request.headers.get('user-agent'))) return withLimit(new Response(await previewPage(prisma, event.url), { headers: { 'content-type': 'text/html; charset=utf-8' } }), verdict);
+		return withLimit(redirectTo('/login'), verdict);
+	}
 	// Onboarding first: nothing else is open until the member has finished the screens (vault "Signup and profile").
 	if (user && !user.onboardedAt && ![...PUBLIC, '/onboarding', '/logout'].some((p) => path === p || path.startsWith(p + '/'))) return withLimit(redirectTo('/onboarding'), verdict);
-	return withLimit(await resolve(event), verdict);
+	// Set on <html> in the server HTML so the dev colours show on first paint, with no flash of the prod look.
+	return withLimit(await resolve(event, { transformPageChunk: ({ html }) => html.replace('<html lang="en">', `<html lang="en" data-env="${APP_ENV}">`) }), verdict);
 };

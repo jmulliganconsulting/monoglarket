@@ -6,7 +6,7 @@
 	const when = (d: Date) => new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 </script>
 
-<svelte:head><title>Activity · Club Predictions</title></svelte:head>
+<svelte:head><title>Activity · MonoGlarket</title></svelte:head>
 
 <h1>Activity</h1>
 <p class="meta">Your record: the markets you've traded, what you put in and what came back, and every change to your balance.</p>

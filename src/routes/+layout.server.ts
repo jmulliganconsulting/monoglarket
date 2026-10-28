@@ -1,3 +1,4 @@
+import { APP_ENV } from '$app/env/private';
 import { prisma } from '#lib/server/db.ts';
 import { isModerator } from '../auth/roles.ts';
 import { visitSummary } from '../summary/summary.ts';
@@ -17,6 +18,7 @@ export async function load({ locals }) {
 	// The member's dabloon balance, shown in the navbar on every screen.
 	const coins = user ? await prisma.account.findFirst({ where: { ownerType: 'user', ownerId: user.id, currency: { kind: 'internal', active: true } }, select: { balance: true, currency: { select: { code: true } } } }) : null;
 	return {
+		dev: APP_ENV === 'dev',
 		unread,
 		coins: coins?.balance ?? 0,
 		coinCode: coins?.currency.code ?? '',

@@ -156,7 +156,7 @@
 		let resolving = $state(false);
 </script>
 
-<svelte:head><title>{data.market.question} · Club Predictions</title></svelte:head>
+<svelte:head><title>{data.market.question} · MonoGlarket</title></svelte:head>
 
 <header class="head" class:framed={!!data.market.imageFile} bind:clientHeight={headH} style:--pic="{headH}px">
 	<p class="meta">{data.market.creator ? `Proposed by ${data.market.creator}` : ''} · {data.market.currency}</p>

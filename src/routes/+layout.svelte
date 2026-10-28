@@ -28,14 +28,14 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href="/sse-favicon.v1.svg" type="image/svg+xml" />
+	<link rel="icon" href={data.dev ? '/sse-favicon.dev.svg' : '/sse-favicon.v1.svg'} type="image/svg+xml" />
 	<link rel="manifest" href="/manifest.webmanifest" />
-	<meta name="theme-color" content="#111111" />
+	<meta name="theme-color" content={data.dev ? '#f59e0b' : '#111111'} />
 	<!-- Link previews (Discord, Twitter/X, Slack, iMessage): the card uses these when a link is pasted. -->
 	<meta name="description" content="Forecast club events with play-money coins." />
-	<meta property="og:site_name" content="Club Predictions" />
+	<meta property="og:site_name" content="MonoGlarket" />
 	<meta property="og:type" content="website" />
-	<meta property="og:title" content="Club Predictions" />
+	<meta property="og:title" content="MonoGlarket" />
 	<meta property="og:description" content="Forecast club events with play-money coins." />
 	<meta property="og:url" content="{page.url.origin}{page.url.pathname}" />
 	<meta property="og:image" content="{page.url.origin}/og-card.png" />
@@ -44,8 +44,11 @@
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
+{#if data.dev}
+	<p class="dev-banner" role="status">Development site: a copy of the live data, not the live site</p>
+{/if}
 <header>
-	<a href="/" class="brand"><img src="/sse-logo-kid.v3.svg" alt="Club Predictions" height="40" /></a>
+	<a href="/" class="brand"><img src="/sse-logo-kid.v3.svg" alt="MonoGlarket" height="40" /></a>
 	<p class="offline-note" role="status">You're offline. Showing what was saved on this device; trading is paused until you reconnect.</p>
 	{#if data.user}
 		<a href="/portfolio" class="balance" aria-label="Balance: {coins(data.coins)} {data.coinCode}"><img src="/sse-coin.svg" alt="" width="28" height="28" />{coins(data.coins)}</a>
@@ -92,14 +95,16 @@
 		<a href="/privacy">Privacy Policy</a>
 		<a href="/terms">Terms of Service</a>
 	</nav>
-	<p>© John Mulligan 2026 · Commit <code>{__GIT_COMMIT__}</code></p>
+	<p>MonoGlarket is an unofficial site, not affiliated with or endorsed by SSE, RIT, or Polymarket.</p>
+	<p>© John Mulligan 2026 · Commit <code>{__GIT_COMMIT__}</code>{#if data.dev}{' · '}<strong class="dev-tag">DEV SITE</strong>{/if}</p>
 </footer>
 
 <style>
 	/* Offline (FR-29): the banner shows, and every green action button is paused so nothing is attempted without a connection. */
 	.offline-note {
 		display: none;
-		margin: 8px 0 0;
+		flex-basis: 100%;
+		margin: 0;
 		font-weight: 600;
 	}
 	:global([data-offline]) .offline-note {
@@ -108,6 +113,17 @@
 	:global([data-offline] .go) {
 		opacity: 0.5;
 		pointer-events: none;
+	}
+
+	/* Shown above the header on the dev site only (APP_ENV=dev). */
+	.dev-banner {
+		margin: 0;
+		padding: 4px 16px;
+		background: #f59e0b;
+		color: #1b2232;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		text-align: center;
 	}
 
 	/* Phone-first (vault: Mobile experience). Look follows vault: Design reference. */
@@ -119,12 +135,15 @@
 		font-weight: var(--weight);
 		line-height: 1.5;
 	}
+	/* Wraps on narrow phones so the name and Sign out button stay on screen instead of running off the right edge. */
 	header {
-		height: 56px;
+		min-height: 56px;
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		padding: 0 16px;
-		padding-top: env(safe-area-inset-top);
+		gap: 8px 12px;
+		padding: 8px 16px;
+		padding-top: calc(8px + env(safe-area-inset-top));
 		border-bottom: 1px solid var(--border);
 		font-weight: var(--weight-strong);
 		font-size: 1.125rem;
@@ -169,6 +188,18 @@
 		font: inherit;
 		cursor: pointer;
 	}
+	/* Dev site (APP_ENV=dev): a light amber header. The text colours are re-set to dark so they stay readable. */
+	:global([data-env='dev']) header {
+		--fg: #1b2232;
+		--fg-2: #303a50;
+		--card-2: #fef3c7;
+		background: #fcd34d;
+		color: var(--fg);
+		border-bottom-color: #b45309;
+	}
+	.dev-tag {
+		color: var(--brand-text);
+	}
 	main {
 		max-width: 1100px;
 		margin: 0 auto;
@@ -176,7 +207,7 @@
 		padding-bottom: calc(88px + env(safe-area-inset-bottom));
 	}
 	/* Bottom nav on phones; every item is a 44 px tap target (NFR-09). */
-	nav {
+	nav[aria-label='Main'] {
 		position: fixed;
 		inset: auto 0 0 0;
 		display: flex;
@@ -186,8 +217,8 @@
 		padding-bottom: env(safe-area-inset-bottom);
 		z-index: 10;
 	}
-	nav > a,
-	nav summary {
+	nav[aria-label='Main'] > a,
+	nav[aria-label='Main'] summary {
 		flex: 1;
 		min-height: 44px;
 		display: grid;
@@ -251,7 +282,7 @@
 		text-decoration: none;
 	}
 	@media (min-width: 768px) {
-		nav {
+		nav[aria-label='Main'] {
 			position: static;
 			justify-content: flex-start;
 			gap: 8px;
@@ -260,8 +291,8 @@
 			border: 0;
 			padding: 0 16px;
 		}
-		nav > a,
-		nav summary {
+		nav[aria-label='Main'] > a,
+		nav[aria-label='Main'] summary {
 			flex: none;
 			padding: 0 12px;
 		}

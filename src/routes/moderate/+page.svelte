@@ -18,7 +18,7 @@
 	};
 </script>
 
-<svelte:head><title>Moderate · Club Predictions</title></svelte:head>
+<svelte:head><title>Moderate · MonoGlarket</title></svelte:head>
 
 <div class="head">
 	<h1>Moderation</h1>

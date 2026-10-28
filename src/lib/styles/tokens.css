@@ -52,3 +52,15 @@
 		--hover: #ffffff1a;
 	}
 }
+
+/* Development site (APP_ENV=dev): amber brand so it can't be mistaken for prod. Amber passes AA under white text. */
+:root[data-env='dev'] {
+	--brand: #b45309;
+	--brand-text: #9a3412;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root[data-env='dev'] {
+		--brand-text: #fb923c;
+	}
+}

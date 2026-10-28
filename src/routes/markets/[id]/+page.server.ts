@@ -7,6 +7,7 @@ import { canSee, viewerOf } from '../../../markets/visibility.ts';
 import { hideComment, postComment } from '../../../comments/comments.ts';
 import { userMessage } from '../../../users/users.ts';
 import { prices } from '../../../engine/lmsr.ts';
+import { priceSeries } from '../../../markets/series.ts';
 import { buy, propose, sell } from '../../../markets/markets.ts';
 import { marketMessage } from '../../../markets/messages.ts';
 import { fileReport, reportMessage } from '../../../reports/reports.ts';
@@ -51,12 +52,7 @@ export async function load({ params, locals }) {
 		}),
 	]);
 
-	// Price history per outcome: starts at the uniform opening price, then one point per trade (the chart's data).
-	const start = m.createdAt.getTime();
-	const series = m.outcomes.map((o, i) => ({
-		label: o.label,
-		points: [{ t: start, p: 1 / m.outcomes.length }, ...trades.filter((t) => t.outcomeId === o.id).map((t) => ({ t: t.createdAt.getTime(), p: t.probAfter }))],
-	}));
+	const series = priceSeries(m.outcomes, trades, m.createdAt);
 
 	// Moderators and admins always see the controls. Ordinary members never propose a result, unless a moderator has
 	// granted them this market (vault "Resolution and payouts").

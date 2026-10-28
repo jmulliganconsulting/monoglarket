@@ -4,7 +4,7 @@
 	let { form }: PageProps = $props();
 </script>
 
-<svelte:head><title>Optional · Club Predictions</title></svelte:head>
+<svelte:head><title>Optional · MonoGlarket</title></svelte:head>
 
 <p class="step">Step 5 of 6</p>
 <h1>Connect later, or now</h1>

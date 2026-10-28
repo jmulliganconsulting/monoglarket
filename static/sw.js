@@ -1,4 +1,4 @@
-// Club Predictions service worker (vault "Mobile experience"): installable (FR-28) and a read-only offline view (FR-29).
+// MonoGlarket service worker (vault "Mobile experience"): installable (FR-28) and a read-only offline view (FR-29).
 // Pages come from the network when it works and are saved as the member opens them. Offline, the saved copy is shown.
 // Writes (trades, comments, sign-in) are never cached or queued: they only ever go to the network, so nothing waits to be sent.
 // Saved pages hold one member's data, so they're deleted when that member signs out.
@@ -61,7 +61,7 @@ self.addEventListener('message', (event) => {
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Club Predictions', { body: data.body || '', icon: '/sse-logo-mark.v3.svg', data: { url: data.url || '/notifications' } }),
+    self.registration.showNotification(data.title || 'MonoGlarket', { body: data.body || '', icon: '/sse-logo-mark.v3.svg', data: { url: data.url || '/notifications' } }),
   );
 });
 self.addEventListener('notificationclick', (event) => {

@@ -1,13 +1,13 @@
-# Club Predictions Terms of Service
+# MonoGlarket Terms of Service
 
 **Effective date:** October 27, 2026
 **Last updated:** October 27, 2026
 
-> **Independent site, not affiliated with SSE.** Club Predictions is independently owned and operated by John Mulligan Consulting LLC. It is not affiliated with, endorsed by, sponsored by, or operated by the Society of Software Engineers at the Rochester Institute of Technology ("SSE") or the Rochester Institute of Technology ("RIT"). References to SSE or RIT on this site are for identification only.
+> **Unofficial site, not affiliated with SSE or Polymarket.** MonoGlarket (Unofficial SSE Polymarket) is independently owned and operated by John Mulligan, doing business as John Mulligan Consulting. It is not affiliated with, endorsed by, sponsored by, or operated by the Society of Software Engineers at the Rochester Institute of Technology ("SSE"), the Rochester Institute of Technology ("RIT"), or Polymarket. References to SSE, RIT, or Polymarket on this site are for identification only.
 
 pelease no sue me por favor gracias supercell
 
-These Terms of Service ("Terms") govern your access to and use of Club Predictions (the "Service"), a play-money prediction market independently owned and operated by John Mulligan Consulting LLC ("we," "us," or "our"). By creating an account, signing in, or using the Service, you agree to these Terms and to the [Privacy Policy](privacy-policy.md). If you do not agree, do not use the Service.
+These Terms of Service ("Terms") govern your access to and use of MonoGlarket (the "Service"), a play-money prediction market independently owned and operated by John Mulligan, doing business as John Mulligan Consulting ("we," "us," or "our"). By creating an account, signing in, or using the Service, you agree to these Terms and to the [Privacy Policy](privacy-policy.md). If you do not agree, do not use the Service.
 
 ## 1. Play money only. No real money, ever.
 
@@ -105,7 +105,7 @@ These Terms of Service ("Terms") govern your access to and use of Club Predictio
 
 ## 9. Ownership and intellectual property
 
-The Service, its design, code, and the Club Predictions name and logos are owned by John Mulligan Consulting LLC or its licensors. You may not use them without written permission, except to use the Service as intended. Other names and marks, including those of SSE and RIT, belong to their respective owners. Their use on the Service does not mean that a member, post, or market is endorsed by SSE or RIT.
+The Service, its design, code, and the MonoGlarket name and logos are owned by John Mulligan, doing business as John Mulligan Consulting, or its licensors. You may not use them without written permission, except to use the Service as intended. Other names and marks, including those of SSE, RIT, and Polymarket, belong to their respective owners. Their use on the Service does not mean that a member, post, or market is endorsed by SSE, RIT, or Polymarket.
 
 ## 10. Termination
 
@@ -130,11 +130,11 @@ THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTIES OF ANY KI
 
 ## 12. Limitation of liability
 
-TO THE FULLEST EXTENT PERMITTED BY LAW, JOHN MULLIGAN CONSULTING LLC AND ITS MEMBERS, OFFICERS, EMPLOYEES, AND AGENTS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF PLAY MONEY, PROFITS, DATA, OR GOODWILL, ARISING OUT OF OR RELATED TO THE SERVICE. OUR TOTAL LIABILITY FOR ALL CLAIMS RELATING TO THE SERVICE WILL NOT EXCEED ONE HUNDRED U.S. DOLLARS (US$100). Because play money has no monetary value, no amount of play money is recoverable in cash. Nothing in these Terms excludes liability that cannot be excluded under New York or federal law.
+TO THE FULLEST EXTENT PERMITTED BY LAW, JOHN MULLIGAN, DOING BUSINESS AS JOHN MULLIGAN CONSULTING, AND HIS EMPLOYEES AND AGENTS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF PLAY MONEY, PROFITS, DATA, OR GOODWILL, ARISING OUT OF OR RELATED TO THE SERVICE. OUR TOTAL LIABILITY FOR ALL CLAIMS RELATING TO THE SERVICE WILL NOT EXCEED ONE HUNDRED U.S. DOLLARS (US$100). Because play money has no monetary value, no amount of play money is recoverable in cash. Nothing in these Terms excludes liability that cannot be excluded under New York or federal law.
 
 ## 13. Indemnity
 
-You agree to defend and hold harmless John Mulligan Consulting LLC and its members, officers, employees, and agents from claims arising from your content, your breach of these Terms, or your misuse of the Service, except where a claim arises from our own gross negligence or willful misconduct.
+You agree to defend and hold harmless John Mulligan, doing business as John Mulligan Consulting, and his employees and agents from claims arising from your content, your breach of these Terms, or your misuse of the Service, except where a claim arises from our own gross negligence or willful misconduct.
 
 ## 14. Governing law and disputes
 
@@ -173,5 +173,5 @@ You agree that clicking an acceptance button, checking a box, or signing in to t
 
 ## 18. Contact
 
-John Mulligan Consulting LLC, [mailing address]
+John Mulligan Consulting (sole proprietorship), [mailing address]
 Email: [contact email]

@@ -20,7 +20,7 @@
 	};
 </script>
 
-<svelte:head><title>Admin · Club Predictions</title></svelte:head>
+<svelte:head><title>Admin · MonoGlarket</title></svelte:head>
 
 <h1>Admin</h1>
 <p class="meta">Blocks, breaks and resolvers. Moderation is on the <a href="/moderate">moderation page</a>.</p>

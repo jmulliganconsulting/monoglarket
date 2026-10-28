@@ -9,9 +9,12 @@ try {
 } catch {}
 
 // Shown in the footer. Builds without git (e.g. a slim Docker image) show "unknown".
+// Uncommitted or untracked files add "-dirty", so a local build never passes for the commit it came from.
 const gitCommit = (() => {
 	try {
-		return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+		const git = (args: string[]) => execFileSync('git', args, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+		const hash = git(['rev-parse', '--short', 'HEAD']);
+		return git(['status', '--porcelain']) ? `${hash}-dirty` : hash;
 	} catch {
 		return 'unknown';
 	}

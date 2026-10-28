@@ -19,7 +19,7 @@
 	const groupName = (id: number | null) => data.groups.find((g) => g.id === id)?.name ?? '';
 </script>
 
-<svelte:head><title>Edit · {data.market.question} · Club Predictions</title></svelte:head>
+<svelte:head><title>Edit · {data.market.question} · MonoGlarket</title></svelte:head>
 
 <h1>Edit market</h1>
 <p class="meta"><a href="/markets/{data.market.id}">Back to the market</a></p>

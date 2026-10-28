@@ -1,5 +1,5 @@
 {
-  "name": "club-predictions",
+  "name": "monoglarket",
   "private": true,
   "type": "module",
   "engines": {
@@ -27,6 +27,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
+    "@resvg/resvg-js": "^2.6.2",
     "@tabler/icons-svelte": "3.50.0",
     "marked": "^18.1.2",
     "nodemailer": "10.2.1",
