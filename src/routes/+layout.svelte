@@ -30,6 +30,9 @@
 <svelte:head>
 	<link rel="icon" href={data.dev ? '/sse-favicon.dev.svg' : '/sse-favicon.v1.svg'} type="image/svg+xml" />
 	<link rel="manifest" href="/manifest.webmanifest" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap" />
 	<meta name="theme-color" content={data.dev ? '#7c3aed' : '#111111'} />
 	
 	<!-- Link previews (Discord, Twitter/X, Slack, iMessage): the card uses these when a link is pasted. -->
@@ -369,8 +372,11 @@
 		min-height: 44px;
 	}
 	:global(h1) {
-		font-size: 1.75rem;
-		font-weight: var(--weight-strong);
+		font-family: var(--font-display);
+		font-stretch: var(--stretch-display);
+		font-size: 2.25rem;
+		line-height: 1.1;
+		font-weight: 650;
 		margin: 8px 0 16px;
 	}
 </style>

@@ -356,8 +356,11 @@
 		place-items: center;
 		border-radius: var(--radius-pill);
 		background: var(--card-2);
-		font-size: 0.875rem;
-		font-weight: var(--weight-strong);
+		/* The chance is the loudest thing on the card. */
+		font-family: var(--font-display);
+		font-stretch: var(--stretch-display);
+		font-size: 1.375rem;
+		font-weight: 650;
 		font-variant-numeric: tabular-nums;
 	}
 	/* A question card: one row per option, name and chance on the left, Yes and No on the right (like the Polymarket date market). */

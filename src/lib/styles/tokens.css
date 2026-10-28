@@ -23,7 +23,9 @@
 	--hover: #0000000d;
 
 	--font: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-	--font-display: 'Instrument Sans Condensed', 'Arial Narrow', var(--font);
+	/* Both load from Google Fonts in +layout.svelte. Display is Instrument Sans at its narrowest width: use with --stretch-display. */
+	--font-display: 'Instrument Sans', 'Arial Narrow', var(--font);
+	--stretch-display: 75%;
 	--weight: 480;
 	--weight-strong: 580;
 
