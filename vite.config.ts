@@ -20,18 +20,22 @@ const gitCommit = (() => {
 	}
 })();
 
-export default defineConfig({
-	server: { port: Number(process.env.PORT) || 5173 },
-	preview: { port: Number(process.env.PORT) || 4173 },
-	define: { __GIT_COMMIT__: JSON.stringify(gitCommit) },
-	plugins: [
-		sveltekit({
-			compilerOptions: {
-				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
-				runes: ({ filename }) =>
-					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
-			},
-			adapter: adapter()
-		})
-	]
+export default defineConfig(({ command, isPreview }) => {
+	// Local `npm run dev` is the dev site unless APP_ENV says otherwise (APP_ENV=prod npm run dev). Builds and `preview` stay prod.
+	if (command === 'serve' && !isPreview) process.env.APP_ENV ??= 'dev';
+	return {
+		server: { port: Number(process.env.PORT) || 5173 },
+		preview: { port: Number(process.env.PORT) || 4173 },
+		define: { __GIT_COMMIT__: JSON.stringify(gitCommit) },
+		plugins: [
+			sveltekit({
+				compilerOptions: {
+					// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
+					runes: ({ filename }) =>
+						filename.split(/[/\\]/).includes('node_modules') ? undefined : true
+				},
+				adapter: adapter()
+			})
+		]
+	};
 });
