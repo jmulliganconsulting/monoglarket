@@ -17,6 +17,9 @@ const STATUS: Record<string, string> = {
 	cancelled: 'Cancelled',
 };
 const COLORS = ['#4f9d69', '#d1495b', '#3e7cb1', '#edae49', '#8e6c8a', '#2ec4b6'];
+// Yes/No use the site's --yes/--no everywhere, whatever colour the outcome was given.
+const HOUSE: Record<string, string> = { yes: '#3669f6', no: '#ce2c8a' };
+const colourOf = (o: { label: string; color: string | null }, i: number) => HOUSE[o.label.trim().toLowerCase()] ?? o.color ?? COLORS[i % COLORS.length];
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pct = (p: number) => `${Math.round(p * 100)}%`;
 
@@ -65,9 +68,9 @@ export function marketSvg(c: Card): string {
 	const paths = c.series.map((s, i) => {
 		const last = s.points[s.points.length - 1];
 		const d = [...s.points, { t: t1, p: last.p }].map((pt, j) => `${j ? 'L' : 'M'}${x(pt.t).toFixed(1)} ${y(pt.p).toFixed(1)}`).join(' ');
-		return `<path d="${d}" fill="none" stroke="${c.outcomes[i].color ?? COLORS[i % COLORS.length]}" stroke-width="5" stroke-linejoin="round"/>`;
+		return `<path d="${d}" fill="none" stroke="${colourOf(c.outcomes[i], i)}" stroke-width="5" stroke-linejoin="round"/>`;
 	});
-	const ranked = c.outcomes.map((o, i) => ({ ...o, color: o.color ?? COLORS[i % COLORS.length] })).sort((a, b) => b.probability - a.probability);
+	const ranked = c.outcomes.map((o, i) => ({ ...o, color: colourOf(o, i) })).sort((a, b) => b.probability - a.probability);
 	const shown = ranked.slice(0, 5);
 	const legend = shown.map((o, i) => {
 		const yy = 370 + i * 56;

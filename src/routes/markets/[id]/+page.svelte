@@ -68,12 +68,12 @@
 	// The headline chance: Yes on a yes/no market, otherwise whichever outcome leads.
 	const lead = $derived(live.find((o) => live.length === 2 && side(o.label) === 'yes') ?? live.reduce((a, b) => (b.probability > a.probability ? b : a), live[0]));
 	const side = (label: string) => ({ yes: 'yes', no: 'no' })[label.trim().toLowerCase()] ?? '';
-	// An outcome's own colour wins. Otherwise Yes/No keep the house colours, then the market's primary and secondary, then a palette.
+	// Yes/No always use the house colours, as on the market list. Otherwise the outcome's own colour, then the market's primary and secondary, then a palette.
 	const palette = ['#4f7cff', '#f5a524', '#14b8a6', '#e11d48', '#8b5cf6', '#84cc16', '#06b6d4', '#f97316', '#64748b', '#d946ef'];
 	type Shown = { label: string; color: string | null; imageFile: string | null; avatar: string | null };
 	const colour = (o: Shown, i: number) =>
-		o.color ??
 		({ yes: 'var(--yes)', no: 'var(--no)' })[side(o.label)] ??
+		o.color ??
 		(i === 0 && data.market.colorPrimary ? data.market.colorPrimary : i === 1 && data.market.colorSecondary ? data.market.colorSecondary : palette[i % palette.length]);
 	const price = (p: number) => `${p.toFixed(2)} ${data.market.currency}`;
 

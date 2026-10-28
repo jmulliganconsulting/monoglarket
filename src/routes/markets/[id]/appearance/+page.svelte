@@ -25,7 +25,8 @@
 		<fieldset>
 			<legend>{o.label}</legend>
 			<input type="hidden" name="outcomeId" value={o.id} />
-			<label>Colour in the graph <input type="color" name="color_{o.id}" value={o.color ?? '#888888'} /></label>
+			<!-- Yes/No always draw in the house blue/pink, so no picker (and the saved colour is cleared). -->
+			{#if !['yes', 'no'].includes(o.label.trim().toLowerCase())}<label>Colour in the graph <input type="color" name="color_{o.id}" value={o.color ?? '#888888'} /></label>{/if}
 			<label>Picture
 				<input type="file" name="image_{o.id}" accept="image/png,image/jpeg,image/webp" />
 			</label>

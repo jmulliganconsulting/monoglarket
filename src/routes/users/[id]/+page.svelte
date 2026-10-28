@@ -7,6 +7,16 @@
 	const when = (d: Date) => d.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 	const joined = (d: Date) => d.toLocaleString(undefined, { month: 'long', year: 'numeric' });
 	const hasRole = $derived(data.badges.some((b) => b.group === 'site' || b.group === 'official'));
+	const side = (label: string) => ({ yes: 'yes', no: 'no' })[label.trim().toLowerCase()] ?? '';
+	const STATUS: Record<string, string> = { open: 'Open', closed: 'Closed', resolved: 'Decided', final: 'Decided' };
+	// A square upload is shown whole as a rounded square; anything else is cropped to a circle.
+	let square = $state(false);
+	const measure = (img: HTMLImageElement) => {
+		const check = () => img.naturalWidth && (square = Math.abs(img.naturalWidth - img.naturalHeight) <= img.naturalWidth * 0.02);
+		check(); // already loaded before hydration
+		img.addEventListener('load', check);
+		return () => img.removeEventListener('load', check);
+	};
 </script>
 
 <svelte:head><title>{data.name} · Monoglarket</title></svelte:head>
@@ -21,7 +31,7 @@
 	<div class="corner">
 		{#if data.isYou}<a class="edit" href="/account">Edit</a>{/if}
 		{#if data.image}
-			<img class="pfp" src="/sse-images/{data.image}" alt="" />
+			<img class="pfp" class:square src="/sse-images/{data.image}" alt="" {@attach measure} />
 		{:else}
 			<span class="pfp initial" aria-hidden="true">{data.name.charAt(0)}</span>
 		{/if}
@@ -49,9 +59,13 @@
 	{#if data.positions.length === 0}
 		<p class="meta">No positions.</p>
 	{:else}
-		<ul class="plain">
+		<ul class="positions">
 			{#each data.positions as p (p.marketId + p.outcome)}
-				<li><a href="/markets/{p.marketId}">{p.question}</a>: {p.shares.toFixed(2)} “{p.outcome}” <span class="meta">{p.status}</span></li>
+				<li>
+					<a class="q" href="/markets/{p.marketId}">{p.question}</a>
+					<span class="held"><span class="side {side(p.outcome)}">{p.outcome}</span> {p.shares.toFixed(2)} shares</span>
+					<span class="status" class:live={p.status === 'open'}>{STATUS[p.status] ?? p.status}</span>
+				</li>
 			{/each}
 		</ul>
 	{/if}
@@ -105,10 +119,13 @@
 		font-weight: var(--weight-strong);
 	}
 	.pfp {
-		width: 64px;
-		height: 64px;
+		width: 96px;
+		height: 96px;
 		border-radius: 50%;
 		object-fit: cover;
+	}
+	.pfp.square {
+		border-radius: 12px;
 	}
 	.initial {
 		display: grid;
@@ -163,5 +180,59 @@
 	}
 	.plain a {
 		color: inherit;
+	}
+	.positions {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.positions li {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		align-items: center;
+		gap: 4px 12px;
+		padding: 10px 0;
+		border-top: 1px solid var(--border);
+	}
+	.positions li:first-child {
+		border-top: none;
+		padding-top: 0;
+	}
+	.positions .q {
+		grid-column: 1 / -1;
+		color: var(--fg);
+		font-weight: var(--weight-strong);
+		text-decoration: none;
+	}
+	.positions .q:hover {
+		text-decoration: underline;
+	}
+	.held {
+		font-size: 0.875rem;
+		font-variant-numeric: tabular-nums;
+		color: var(--muted);
+	}
+	.side {
+		display: inline-block;
+		padding: 2px 10px;
+		margin-right: 4px;
+		border-radius: var(--radius-pill);
+		background: var(--card-2);
+		color: var(--fg);
+		font-weight: var(--weight-strong);
+	}
+	.side.yes {
+		color: var(--yes-text);
+	}
+	.side.no {
+		color: var(--no-text);
+	}
+	.status {
+		font-size: 0.8125rem;
+		color: var(--muted);
+	}
+	.status.live {
+		color: var(--fg);
+		font-weight: var(--weight-strong);
 	}
 </style>
