@@ -30,7 +30,8 @@
 <svelte:head>
 	<link rel="icon" href={data.dev ? '/sse-favicon.dev.svg' : '/sse-favicon.v1.svg'} type="image/svg+xml" />
 	<link rel="manifest" href="/manifest.webmanifest" />
-	<meta name="theme-color" content={data.dev ? '#f59e0b' : '#111111'} />
+	<meta name="theme-color" content={data.dev ? '#7c3aed' : '#111111'} />
+	
 	<!-- Link previews (Discord, Twitter/X, Slack, iMessage): the card uses these when a link is pasted. -->
 	<meta name="description" content="Forecast club events with play-money coins." />
 	<meta property="og:site_name" content="MonoGlarket" />
@@ -44,9 +45,6 @@
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
-{#if data.dev}
-	<p class="dev-banner" role="status">Development site: a copy of the live data, not the live site</p>
-{/if}
 <header>
 	<a href="/" class="brand"><img src="/sse-logo-kid.v3.svg" alt="MonoGlarket" height="40" /></a>
 	<p class="offline-note" role="status">You're offline. Showing what was saved on this device; trading is paused until you reconnect.</p>
@@ -91,12 +89,19 @@
 {/if}
 <main>{@render children()}</main>
 <footer>
-	<nav class="legal-links" aria-label="Legal">
-		<a href="/privacy">Privacy Policy</a>
-		<a href="/terms">Terms of Service</a>
-	</nav>
-	<p>MonoGlarket is an unofficial site, not affiliated with or endorsed by SSE, RIT, or Polymarket.</p>
-	<p>© John Mulligan 2026 · Commit <code>{__GIT_COMMIT__}</code>{#if data.dev}{' · '}<strong class="dev-tag">DEV SITE</strong>{/if}</p>
+	<div class="foot">
+		<div class="notice">
+			<p>Copyright © {new Date().getFullYear()} - John Mulligan Consulting. All Rights Reserved.</p>
+			<p class="build">MonoGlarket is an unofficial site, not affiliated with or endorsed by SSE, RIT, or Polymarket.</p>
+		</div>
+		<div class="links">
+			<nav class="legal-links" aria-label="Legal">
+				<a href="/privacy">Privacy Policy</a>
+				<a href="/terms">Terms of Service</a>
+			</nav>
+			<p class="build">Commit <code>{__GIT_COMMIT__}</code></p>
+		</div>
+	</div>
 </footer>
 
 <style>
@@ -113,17 +118,6 @@
 	:global([data-offline] .go) {
 		opacity: 0.5;
 		pointer-events: none;
-	}
-
-	/* Shown above the header on the dev site only (APP_ENV=dev). */
-	.dev-banner {
-		margin: 0;
-		padding: 4px 16px;
-		background: #f59e0b;
-		color: #1b2232;
-		font-size: 0.8125rem;
-		font-weight: 600;
-		text-align: center;
 	}
 
 	/* Phone-first (vault: Mobile experience). Look follows vault: Design reference. */
@@ -188,17 +182,14 @@
 		font: inherit;
 		cursor: pointer;
 	}
-	/* Dev site (APP_ENV=dev): a light amber header. The text colours are re-set to dark so they stay readable. */
+	/* Dev site (APP_ENV=dev): a solid violet header with white text. The logo's light lettering stays readable on it. */
 	:global([data-env='dev']) header {
-		--fg: #1b2232;
-		--fg-2: #303a50;
-		--card-2: #fef3c7;
-		background: #fcd34d;
+		--fg: #fff;
+		--fg-2: #ede9fe;
+		--card-2: #ffffff33;
+		background: #6d28d9;
 		color: var(--fg);
-		border-bottom-color: #b45309;
-	}
-	.dev-tag {
-		color: var(--brand-text);
+		border-bottom-color: #5b21b6;
 	}
 	main {
 		max-width: 1100px;
@@ -309,17 +300,42 @@
 			padding-bottom: 16px;
 		}
 	}
-	/* Footer sits above the phone bottom nav, so it keeps the same clearance as main. */
+	/* Modelled on jmulligan191.com's footer: centred on phones, copyright left and links right on desktop. */
+	/* The phone bottom nav sits over the footer, so it keeps the same clearance as main. */
 	footer {
-		max-width: 1100px;
-		margin: 0 auto;
-		padding: 16px 16px calc(88px + env(safe-area-inset-bottom));
 		border-top: 1px solid var(--border);
 		color: var(--muted);
-		font-size: 0.8125rem;
+		font-size: 0.875rem;
+		padding-bottom: calc(88px + env(safe-area-inset-bottom));
 	}
-	footer p {
-		margin: 8px 0 0;
+	.foot {
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 32px 16px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		text-align: center;
+	}
+	.notice {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.notice p,
+	.build {
+		margin: 0;
+	}
+	.build {
+		font-size: 0.75rem;
+		opacity: 0.6;
+	}
+	.links {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
 	}
 	footer a {
 		color: var(--fg-2);
@@ -327,7 +343,25 @@
 	.legal-links {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
 		gap: 4px 16px;
+	}
+	@media (min-width: 768px) {
+		footer {
+			padding-bottom: 0;
+		}
+		.foot {
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: flex-start;
+			text-align: left;
+		}
+		.links {
+			align-items: flex-end;
+		}
+		.legal-links {
+			justify-content: flex-end;
+		}
 	}
 	.legal-links a {
 		display: inline-flex;
