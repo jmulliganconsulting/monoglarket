@@ -72,6 +72,8 @@
 		return withPicture ? `/market-images/${withPicture.imageFile}` : null;
 	};
 	// A question's options (several-winner or date) share one card, one row per option; every other market is a card of its own.
+	// Past this many options the card shows the first ones and links to the rest.
+	const OPTIONS_SHOWN = 5;
 	const entriesOf = (list: Card[]) => {
 		const out: Card[][] = [];
 		const byGroup = new Map<number, Card[]>();
@@ -153,7 +155,7 @@
 						<p class={meta}>{closes(entry[0].closeAt)}</p>
 					{/if}
 					<p class={head} aria-hidden="true"><span>Option</span><span>Chance</span></p>
-					{#each entry as o (o.id)}
+					{#each entry.slice(0, OPTIONS_SHOWN) as o (o.id)}
 						<!-- One row per option, name and chance on the left, Yes and No on the right (like the Polymarket date market). -->
 						<div class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 border-t border-border pt-2.5">
 							<a class="text-sm font-strong text-fg no-underline" href="/markets/{o.id}">{o.optionLabel}</a>
@@ -166,6 +168,9 @@
 							{/if}
 						</div>
 					{/each}
+					{#if entry.length > OPTIONS_SHOWN}
+						<p class="{meta} border-t border-border pt-2.5"><a class="text-inherit" href="/questions/{entry[0].questionGroupId}">+ {entry.length - OPTIONS_SHOWN} more</a></p>
+					{/if}
 				</li>
 			{:else}
 				{@const m = entry[0]}
