@@ -7,12 +7,15 @@ test('a second copy of a job skips while the first holds the lock', async () => 
 	const { prisma, drop } = await testPrisma();
 	try {
 		let runs = 0;
+		let started!: () => void;
+		const running = new Promise<void>((resolve) => (started = resolve));
 		let finish!: () => void;
 		const first = withJobLock(prisma, 'test-job', () => {
 			runs++;
+			started();
 			return new Promise<void>((resolve) => (finish = resolve));
 		});
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		await running;
 		await withJobLock(prisma, 'test-job', async () => {
 			runs++;
 		});
