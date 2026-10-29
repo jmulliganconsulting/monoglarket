@@ -154,7 +154,7 @@ export async function syncRoster(prisma: PrismaClient, opts: SyncOptions) {
 		tryGet<SseTermCount>(fetchFn, opts.baseUrl, '/api/memberships'),
 	]);
 	// External data: keep only rows with the fields we key on.
-	const valid = users?.filter((u) => Number.isInteger(u?.id) && typeof u.email === 'string' && u.email.includes('@')) ?? [];
+	const valid = users?.filter((u) => Number.isInteger(u?.id) && u.id >= 0 && typeof u.email === 'string' && u.email.includes('@')) ?? [];
 	// No usable users almost certainly means the site broke, not that everyone left; don't flag the table as removed.
 	if (users && !valid.length) console.warn('SSE /api/user: no valid users; keeping previous data');
 	// Status needs all three role lists; with one missing, members keep their last status.
