@@ -106,7 +106,11 @@
 				<button class="secondary">Disconnect Discord</button>
 			</form>
 		{:else}
-			<p>Sign in with Discord to connect it to your SSE profile. We save your Discord profile, its email, and the accounts you've connected on Discord, and may give you server roles later.</p>
+			<p>Sign in with Discord to connect it to your Monoglarket profile.</p>
+			<p class="meta">
+				This is used to to update your Linked Roles on the discord server when it is eventually made.
+				<!-- This is used to verify your identity and provide a seamless experience across the platform. -->
+			</p>
 			<a class="button" href="/account/discord" data-sveltekit-reload>Connect Discord</a>
 		{/if}
 		{#if form?.discordDisconnected}<p role="status">Discord disconnected.</p>

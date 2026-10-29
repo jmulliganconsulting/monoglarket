@@ -9,7 +9,7 @@
 <svelte:head><title>Activity · Monoglarket</title></svelte:head>
 
 <h1>Activity</h1>
-<p class="meta">Your record: the markets you've traded, what you put in and what came back, and every change to your balance.</p>
+<p class="meta">A list of all the markets you've traded, what you put in and what came back, and every change to your balance.</p>
 
 <section>
 	<h2>Markets</h2>
@@ -29,7 +29,7 @@
 </section>
 
 <section>
-	<h2>Every transaction</h2>
+	<h2>Transaction</h2>
 	{#if data.log.length === 0}
 		<p class="meta">Nothing yet.</p>
 	{:else}
