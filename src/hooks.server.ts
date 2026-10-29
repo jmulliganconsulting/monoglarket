@@ -1,6 +1,6 @@
 import type { Handle, ServerInit } from '@sveltejs/kit/hooks';
 import { checkRequest, type Verdict } from './ratelimit/ratelimit.ts';
-import { APP_ENV, DATA_DIR, GITHUB_TOKEN, RIT_API_KEY, SITE_CURRENCY, SSE_API_URL, SSE_SYNC_MINUTES, VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY, VAPID_SUBJECT } from '$app/env/private';
+import { APP_ENV, DATA_DIR, GITHUB_TOKEN, RIT_API_KEY, SITE_CURRENCY, SSE_API_TOKEN, SSE_API_URL, SSE_SYNC_MINUTES, SSE_USER_AGENT, VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY, VAPID_SUBJECT } from '$app/env/private';
 import { sendPendingPushes, webPushSender } from './notifications/push.ts';
 import { getSession } from './auth/auth.ts';
 import { prisma } from '#lib/server/db.ts';
@@ -37,7 +37,7 @@ export const init: ServerInit = () => {
 	if (!g.resolverTimer) g.resolverTimer = setInterval(() => runResolvers(prisma).catch((e) => console.error('Resolver job failed:', e.message)), 5 * 60_000);
 	if (g.sseTimer) return;
 	const baseUrl = SSE_API_URL;
-	const opts = baseUrl && { baseUrl, imageDir: join(DATA_DIR, 'sse-images'), ritApiKey: RIT_API_KEY, gitHubToken: GITHUB_TOKEN };
+	const opts = baseUrl && { baseUrl, imageDir: join(DATA_DIR, 'sse-images'), ritApiKey: RIT_API_KEY, gitHubToken: GITHUB_TOKEN, sseToken: SSE_API_TOKEN, userAgent: SSE_USER_AGENT };
 	let running = false; // the first run downloads every picture and can outlast the interval
 	const settle = async () => {
 		const currency = await prisma.currency.findUnique({ where: { code: SITE_CURRENCY } });

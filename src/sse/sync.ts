@@ -1,8 +1,9 @@
 // Mirrors the SSE website's users, officers, mentors and memberships into sse_members / sse_officers / sse_degrees.
-// Uses the site's five public bulk GETs (no login): /api/user, /api/officer (every role, past and present), /api/officer-positions
+// Uses the site's five bulk GETs: /api/user (now 403 without a login), /api/officer (every role, past and present), /api/officer-positions
 // (each position and its current holder, recorded per RIT term in sse_officer_terms), /api/mentor?detailed=true
-// (active and inactive mentors, each with their latest application), /api/memberships; plus /api/user/{id}/profile, the only source of each membership's reason and date, fetched
-// only for users whose membership count changed or whose copy is a week old. Every request to the site is rate limited (politeFetch).
+// (active and inactive mentors, each with their latest application; plain /api/mentor, without applications, if that fails), /api/memberships; plus /api/user/{id}/profile, the only source of each membership's reason and date, fetched
+// only for users whose membership count changed or whose copy is a week old. Every request to the site is rate limited and carries
+// the User-Agent and (when set) bearer token (politeFetch). A failing bulk GET is logged and its part of the mirror left as it was; the rest still sync.
 // Nothing is deleted: users, roles, mentor records and memberships that vanish from the site get removedAt instead.
 // Status rules copy the site's next/lib/authLevelResolver.ts: active officer > active mentor > >= 1 membership ever > guest.
 // Events (/api/event) and their check-ins (/api/event/{id}/attendance) are mirrored too, see syncEvents.
@@ -26,6 +27,10 @@ export type SyncOptions = {
 	imageDir: string;
 	ritApiKey?: string;
 	gitHubToken?: string;
+	/** Bearer token for SSE endpoints that need a login. */
+	sseToken?: string;
+	/** User-Agent sent to the SSE site. */
+	userAgent?: string;
 	fetchFn?: Fetch;
 	lookup?: Lookup;
 	/** Minimum gap between requests to the SSE site (default 500 ms, i.e. at most 2 per second). */
@@ -49,7 +54,7 @@ const RECHECK_MS = 7 * 86_400_000; // GitHub re-verified, failed images retried,
  * Rate limit for the SSE site, which doesn't limit these GETs itself: requests start at least gapMs apart, and a 429/503
  * waits out Retry-After (default 30 s, max 5 min) up to 3 tries. Requests to other hosts pass straight through.
  */
-export function politeFetch(fetchFn: Fetch, baseUrl: string, gapMs: number): Fetch {
+export function politeFetch(fetchFn: Fetch, baseUrl: string, gapMs: number, headers: Record<string, string> = {}): Fetch {
 	const host = new URL(baseUrl).host;
 	let queue: Promise<unknown> = Promise.resolve();
 	const turn = (ms: number) => {
@@ -59,6 +64,9 @@ export function politeFetch(fetchFn: Fetch, baseUrl: string, gapMs: number): Fet
 	};
 	return (async (input: URL | string | Request, init?: RequestInit) => {
 		if (new URL(input instanceof Request ? input.url : input).host !== host) return fetchFn(input, init);
+		const h = new Headers(init?.headers);
+		for (const [k, v] of Object.entries(headers)) h.set(k, v);
+		init = { ...init, headers: h };
 		for (let attempt = 1; ; attempt++) {
 			await turn(gapMs);
 			const res = await fetchFn(input, init);
@@ -81,6 +89,18 @@ async function get<T>(fetchFn: Fetch, base: string, path: string): Promise<T[]> 
 	const body = await getJson(fetchFn, base, path);
 	if (!Array.isArray(body)) throw new Error(`SSE ${path}: expected an array`);
 	return body;
+}
+
+/** get, but a failure (or an empty list, which means the site broke, not that everything was deleted) is logged and gives null. */
+async function tryGet<T>(fetchFn: Fetch, base: string, path: string): Promise<T[] | null> {
+	try {
+		const rows = await get<T>(fetchFn, base, path);
+		if (rows.length) return rows;
+		console.warn(`SSE ${path}: empty; keeping previous data`);
+	} catch (e) {
+		console.warn(`${(e as Error).message}; keeping previous data`);
+	}
+	return null;
 }
 
 const str = (v: unknown) => (typeof v === 'string' ? v : null);
@@ -115,41 +135,44 @@ const date = (v: unknown) => {
 
 /** Full refresh: roster, membership details, then lookups. */
 export async function syncSse(prisma: PrismaClient, opts: SyncOptions) {
-	opts = { ...opts, fetchFn: politeFetch(opts.fetchFn ?? fetch, opts.baseUrl, opts.requestGapMs ?? 500) };
+	const headers = { 'user-agent': opts.userAgent ?? 'Monoglarket-sync', ...(opts.sseToken && { authorization: `Bearer ${opts.sseToken}` }) };
+	opts = { ...opts, fetchFn: politeFetch(opts.fetchFn ?? fetch, opts.baseUrl, opts.requestGapMs ?? 500, headers) };
 	const roster = await syncRoster(prisma, opts);
 	const summary = { ...roster, ...(await syncProfiles(prisma, opts)), ...(await syncEvents(prisma, opts)), ...(await enrichSse(prisma, opts)) };
 	await audit(prisma, null, 'sse_sync', null, JSON.stringify(summary));
 	return summary;
 }
 
-/** Pull everything first, then write in one transaction: a failed or partial fetch leaves the last good copy untouched. */
+/** Pull everything first, then write in one transaction. An endpoint that fails (null) leaves the tables it feeds untouched. */
 export async function syncRoster(prisma: PrismaClient, opts: SyncOptions) {
 	const fetchFn = opts.fetchFn ?? fetch;
 	const [users, officers, positions, mentors, termCounts] = await Promise.all([
-		get<SseUser>(fetchFn, opts.baseUrl, '/api/user'),
-		get<SseOfficerRow>(fetchFn, opts.baseUrl, '/api/officer'),
-		get<SsePositionRow>(fetchFn, opts.baseUrl, '/api/officer-positions'),
-		get<SseMentorRow>(fetchFn, opts.baseUrl, '/api/mentor?detailed=true'),
-		get<SseTermCount>(fetchFn, opts.baseUrl, '/api/memberships'),
+		tryGet<SseUser>(fetchFn, opts.baseUrl, '/api/user'),
+		tryGet<SseOfficerRow>(fetchFn, opts.baseUrl, '/api/officer'),
+		tryGet<SsePositionRow>(fetchFn, opts.baseUrl, '/api/officer-positions'),
+		tryGet<SseMentorRow>(fetchFn, opts.baseUrl, '/api/mentor?detailed=true').then((r) => r ?? tryGet<SseMentorRow>(fetchFn, opts.baseUrl, '/api/mentor')),
+		tryGet<SseTermCount>(fetchFn, opts.baseUrl, '/api/memberships'),
 	]);
 	// External data: keep only rows with the fields we key on.
-	const valid = users.filter((u) => Number.isInteger(u?.id) && typeof u.email === 'string' && u.email.includes('@'));
-	// An empty roster almost certainly means the SSE site broke, not that everyone left; don't wipe the table.
-	if (valid.length === 0) throw new Error('SSE /api/user returned no users; keeping previous data');
+	const valid = users?.filter((u) => Number.isInteger(u?.id) && typeof u.email === 'string' && u.email.includes('@')) ?? [];
+	// No usable users almost certainly means the site broke, not that everyone left; don't flag the table as removed.
+	if (users && !valid.length) console.warn('SSE /api/user: no valid users; keeping previous data');
+	// Status needs all three role lists; with one missing, members keep their last status.
+	const rolesKnown = !!(officers && positions && mentors);
 	// Term numbers are nice-to-have: an RIT API outage falls back to the code pattern rather than failing the sync.
 	const termCodes = opts.ritApiKey ? await fetchRitTerms(opts.ritApiKey, fetchFn).catch(() => new Map<string, string>()) : new Map<string, string>();
 
-	const term = new Map(termCounts.map((t) => [t.userId, t.membershipCount]));
+	const term = new Map(termCounts?.map((t) => [t.userId, t.membershipCount]));
 	const mentorUntil = new Map<number, Date>();
-	for (const m of mentors) {
+	for (const m of mentors ?? []) {
 		if (!m?.isActive || !Number.isInteger(m.user?.id)) continue;
 		const until = new Date(m.expirationDate);
 		const prev = mentorUntil.get(m.user.id);
 		if (!prev || until > prev) mentorUntil.set(m.user.id, until);
 	}
-	const officerIds = new Set(officers.filter((o) => o?.is_active).map((o) => o.user?.id));
-	const seOfficePosts = new Set(positions.filter((p) => p.category === 'SE_OFFICE').map((p) => p.id));
-	const seStaffIds = new Set(officers.filter((o) => o?.is_active && seOfficePosts.has(o.position?.id ?? -1)).map((o) => o.user?.id));
+	const officerIds = new Set(officers?.filter((o) => o?.is_active).map((o) => o.user?.id));
+	const seOfficePosts = new Set(positions?.filter((p) => p.category === 'SE_OFFICE').map((p) => p.id));
+	const seStaffIds = new Set(officers?.filter((o) => o?.is_active && seOfficePosts.has(o.position?.id ?? -1)).map((o) => o.user?.id));
 	const before = new Map((await prisma.sseMember.findMany({ select: { id: true, gitHubGiven: true, imageGiven: true, majorGiven: true, linkedInSlugManual: true } })).map((m) => [m.id, m]));
 	const now = new Date();
 
@@ -183,12 +206,9 @@ export async function syncRoster(prisma: PrismaClient, opts: SyncOptions) {
 					gitHubGiven,
 					imageGiven,
 					membershipCount,
-					isMember: membershipCount > 0 && !seStaff,
-					termMembershipCount: term.get(u.id) ?? 0,
+					...(termCounts && { termMembershipCount: term.get(u.id) ?? 0 }),
 					membershipFetchedAt: now,
-					isMentor: mentorUntil.has(u.id),
-					mentorExpiresAt: mentorUntil.get(u.id) ?? null,
-					status,
+					...(rolesKnown && { isMember: membershipCount > 0 && !seStaff, isMentor: mentorUntil.has(u.id), mentorExpiresAt: mentorUntil.get(u.id) ?? null, status }),
 					syncedAt: now,
 					removedAt: null,
 					// A new GitHub value is unverified until enrichSse checks it.
@@ -202,10 +222,10 @@ export async function syncRoster(prisma: PrismaClient, opts: SyncOptions) {
 					await db.sseDegree.createMany({ data: parseMajors(majorGiven).map((d, sort) => ({ memberId: u.id, sort, ...d })) });
 				}
 			}
-			// Users deleted on the SSE site.
-			await db.sseMember.updateMany({ where: { syncedAt: { lt: now }, removedAt: null }, data: { removedAt: now } });
-			const ids = new Set(valid.map((u) => u.id));
-			const roles = officers.filter((o) => Number.isInteger(o?.id) && ids.has(o.user?.id) && typeof o.position?.title === 'string');
+			// Users deleted on the SSE site. Without the user list, the members we already have stand in for it.
+			if (valid.length) await db.sseMember.updateMany({ where: { syncedAt: { lt: now }, removedAt: null }, data: { removedAt: now } });
+			const ids = valid.length ? new Set(valid.map((u) => u.id)) : new Set(before.keys());
+			const roles = (officers ?? []).filter((o) => Number.isInteger(o?.id) && ids.has(o.user?.id) && typeof o.position?.title === 'string');
 			for (const o of roles) {
 				const data = {
 					memberId: o.user.id,
@@ -219,12 +239,12 @@ export async function syncRoster(prisma: PrismaClient, opts: SyncOptions) {
 				};
 				await db.sseOfficer.upsert({ where: { sseOfficerId: o.id }, create: { sseOfficerId: o.id, ...data }, update: data });
 			}
-			await db.sseOfficer.updateMany({ where: { sseOfficerId: { notIn: roles.map((o) => o.id) }, removedAt: null }, data: { removedAt: now } });
-			const posts = positions.filter((p) => Number.isInteger(p?.id) && typeof p.title === 'string');
+			if (officers) await db.sseOfficer.updateMany({ where: { sseOfficerId: { notIn: roles.map((o) => o.id) }, removedAt: null }, data: { removedAt: now } });
+			const posts = (positions ?? []).filter((p) => Number.isInteger(p?.id) && typeof p.title === 'string');
 			// Retired positions (Branding Head, ...) appear only on old roles; give them a row so their terms count too.
 			const listed = new Set(posts.map((p) => p.id));
 			const retired = new Map(roles.filter((o) => Number.isInteger(o.position.id) && !listed.has(o.position.id!)).map((o) => [o.position.id!, o.position]));
-			for (const [id, p] of retired) {
+			for (const [id, p] of positions ? retired : []) {
 				const data = { title: p.title, isPrimary: !!p.is_primary, syncedAt: now };
 				await db.sseOfficerPosition.upsert({ where: { id }, create: { id, ...data, isDefunct: true, removedAt: now }, update: data });
 			}
@@ -248,9 +268,9 @@ export async function syncRoster(prisma: PrismaClient, opts: SyncOptions) {
 				const seen = { termCode: code(current), memberId: holder.userId, lastSeenAt: now };
 				await db.sseOfficerTerm.upsert({ where: { term_positionId_sseOfficerId: key }, create: { ...key, ...seen }, update: seen });
 			}
-			// After the positions exist (foreign key).
-			await db.sseOfficerTerm.updateMany({ where: { fromDates: true }, data: { fromDates: false } });
-			for (const o of roles) {
+			// After the positions exist (foreign key); needs both lists, or a position seen only on a role may be missing.
+			if (officers && positions) await db.sseOfficerTerm.updateMany({ where: { fromDates: true }, data: { fromDates: false } });
+			for (const o of officers && positions ? roles : []) {
 				const start = date(o.start_date);
 				const end = date(o.end_date) ?? (o.is_active ? now : null);
 				if (!Number.isInteger(o.position.id) || !start || !end) continue;
@@ -260,8 +280,8 @@ export async function syncRoster(prisma: PrismaClient, opts: SyncOptions) {
 					await db.sseOfficerTerm.upsert({ where: { term_positionId_sseOfficerId: key }, create: { ...key, ...data }, update: data });
 				}
 			}
-			await db.sseOfficerPosition.updateMany({ where: { id: { notIn: [...listed] }, removedAt: null }, data: { removedAt: now } });
-			const mentorRows = mentors.filter((m) => Number.isInteger(m?.id) && ids.has(m.user?.id));
+			if (positions) await db.sseOfficerPosition.updateMany({ where: { id: { notIn: [...listed] }, removedAt: null }, data: { removedAt: now } });
+			const mentorRows = (mentors ?? []).filter((m) => Number.isInteger(m?.id) && ids.has(m.user?.id));
 			for (const m of mentorRows) {
 				const data = { memberId: m.user.id, isActive: !!m.isActive, expirationDate: date(m.expirationDate), removedAt: null };
 				await db.sseMentor.upsert({ where: { id: m.id }, create: { id: m.id, ...data }, update: data });
@@ -289,7 +309,7 @@ export async function syncRoster(prisma: PrismaClient, opts: SyncOptions) {
 				};
 				await db.sseMentorApplication.upsert({ where: { id: a!.id }, create: { id: a!.id, ...app }, update: app });
 			}
-			await db.sseMentor.updateMany({ where: { id: { notIn: mentorRows.map((m) => m.id) }, removedAt: null }, data: { removedAt: now } });
+			if (mentors) await db.sseMentor.updateMany({ where: { id: { notIn: mentorRows.map((m) => m.id) }, removedAt: null }, data: { removedAt: now } });
 			return { members: valid.length, officers: roles.filter((o) => o.is_active).length, officerRoles: roles.length, positions: posts.length, vacant: posts.filter((p) => !p.currentOfficer).length, mentors: mentorUntil.size };
 		},
 		{ timeout: 120_000 }, // a few thousand upserts outlast Prisma's 5 s default
@@ -344,8 +364,8 @@ const RECENT_EVENT_MS = 14 * 86_400_000;
  */
 export async function syncEvents(prisma: PrismaClient, opts: SyncOptions) {
 	const fetchFn = opts.fetchFn ?? fetch;
-	const rows = (await get<SseEventRow>(fetchFn, opts.baseUrl, '/api/event')).filter((e) => typeof e?.id === 'string' && e.id && date(e.date));
-	if (rows.length === 0) throw new Error('SSE /api/event returned no events; keeping previous data');
+	const rows = (await tryGet<SseEventRow>(fetchFn, opts.baseUrl, '/api/event'))?.filter((e) => typeof e?.id === 'string' && e.id && date(e.date));
+	if (!rows?.length) return { events: 0, attendanceFetched: 0, checkins: 0 };
 	const now = new Date();
 	const before = new Map((await prisma.sseEvent.findMany({ select: { id: true, image: true, places: { orderBy: { sort: 'asc' }, select: { place: true, room: true, role: true } } } })).map((e) => [e.id, e]));
 	// Same series, different spellings ("PowerPoint Karaoke" / "Power Point Karaoke"): every event gets the most common one.

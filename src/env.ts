@@ -20,6 +20,8 @@ export const variables = defineEnvVars({
 	DISCORD_CLIENT_SECRET: { schema: optional, description: 'Discord app client secret' },
 	DISCORD_TOKEN_KEY: { schema: optional, description: 'Base64 of 32 random bytes (openssl rand -base64 32) that encrypts stored Discord tokens; required for Connect Discord. Changing it orphans stored tokens' },
 	SSE_API_URL: { schema: optional, description: 'SSE website origin to mirror members/officers from, e.g. https://sse.rit.edu; unset = no sync' },
+	SSE_API_TOKEN: { schema: optional, description: 'Bearer token sent to the SSE site, for endpoints that need a login; unset = public endpoints only' },
+	SSE_USER_AGENT: { schema: (v) => v || 'Monoglarket-sync', description: 'User-Agent header sent to the SSE site (default Monoglarket-sync)' },
 	RIT_API_KEY: { schema: optional, description: 'Bearer token for api.rit.edu (graduation term numbers); unset = term numbers from the code pattern only' },
 	GITHUB_TOKEN: { schema: optional, description: 'GitHub token for SSE GitHub checks (5000/h instead of 60/h); no scopes needed' },
 	DATA_DIR: { schema: (v) => v || 'data', description: 'Directory for files the app keeps, e.g. saved SSE profile pictures (default ./data)' },

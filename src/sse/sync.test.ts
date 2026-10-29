@@ -23,13 +23,17 @@ after(async () => {
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]);
 const calls: string[] = [];
+const sent: Headers[] = [];
 // Fake internet: SSE site + GitHub + RIT + image hosts, keyed by host+path. undefined body = HTTP 500.
 const net = (routes: Record<string, unknown>) =>
-	(async (input: URL | string) => {
+	(async (input: URL | string, init?: RequestInit) => {
 		const url = new URL(input);
-		calls.push(url.host + url.pathname);
-		const body = routes[url.host + url.pathname];
+		calls.push(url.host + url.pathname + url.search);
+		if (url.host === 'sse.test') sent.push(new Headers(init?.headers));
+		// A route with its query string wins over the bare path.
+		const body = routes[url.host + url.pathname + url.search in routes ? url.host + url.pathname + url.search : url.host + url.pathname];
 		if (body === undefined) return new Response('down', { status: 500 });
+		if (body === 403) return new Response('forbidden', { status: 403 });
 		if (body === 404) return new Response('missing', { status: 404 });
 		if (body instanceof Uint8Array) return new Response(new Blob([body as Uint8Array<ArrayBuffer>]), { headers: { 'content-type': 'image/png' } });
 		return Response.json(body);
@@ -148,10 +152,21 @@ test('roster, clean-up, lookups, departures, broken site', async () => {
 	assert.equal(await sseMemberByEmail(pool, 'guest@rit.edu'), null);
 	assert.ok((await pool.sseMember.findUnique({ where: { id: 4 } }))?.removedAt);
 
-	// One endpoint down, or an empty roster: throw, keep the last good copy.
-	await assert.rejects(syncSse(pool, opts({ ...sse, 'sse.test/api/mentor': undefined })));
-	await assert.rejects(syncSse(pool, opts({ ...sse, 'sse.test/api/user': [] })));
+	// An endpoint down, forbidden or empty: logged, its tables keep the last good copy, the rest still sync.
+	const mentorsBefore = await pool.sseMentor.count({ where: { removedAt: null } });
+	sent.length = 0;
+	const down = await syncSse(pool, { ...opts({ ...sse, 'sse.test/api/mentor': undefined, 'sse.test/api/user': 403 }), sseToken: 'tok', userAgent: 'ua-test' });
+	assert.equal(down.members, 0);
+	assert.equal(down.events, 3);
+	assert.equal(await pool.sseMentor.count({ where: { removedAt: null } }), mentorsBefore);
+	assert.equal((await sseMemberByEmail(pool, 'mentor@rit.edu'))?.status, 'mentor');
+	assert.ok(sent.length && sent.every((h) => h.get('authorization') === 'Bearer tok' && h.get('user-agent') === 'ua-test'));
+	await syncSse(pool, opts({ ...sse, 'sse.test/api/user': [] }));
 	assert.equal(await pool.sseMember.count({ where: { removedAt: null } }), 4);
+	// ?detailed=true failing falls back to plain /api/mentor.
+	calls.length = 0;
+	assert.equal((await syncSse(pool, opts({ ...sse, 'sse.test/api/mentor?detailed=true': undefined }))).mentors, 1);
+	assert.ok(calls.includes('sse.test/api/mentor?detailed=true') && calls.includes('sse.test/api/mentor'));
 });
 
 test('events: every field, parsed places, check-ins kept when the site drops them', async () => {
@@ -186,7 +201,8 @@ test('events: every field, parsed places, check-ins kept when the site drops the
 	assert.deepEqual([ev3after.category, ev3after.categoryManual, ev3after.seriesManual, ev3after.imageError], ['talk', 'company', 'Docker Inc.', 'HTTP 500']);
 	assert.equal((await pool.eventCategory.findUniqueOrThrow({ where: { key: 'talk' } })).name, 'Talks');
 	assert.ok((await pool.sseEvent.findUniqueOrThrow({ where: { id: 'ev2' } })).removedAt);
-	await assert.rejects(syncSse(pool, opts({ ...sse, 'sse.test/api/event': [] })), /no events/);
+	assert.equal((await syncSse(pool, opts({ ...sse, 'sse.test/api/event': [] }))).events, 0);
+	assert.equal(await pool.sseEvent.count({ where: { removedAt: null } }), 2);
 });
 
 test('driveImage', () => {
