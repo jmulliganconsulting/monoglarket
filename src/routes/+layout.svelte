@@ -203,7 +203,7 @@
 			<a class="inline-flex min-h-11 items-center" href="/terms">Terms of Service</a>
 			<a class="inline-flex min-h-11 items-center" href={REPO}>GitHub</a>
 		</nav>
-		<p class="m-0 text-xs opacity-60 md:col-start-2 md:row-start-2 md:justify-self-end">Commit {#if __GIT_COMMIT__ === 'unknown'}<code>{__GIT_COMMIT__}</code>{:else}<a href="{REPO}/commit/{__GIT_COMMIT__.replace('-dirty', '')}"><code>{__GIT_COMMIT__}</code></a>{/if}</p>
+		<p class="m-0 text-xs opacity-60 md:col-start-2 md:row-start-2 md:justify-self-end">Deployed <time datetime={__DEPLOYED_AT__}>{new Date(__DEPLOYED_AT__).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}</time> · {#if __GIT_COMMIT__ === 'unknown'}<code>{__GIT_COMMIT__}</code>{:else}<a href="{REPO}/commit/{__GIT_COMMIT__.replace('-dirty', '')}"><code>{__GIT_COMMIT__}</code></a>{/if}</p>
 	</div>
 </footer>
 

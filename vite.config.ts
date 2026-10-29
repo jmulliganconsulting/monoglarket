@@ -27,7 +27,7 @@ export default defineConfig(({ command, isPreview }) => {
 	return {
 		server: { port: Number(process.env.PORT) || 5173 },
 		preview: { port: Number(process.env.PORT) || 4173 },
-		define: { __GIT_COMMIT__: JSON.stringify(gitCommit) },
+		define: { __GIT_COMMIT__: JSON.stringify(gitCommit), __DEPLOYED_AT__: JSON.stringify(new Date().toISOString()) },
 		plugins: [
 			tailwindcss(),
 			sveltekit({
