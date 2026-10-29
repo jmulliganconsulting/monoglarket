@@ -93,7 +93,7 @@ export function renderPng(svg: string): Uint8Array<ArrayBuffer> {
 	return new Uint8Array(new Resvg(svg, { font: { loadSystemFonts: true } }).render().asPng());
 }
 
-function page(meta: { title: string; description: string; url: string; image: string }): string {
+function page(meta: { title: string; description: string; url: string; image: string; oembed?: string }): string {
 	const tags = [
 		['og:site_name', 'Monoglarket'],
 		['og:type', 'website'],
@@ -112,6 +112,8 @@ function page(meta: { title: string; description: string; url: string; image: st
 <meta name="description" content="${esc(meta.description)}" />
 ${tags.map(([k, v]) => `<meta property="${k}" content="${esc(v)}" />`).join('\n')}
 <meta name="twitter:card" content="summary_large_image" />
+${meta.oembed ? `<link rel="alternate" type="application/json+oembed" href="${esc(meta.oembed)}" title="${esc(meta.title)}" />` : ''}
+<link rel="discord:component-embed" type="application/json" href="${esc(embedUrl(meta.url))}" />
 </head>
 <body><a href="${esc(meta.url)}">${esc(meta.title)}</a></body>
 </html>`;
@@ -132,8 +134,10 @@ const TITLES: Record<string, string> = {
 	'/markets/new': 'New market',
 };
 
-/** What a link preview bot reads from a login-gated URL. Markets that are not public show only the site's card. */
-export async function previewPage(prisma: PrismaClient, url: URL): Promise<string> {
+type Meta = { title: string; description: string; url: string; image: string; oembed?: string };
+
+/** The card a page shows in link previews. Markets that are not public get the site's card, so private questions stay hidden. */
+export async function previewMeta(prisma: PrismaClient, url: URL): Promise<Meta> {
 	const title = TITLES[url.pathname];
 	const generic = {
 		title: title ? `${title} · Monoglarket` : 'Monoglarket',
@@ -143,12 +147,38 @@ export async function previewPage(prisma: PrismaClient, url: URL): Promise<strin
 	};
 	const match = /^\/markets\/(\d+)\/?$/.exec(url.pathname);
 	const card = match ? await marketCard(prisma, Number(match[1])) : null;
-	if (!match || !card) return page(generic);
+	if (!match || !card) return generic;
 	const odds = card.outcomes.map((o) => `${o.label} ${pct(o.probability)}`).join(' · ');
-	return page({
+	return {
 		title: card.question,
 		description: `${card.status}. ${odds}`.slice(0, 300),
 		url: `${url.origin}/markets/${match[1]}`,
 		image: `${url.origin}/share/market-card/${match[1]}`,
-	});
+		oembed: `${url.origin}/oembed?url=${encodeURIComponent(`${url.origin}/markets/${match[1]}`)}`,
+	};
+}
+
+export async function previewPage(prisma: PrismaClient, url: URL): Promise<string> {
+	return page(await previewMeta(prisma, url));
+}
+
+// Discord component embed (linked JSON): a card with the title, the odds and a button back to the page. Link buttons only; they need no interaction endpoint.
+const ACCENT = 0x3669f6; // the site's yes blue
+
+/** Where Discord reads the component JSON for a page on this site. */
+export const embedUrl = (pageUrl: string) => `${new URL(pageUrl).origin}/embed?url=${encodeURIComponent(pageUrl)}`;
+
+export function componentEmbed(meta: Meta) {
+	return {
+		component: {
+			type: 17,
+			accent_color: ACCENT,
+			components: [
+				{ type: 10, content: `# ${meta.title}` },
+				{ type: 10, content: meta.description },
+				{ type: 12, items: [{ media: { url: meta.image } }] },
+				{ type: 1, components: [{ type: 2, style: 5, label: 'Open on Monoglarket', url: meta.url }] },
+			],
+		},
+	};
 }

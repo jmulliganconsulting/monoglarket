@@ -60,7 +60,7 @@ export const init: ServerInit = () => {
 };
 
 // Pages anyone can reach without signing in.
-const PUBLIC = ['/login', '/health', '/favicon.ico', '/robots.txt', '/terms', '/privacy', '/share'];
+const PUBLIC = ['/login', '/health', '/favicon.ico', '/robots.txt', '/terms', '/privacy', '/changelog', '/share', '/oembed', '/embed'];
 
 // Every response carries the rate-limit headers (vault ADR-026), including redirects and 429s.
 function withLimit(res: Response, v: Verdict): Response {

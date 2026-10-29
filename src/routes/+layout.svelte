@@ -8,6 +8,15 @@
 
 	let { children, data }: LayoutProps = $props();
 
+	// JSON-LD for the site. Built in script so the page's origin fills in (Svelte does not interpolate inside a <script> tag).
+	const websiteLd = $derived(JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'WebSite',
+		name: 'Monoglarket',
+		description: 'Forecast club events with play-money coins.',
+		url: page.url.origin,
+	}));
+
 	// Choosing a link closes the More menu.
 	const closeMenu = (e: MouseEvent) => {
 		if ((e.target as HTMLElement).closest('a')) (e.currentTarget as HTMLElement).closest('details')?.removeAttribute('open');
@@ -88,58 +97,93 @@
 		return () => observer.disconnect();
 	});
 
+	// A bar item: phone tab that shares the bar, natural width while measuring and on desktop. 44 px tap target (NFR-09).
+	const tab = 'grid min-h-11 flex-1 cursor-pointer list-none place-items-center whitespace-nowrap text-[0.8125rem] text-fg-2 no-underline group-data-measuring:flex-none group-data-measuring:px-3 md:flex-none md:px-3 [&::-webkit-details-marker]:hidden';
+
 	// Saved pages belong to the member who signed in: forget them when they sign out.
 	const clearSavedPages = () => navigator.serviceWorker?.controller?.postMessage('signed-out');
 </script>
 
 {#snippet label(link: { href: string; text: string })}
-	{link.text}{#if link.href === '/notifications' && data.unread}<span class="count" aria-label="{data.unread} unread">{data.unread}</span>{/if}
+	{link.text}{#if link.href === '/notifications' && data.unread}<span class="ml-1 inline-block min-w-[1.4em] rounded-pill bg-fg px-[5px] text-center text-xs font-strong text-bg" aria-label="{data.unread} unread">{data.unread}</span>{/if}
 {/snippet}
 
 <svelte:head>
+	<!-- meta descriptions -->
+	<!-- title set elsewhere -->
+	<meta name="description" content="Forecast club events with play-money coins." />
+	<link rel="canonical" href="{page.url.origin}{page.url.pathname}" />
+	<meta name="robots" content="index, follow" />
+
+	<!-- icons -->
 	<link rel="icon" href={data.dev ? '/sse-favicon.dev.svg' : '/sse-favicon.v1.svg'} type="image/svg+xml" />
+	<link rel="icon" href={data.dev ? '/sse-favicon.dev.png' : '/sse-favicon.v1.png'} type="image/png" />
+	<link rel="apple-touch-icon" href={data.dev ? '/sse-favicon.dev.png' : '/sse-favicon.v1.png'} />
 	<link rel="manifest" href="/manifest.webmanifest" />
+	<meta name="theme-color" content={data.dev ? '#7c3aed' : '#111111'} />
+
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap" />
-	<meta name="theme-color" content={data.dev ? '#7c3aed' : '#111111'} />
 	
-	<!-- Link previews (Discord, Twitter/X, Slack, iMessage): the card uses these when a link is pasted. -->
-	<meta name="description" content="Forecast club events with play-money coins." />
-	<meta property="og:site_name" content="Monoglarket" />
+	<!-- open graph and more descriptions -->
 	<meta property="og:type" content="website" />
+	<meta property="og:url" content="{page.url.origin}{page.url.pathname}" />
 	<meta property="og:title" content="Monoglarket" />
 	<meta property="og:description" content="Forecast club events with play-money coins." />
-	<meta property="og:url" content="{page.url.origin}{page.url.pathname}" />
 	<meta property="og:image" content="{page.url.origin}/og-card.png" />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content="Monoglarket logo" />
+	<meta property="og:site_name" content="Monoglarket" />
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:pubdate" content="{new Date().toISOString()}" />
+
+	<!-- social media specific meta tags -->
 	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Monoglarket" />
+	<meta name="twitter:description" content="Forecast club events with play-money coins." />
+	<meta name="twitter:image" content="{page.url.origin}/og-card.png" />
+	<meta name="twitter:image:width" content="1200" />
+	<meta name="twitter:image:height" content="630" />
+	<meta name="twitter:image:alt" content="Monoglarket logo" />
+	<!--
+	<meta name="twitter:site" content="@monoglarket" /> 
+	-->
+	<!-- Discord component embed: buttons and a card for this page, read from /embed (see previews/previews.ts). -->
+	<link rel="discord:component-embed" type="application/json" href="{page.url.origin}/embed?url={encodeURIComponent(page.url.href)}" />
+
+	<!-- structured data -->
+	{@html `<script type="application/ld+json">${websiteLd}</script>`}
+
 </svelte:head>
 
-<header>
-	<a href="/" class="brand"><img src="/sse-logo-kid.v3.svg" alt="Monoglarket" height="40" /></a>
-	<p class="offline-note" role="status">You're offline. Showing what was saved on this device; trading is paused until you reconnect.</p>
+<!-- Wraps on narrow phones so the name and Sign out button stay on screen. Dev site: solid violet with white text; the logo's light lettering stays readable on it. -->
+<header class="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border px-4 pt-[calc(8px+env(safe-area-inset-top))] pb-2 text-lg font-strong dev:border-b-[#5b21b6] dev:bg-[#6d28d9] dev:text-fg dev:[--card-2:#ffffff33] dev:[--fg-2:#ede9fe] dev:[--fg:#fff]">
+	<a href="/" class="text-inherit no-underline"><img class="block h-10 w-auto" src="/sse-logo-kid.v3.svg" alt="Monoglarket" height="40" /></a>
+	<p class="m-0 hidden basis-full font-semibold offline:block" role="status">You're offline. Showing what was saved on this device; trading is paused until you reconnect.</p>
 	{#if data.user}
-		<a href="/portfolio" class="balance" aria-label="Balance: {coins(data.coins)} {data.coinCode}"><img src="/sse-coin.svg" alt="" width="28" height="28" />{coins(data.coins)}</a>
-		<form method="POST" action="/logout" onsubmit={clearSavedPages}>
-			<a href="/account">{data.user.displayName}</a>
-			<button>Sign out</button>
+		<a href="/portfolio" class="mr-4 ml-auto flex items-center gap-1.5 text-base text-inherit tabular-nums no-underline" aria-label="Balance: {coins(data.coins)} {data.coinCode}"><img class="size-7" src="/sse-coin.svg" alt="" width="28" height="28" />{coins(data.coins)}</a>
+		<form class="flex items-center gap-2 text-sm font-body text-fg-2" method="POST" action="/logout" onsubmit={clearSavedPages}>
+			<a class="text-inherit no-underline" href="/account">{data.user.displayName}</a>
+			<button class="h-11 cursor-pointer rounded-pill border-0 bg-card-2 px-3 text-fg [font:inherit]">Sign out</button>
 		</form>
 	{/if}
 </header>
 {#if data.user && data.onboarded}
 	<!-- Every link sits in the bar in order; the ones that don't fit move into More (bottom bar on phones, dropdown on desktop). -->
-	<nav aria-label="Main" bind:this={nav} data-measuring={measuring || undefined}>
+	<!-- Bottom bar on phones, a row under the header on desktop. While measuring, the bar hides overflow instead of scrolling the page. -->
+	<nav class="group fixed inset-x-0 bottom-0 z-10 flex justify-around border-t border-border bg-card pb-[env(safe-area-inset-bottom)] data-measuring:overflow-hidden md:static md:mx-auto md:max-w-page md:justify-start md:gap-2 md:border-0 md:px-4 md:pb-0" aria-label="Main" bind:this={nav} data-measuring={measuring || undefined}>
 		{#each links.slice(0, shown) as link (link.href)}
-			<a href={link.href}>{@render label(link)}</a>
+			<a class={tab} href={link.href}>{@render label(link)}</a>
 		{/each}
 		{#if measuring || shown < links.length}
-			<details class="more">
-				<summary>More</summary>
-				<div class="panel" onclick={closeMenu} role="presentation">
+			<details class="flex flex-1 justify-center md:relative md:flex-none">
+				<summary class={tab}>More</summary>
+				<!-- Opens above the bar on phones, below it on desktop. -->
+				<div class="absolute right-2 bottom-[calc(100%+8px)] grid max-h-[70vh] w-[min(280px,calc(100vw-16px))] gap-2 overflow-auto rounded-card bg-card px-3 py-2 shadow-card md:top-[calc(100%+4px)] md:right-0 md:bottom-auto" onclick={closeMenu} role="presentation">
 					{#each links.slice(shown) as link (link.href)}
-						<a href={link.href}>{@render label(link)}</a>
+						<a class="flex min-h-11 items-center text-fg no-underline" href={link.href}>{@render label(link)}</a>
 					{/each}
 				</div>
 			</details>
