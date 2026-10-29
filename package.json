@@ -16,7 +16,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "generate": "prisma generate",
-    "postinstall": "prisma generate",
+    "postinstall": "svelte-kit sync && prisma generate",
     "check:sqlite": "T=$(mktemp -d) && sed 's/provider = \"postgresql\"/provider = \"sqlite\"/' prisma/schema.prisma > $T/schema.prisma && prisma validate --schema $T/schema.prisma",
     "test": "node --test --test-concurrency=1 \"src/**/*.test.ts\"",
     "typecheck": "npm run check",

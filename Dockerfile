@@ -1,11 +1,8 @@
 FROM node:24-slim AS build
 WORKDIR /app
-COPY package.json package-lock.json .npmrc ./
-COPY prisma ./prisma
-COPY prisma.config.ts ./
-RUN npm ci
+# Copy everything first: postinstall needs svelte.config and tsconfig for `svelte-kit sync`
 COPY . .
-RUN npm run build
+RUN npm ci && npm run build
 
 FROM node:24-slim
 WORKDIR /app
