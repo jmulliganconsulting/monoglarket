@@ -5,4 +5,5 @@ data
 src/generated
 .env
 .env.*
-.claude
+# .env.example is tracked; excluding it would make git report it as deleted in the build
+!.env.example
