@@ -5,6 +5,8 @@
 
 	let { data, form }: PageProps = $props();
 	const v = $derived((form as ActionData | undefined)?.values);
+	// Shared with the birthday fields, so the day list follows the year (29 February).
+	let birthYear = $state<number | string | null>(null);
 	// Picked in the dropdown; until then the last submitted value, or the United States.
 	let picked = $state<string | null>(null);
 	const country = $derived(picked ?? v?.country ?? 'US');
@@ -21,10 +23,10 @@
 	{#if form?.error}<p class="error" role="alert">{form.error}</p>{/if}
 
 	<div class="row">
-		<label>Birth year<input name="birthYear" type="number" inputmode="numeric" autocomplete="bday-year" min="1900" max={data.thisYear} required value={v?.birthYear ?? ''} /></label>
+		<label>Birth year<input name="birthYear" type="number" inputmode="numeric" autocomplete="bday-year" min="1900" max={data.thisYear} required bind:value={birthYear} /></label>
 	</div>
 
-	<BirthdayFields month={v?.birthMonth} day={v?.birthDay} checked={v?.birthdayRewards} />
+	<BirthdayFields month={v?.birthMonth} day={v?.birthDay} checked={v?.birthdayRewards} bind:year={birthYear} />
 
 	<label>Country
 		<select name="country" required autocomplete="country" onchange={(e) => (picked = e.currentTarget.value)}>
