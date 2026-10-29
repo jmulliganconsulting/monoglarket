@@ -1,4 +1,11 @@
-# Set DOMAIN in .env (e.g. predict.myclub.org) for automatic HTTPS; defaults to localhost.
-{$DOMAIN:localhost} {
-	reverse_proxy app:3000
+# Plain HTTP on the host's 127.0.0.1:5173. nginx on the host terminates TLS for the public domain and proxies here.
+# Both app copies are upstreams. Caddy health-checks /health and only sends traffic to healthy copies; lb_policy first prefers app_blue when both are up.
+:80 {
+	reverse_proxy app_blue:3000 app_red:3000 {
+		lb_policy first
+		lb_try_duration 10s
+		health_uri /health
+		health_interval 5s
+		health_timeout 3s
+	}
 }

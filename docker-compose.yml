@@ -1,4 +1,22 @@
-# Dev: `npm run db:up` starts only db. Production: `docker compose up -d --build` starts everything.
+# Dev: `npm run db:up` starts only db. Production: scripts/deploy.sh <image> (blue/green: app_blue and app_red take turns, Caddy routes to the healthy one).
+x-app: &app
+  build: .
+  image: ${APP_IMAGE:-monoglarket-app:local}
+  # Everything the app reads comes from .env on the server (see .env.example). The lines below override it for the container.
+  env_file: [{ path: .env, required: false }]
+  environment:
+    PORT: 3000 # .env may set PORT for `npm run dev`; Caddy expects 3000
+    DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/clubpredict
+    ORIGIN: https://${DOMAIN:-localhost}
+    # Proof uploads: 5 pieces of 5 MB plus form overhead. The adapter's default is 512K, which refuses a 682 KB picture with 413.
+    BODY_SIZE_LIMIT: 26M
+    DATA_DIR: /app/data
+  volumes:
+    - app_data:/app/data
+  depends_on:
+    db: { condition: service_healthy }
+  restart: unless-stopped
+
 services:
   db:
     image: postgres:16
@@ -6,49 +24,27 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: clubpredict
-    ports: ["${POSTGRES_PORT:-5434}:5432"]
+    ports: ["127.0.0.1:${POSTGRES_PORT:-5434}:5432"] # loopback only: production Postgres must not be public
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 5s
       retries: 10
 
-  app:
-    build: .
-    environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/clubpredict
-      ORIGIN: https://${DOMAIN:-localhost}
-      # Proof uploads: 5 pieces of 5 MB plus form overhead. The adapter's default is 512K, which refuses a 682 KB picture with 413.
-      BODY_SIZE_LIMIT: 26M
-      ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-}
-      ALLOWED_EMAILS: ${ALLOWED_EMAILS:-}
-      SMTP_URL: ${SMTP_URL:-}
-      MAIL_FROM: ${MAIL_FROM:-}
-      GOOGLE_SIGNIN_ENABLED: ${GOOGLE_SIGNIN_ENABLED:-true}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
-      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET:-}
-      SSE_API_URL: ${SSE_API_URL:-}
-      SSE_SYNC_MINUTES: ${SSE_SYNC_MINUTES:-15}
-      RIT_API_KEY: ${RIT_API_KEY:-}
-      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
-      DATA_DIR: /app/data
-    volumes:
-      - app_data:/app/data
-    depends_on:
-      db: { condition: service_healthy }
-    restart: unless-stopped
+  # Two copies of the app. Only one is live at a time, except for the seconds a deploy overlaps them.
+  app_blue:
+    <<: *app
+
+  app_red:
+    <<: *app
 
   caddy:
     image: caddy:2
-    environment:
-      DOMAIN: ${DOMAIN:-localhost}
-    ports: ["${HTTP_PORT:-80}:80", "${HTTPS_PORT:-443}:443"]
+    # Loopback only: the host's nginx proxies the public site here, so Caddy never takes ports 80 or 443.
+    ports: ["127.0.0.1:5173:80"]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
-    depends_on: [app]
     restart: unless-stopped
 
 volumes:

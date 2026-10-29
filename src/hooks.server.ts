@@ -14,6 +14,7 @@ import { startHub } from './live/hub.ts';
 import { runNotifications } from './notifications/notify.ts';
 import { runAllowance } from './allowance/allowance.ts';
 import { isPreviewBot, previewPage } from './previews/previews.ts';
+import { withJobLock } from '#lib/server/jobLock.ts';
 
 // Keep the SSE mirror fresh, then pay out sitecurrency for what it (and our own event records) show. One timer per process: Vite dev re-runs init on reload.
 export const init: ServerInit = () => {
@@ -21,20 +22,20 @@ export const init: ServerInit = () => {
 	// Web push alerts go out once a minute, only when VAPID keys are set (vault "Alerts").
 	if (!g.pushTimer && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_SUBJECT) {
 		const send = webPushSender({ publicKey: VAPID_PUBLIC_KEY, privateKey: VAPID_PRIVATE_KEY, subject: VAPID_SUBJECT });
-		g.pushTimer = setInterval(() => sendPendingPushes(prisma, send).catch((e) => console.error('Push job failed:', e.message)), 60_000);
+		g.pushTimer = setInterval(() => withJobLock(prisma, 'push', () => sendPendingPushes(prisma, send)).catch((e) => console.error('Push job failed:', e.message)), 60_000);
 	}
 	// Live prices: one timer per process (vault "Live prices").
 	if (!g.liveStop) g.liveStop = startHub(prisma);
 	// Hourly: weekly allowances (FR-15) and the reminders for closing and overdue markets (FR-20, FR-24).
 	if (!g.hourlyTimer)
 		g.hourlyTimer = setInterval(() => {
-			runAllowance(prisma).catch((e) => console.error('Allowance job failed:', e.message));
-			runNotifications(prisma).catch((e) => console.error('Notification job failed:', e.message));
+			withJobLock(prisma, 'allowance', () => runAllowance(prisma)).catch((e) => console.error('Allowance job failed:', e.message));
+			withJobLock(prisma, 'notifications', () => runNotifications(prisma)).catch((e) => console.error('Notification job failed:', e.message));
 		}, 60 * 60_000);
 	// Close trading at close_at and finalise markets after their dispute window (vault "Market lifecycle").
-	if (!g.marketTimer) g.marketTimer = setInterval(() => runMarketJobs(prisma).catch((e) => console.error('Market jobs failed:', e.message)), 60_000);
+	if (!g.marketTimer) g.marketTimer = setInterval(() => withJobLock(prisma, 'markets', () => runMarketJobs(prisma)).catch((e) => console.error('Market jobs failed:', e.message)), 60_000);
 	// Trusted sources are asked every 5 min for closed markets; their answers wait for a moderator (vault "Resolving markets").
-	if (!g.resolverTimer) g.resolverTimer = setInterval(() => runResolvers(prisma).catch((e) => console.error('Resolver job failed:', e.message)), 5 * 60_000);
+	if (!g.resolverTimer) g.resolverTimer = setInterval(() => withJobLock(prisma, 'resolvers', () => runResolvers(prisma)).catch((e) => console.error('Resolver job failed:', e.message)), 5 * 60_000);
 	if (g.sseTimer) return;
 	const baseUrl = SSE_API_URL;
 	const opts = baseUrl && { baseUrl, imageDir: join(DATA_DIR, 'sse-images'), ritApiKey: RIT_API_KEY, gitHubToken: GITHUB_TOKEN, sseToken: SSE_API_TOKEN, userAgent: SSE_USER_AGENT };
@@ -48,10 +49,12 @@ export const init: ServerInit = () => {
 	const run = () => {
 		if (running) return;
 		running = true;
-		(opts ? syncSse(prisma, opts) : Promise.resolve(null))
-			.then((r) => r && console.log(`SSE sync: ${r.members} users, ${r.officers} active officer positions (${r.officerRoles} all-time), ${r.mentors} mentors, ${r.profilesFetched} profiles read, ${r.events} events, ${r.attendanceFetched} attendance lists (${r.checkins} check-ins); ${r.gitHubChecked} GitHub checks, ${r.imagesSaved} pictures saved, ${r.imagesFailed} failed`))
-			.catch((e) => console.error('SSE sync failed:', e.message))
-			.then(settle) // also after a failed sync: the mirror still holds the last good copy
+		withJobLock(prisma, 'sse', () =>
+			(opts ? syncSse(prisma, opts) : Promise.resolve(null))
+				.then((r) => r && console.log(`SSE sync: ${r.members} users, ${r.officers} active officer positions (${r.officerRoles} all-time), ${r.mentors} mentors, ${r.profilesFetched} profiles read, ${r.events} events, ${r.attendanceFetched} attendance lists (${r.checkins} check-ins); ${r.gitHubChecked} GitHub checks, ${r.imagesSaved} pictures saved, ${r.imagesFailed} failed`))
+				.catch((e) => console.error('SSE sync failed:', e.message))
+				.then(settle), // also after a failed sync: the mirror still holds the last good copy
+		)
 			.catch((e) => console.error('Earning failed:', e.message))
 			.finally(() => (running = false));
 	};
