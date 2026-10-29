@@ -12,45 +12,13 @@
 </script>
 
 {#if src && banner}
-	<img class="banner" class:large {src} alt="" onload={measure} />
+	<img class={['h-auto w-full rounded-xl object-cover', large ? 'max-h-[380px]' : 'max-h-[220px]']} {src} alt="" onload={measure} />
 	{@render children()}
 {:else}
-	<div class="row">
+	<div class="flex items-start gap-3 [&_h2]:min-w-0 [&_h2]:flex-1">
 		{@render children()}
-		{#if src}<img class="logo" class:large {src} alt="" onload={measure} />{/if}
+		<!-- "logo" is a hook only: the market page pins the large logo to its header's edge. -->
+		{#if src}<img class={['logo flex-none object-contain', large ? 'size-32 rounded-2xl' : 'size-16 rounded-xl']} {src} alt="" onload={measure} />{/if}
 	</div>
 {/if}
 
-<style>
-	.row {
-		display: flex;
-		gap: 12px;
-		align-items: flex-start;
-	}
-	.row :global(h2) {
-		flex: 1;
-		min-width: 0;
-	}
-	.logo {
-		width: 64px;
-		height: 64px;
-		flex: none;
-		object-fit: contain;
-		border-radius: 12px;
-	}
-	.logo.large {
-		width: 128px;
-		height: 128px;
-		border-radius: 16px;
-	}
-	.banner {
-		width: 100%;
-		height: auto;
-		max-height: 220px;
-		object-fit: cover;
-		border-radius: 12px;
-	}
-	.banner.large {
-		max-height: 380px;
-	}
-</style>

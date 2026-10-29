@@ -1,0 +1,67 @@
+/* Tailwind v4. Preflight is left out while pages still carry their own <style> blocks: its reset would
+   restyle every heading, list and button on pages not converted yet. Utilities live in a layer, so a page's own styles still win. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import './tokens.css';
+
+/* Offline banner and paused actions (FR-29); dev site header (APP_ENV=dev). Both set on <html>. */
+@custom-variant offline (&:where([data-offline] *));
+@custom-variant dev (&:where([data-env='dev'] *));
+
+/* tokens.css stays the source of truth (it switches with the phone's light/dark setting); inline makes utilities read the live variables. */
+@theme inline {
+	--color-bg: var(--bg);
+	--color-card: var(--card);
+	--color-card-2: var(--card-2);
+	--color-border: var(--border);
+	--color-fg: var(--fg);
+	--color-fg-2: var(--fg-2);
+	--color-muted: var(--muted);
+	--color-brand: var(--brand);
+	--color-brand-text: var(--brand-text);
+	--color-yes: var(--yes);
+	--color-no: var(--no);
+	--color-yes-text: var(--yes-text);
+	--color-no-text: var(--no-text);
+	--color-hover: var(--hover);
+
+	--font-sans: var(--font);
+	--font-display: var(--font-display);
+	--font-weight-body: var(--weight);
+	--font-weight-strong: var(--weight-strong);
+
+	--radius-pill: var(--radius-pill);
+	--radius-card: var(--radius-card);
+	--shadow-card: var(--shadow-card);
+	--ease-standard: var(--ease);
+}
+
+@theme {
+	--container-page: 1100px;
+}
+
+@layer base {
+	/* Phone-first (vault: Mobile experience). Look follows vault: Design reference. */
+	body {
+		margin: 0;
+		background: var(--bg);
+		color: var(--fg);
+		font-family: var(--font);
+		font-weight: var(--weight);
+		line-height: 1.5;
+	}
+	h1 {
+		font-family: var(--font-display);
+		font-stretch: var(--stretch-display);
+		font-size: 2.25rem;
+		line-height: 1.1;
+		font-weight: 650;
+		margin: 8px 0 16px;
+	}
+	/* Every green action button (class "go", on many pages) pauses offline so nothing is attempted without a connection. */
+	[data-offline] .go {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+}

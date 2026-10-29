@@ -10,100 +10,32 @@
 	const modal = (node: HTMLDialogElement) => node.showModal();
 </script>
 
-<dialog use:modal aria-labelledby="visit-title" class="visit">
-	<h2 id="visit-title">Since your last visit</h2>
-	<p class="meta">Since {when(summary.since)}</p>
+<dialog use:modal aria-labelledby="visit-title" class="max-h-[85vh] w-[min(560px,calc(100vw-32px))] overflow-auto rounded-card border-0 bg-card p-5 text-fg shadow-card backdrop:bg-black/50 [&_p]:my-1">
+	<h2 class="mt-0 mb-1 text-xl" id="visit-title">Since your last visit</h2>
+	<p class="text-sm text-muted">Since {when(summary.since)}</p>
 	{#each summary.currencies as c (c.code)}
-		<section>
-			<p class="net" class:up={c.net > 0} class:down={c.net < 0}>
-				{c.name}: <strong>{signedCoins(c.net)}</strong> net
+		<section class="border-t border-border py-3">
+			<p>
+				{c.name}: <strong class={c.net > 0 ? 'text-yes-text' : c.net < 0 ? 'text-no-text' : ''}>{signedCoins(c.net)}</strong> net
 			</p>
 			{#each c.won as w (w.question)}
-				<p class="won">Won on {w.question}: {w.shares.toFixed(2)} winning shares paid out.</p>
+				<p class="text-yes-text">Won on {w.question}: {w.shares.toFixed(2)} winning shares paid out.</p>
 			{/each}
 			{#each c.lost as l (l.question)}
-				<p class="lost">Lost on {l.question}: {coins(l.amount)} {c.code}.</p>
+				<p class="text-no-text">Lost on {l.question}: {coins(l.amount)} {c.code}.</p>
 			{/each}
 			<details>
-				<summary>Every change ({c.items.length})</summary>
-				<ul>
+				<summary class="flex min-h-11 cursor-pointer items-center">Every change ({c.items.length})</summary>
+				<ul class="mt-2 mb-0 grid list-none gap-1.5 p-0 text-sm">
 					{#each c.items as it, i (i)}
-						<li><span>{it.text}</span> <span class="amt">{signedCoins(it.amount)}</span> <span class="meta">{when(it.at)}</span></li>
+						<li><span>{it.text}</span> <span class="font-strong tabular-nums">{signedCoins(it.amount)}</span> <span class="text-sm text-muted">{when(it.at)}</span></li>
 					{/each}
 				</ul>
 			</details>
 		</section>
 	{/each}
 	<form method="POST" action="/summary?/dismiss" use:enhance>
-		<button class="go">Got it</button>
+		<button class="go min-h-11 cursor-pointer rounded-pill border-0 bg-fg px-5 font-strong text-bg [font-family:inherit] [font-size:inherit]">Got it</button>
 	</form>
 </dialog>
 
-<style>
-	.visit {
-		width: min(560px, calc(100vw - 32px));
-		max-height: 85vh;
-		overflow: auto;
-		border: 0;
-		border-radius: var(--radius-card);
-		background: var(--card);
-		color: var(--fg);
-		padding: 20px;
-		box-shadow: var(--shadow-card);
-	}
-	.visit::backdrop {
-		background: rgb(0 0 0 / 0.5);
-	}
-	h2 {
-		margin: 0 0 4px;
-		font-size: 1.25rem;
-	}
-	section {
-		border-top: 1px solid var(--border);
-		padding: 12px 0;
-	}
-	p {
-		margin: 4px 0;
-	}
-	.meta {
-		color: var(--muted);
-		font-size: 0.875rem;
-	}
-	.net.up strong,
-	.won {
-		color: var(--yes-text);
-	}
-	.net.down strong,
-	.lost {
-		color: var(--no-text);
-	}
-	ul {
-		list-style: none;
-		padding: 0;
-		margin: 8px 0 0;
-		display: grid;
-		gap: 6px;
-		font-size: 0.875rem;
-	}
-	.amt {
-		font-weight: var(--weight-strong);
-		font-variant-numeric: tabular-nums;
-	}
-	summary {
-		min-height: 44px;
-		display: flex;
-		align-items: center;
-		cursor: pointer;
-	}
-	.go {
-		font: inherit;
-		min-height: 44px;
-		padding: 0 20px;
-		border: 0;
-		border-radius: var(--radius-pill);
-		background: var(--fg);
-		color: var(--bg);
-		font-weight: var(--weight-strong);
-		cursor: pointer;
-	}
-</style>

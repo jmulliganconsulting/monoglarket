@@ -22,48 +22,19 @@
 	};
 	const ring = $derived(badge.ring ? `inset 0 0 0 0.5px ${badge.ring}` : undefined);
 	const Icon = $derived(badge.icon ? ICON[badge.icon as keyof typeof ICON] : undefined);
+	// Solid role colour: near-black text and icon, the same in both themes. Outline: transparent with a muted ring.
+	const tone = $derived(badge.outline ? 'bg-transparent text-muted shadow-[inset_0_0_0_1px_var(--muted)]' : badge.colour ? 'text-black' : 'bg-card-2 text-fg');
+	const base = 'inline-flex items-center justify-center gap-1.5 text-sm font-strong';
 </script>
 
 {#if compact}
-	<span class="chip" class:outline={badge.outline} class:filled={!!badge.colour} style:background={badge.colour} style:box-shadow={ring} title={badge.label} role="img" aria-label={badge.label}>
+	<span class="{base} {tone} size-6 flex-none rounded-full" style:background={badge.colour} style:box-shadow={ring} title={badge.label} role="img" aria-label={badge.label}>
 		{#if Icon}<Icon size={14} stroke={2} aria-hidden="true" />{/if}
 	</span>
 {:else}
-	<span class="pill" class:outline={badge.outline} class:filled={!!badge.colour} style:background={badge.colour} style:box-shadow={ring}>
+	<span class="{base} {tone} rounded-pill px-3.5 py-1.5" style:background={badge.colour} style:box-shadow={ring}>
 		{#if Icon}<Icon size={16} stroke={2} aria-hidden="true" />{/if}
 		{badge.label}
 	</span>
 {/if}
 
-<style>
-	.chip,
-	.pill {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		background: var(--card-2);
-		color: var(--fg);
-		font-size: 0.875rem;
-		font-weight: var(--weight-strong);
-	}
-	.chip {
-		width: 24px;
-		height: 24px;
-		border-radius: 50%;
-		flex: none;
-	}
-	.pill {
-		border-radius: var(--radius-pill);
-		padding: 6px 14px;
-	}
-	/* Solid role colour: near-black text and icon, the same in both themes. */
-	.filled {
-		color: #000;
-	}
-	.outline {
-		background: transparent;
-		color: var(--muted);
-		box-shadow: inset 0 0 0 1px var(--muted);
-	}
-</style>

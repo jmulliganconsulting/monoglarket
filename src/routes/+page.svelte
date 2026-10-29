@@ -90,90 +90,108 @@
 	const groups = $derived(
 		[...data.categories.map((c) => ({ name: c.name, list: cards.filter((m) => m.categoryKey === c.key) })), { name: 'Other', list: cards.filter((m) => !m.categoryKey) }].filter((g) => g.list.length),
 	);
+
+	// Market card: vault examples/Design reference, "Market card". Shared classes for the cards below.
+	const card = 'grid gap-3 rounded-card bg-card p-4 shadow-card';
+	const title = 'm-0 text-[0.9375rem] leading-[1.33] font-strong [&_a]:text-inherit [&_a]:no-underline';
+	const meta = 'm-0 text-sm tracking-[-0.1px] text-muted';
+	const head = `${meta} -mb-1.5 flex justify-between text-xs [&>:last-child]:min-w-[60px] [&>:last-child]:text-center`;
+	// The chance is the loudest thing on the card.
+	const pill = 'grid h-11 min-w-[60px] place-items-center rounded-pill bg-card-2 font-display text-[1.375rem] font-[650] tabular-nums [font-stretch:var(--stretch-display)]';
+	const sideText = { yes: 'text-yes-text', no: 'text-no-text' } as Record<string, string>;
+	const sideBar = { yes: 'bg-yes', no: 'bg-no' } as Record<string, string>;
+	const choice = 'inline-flex min-h-11 items-center rounded-xl bg-card-2 px-2.5 text-[0.8125rem] font-strong whitespace-nowrap no-underline';
+
 </script>
 
 <svelte:head><title>Monoglarket</title></svelte:head>
 
 <h1>{data.decided ? 'Decided markets' : 'Open markets'}</h1>
 
-<nav class="status" aria-label="Market status">
-	<a href="/" aria-current={data.decided ? undefined : 'page'}>Open</a>
-	<a href="/?tab=decided" aria-current={data.decided ? 'page' : undefined}>Decided</a>
+<!-- Status is text tabs on a divider line, so it doesn't read as category buttons. The active underline sits on the divider. -->
+<nav class="mb-4 flex flex-wrap gap-6 border-b border-border" aria-label="Market status">
+	{#each [{ href: '/', text: 'Open', on: !data.decided }, { href: '/?tab=decided', text: 'Decided', on: data.decided }] as t (t.href)}
+		<a class="-mb-px inline-flex min-h-11 items-center border-b-2 border-transparent px-0.5 text-muted no-underline aria-[current=page]:border-fg aria-[current=page]:font-strong aria-[current=page]:text-fg" href={t.href} aria-current={t.on ? 'page' : undefined}>{t.text}</a>
+	{/each}
 </nav>
-<nav class="chips" aria-label="Categories">
-	<a class="all" href="/{data.decided ? '?tab=decided' : ''}" aria-current={data.category ? undefined : 'page'}>All</a>
+<!-- Coloured tabs keep their colour when selected; the ring shows which one is open. All sits apart from the categories. -->
+<nav class="mb-5 flex flex-wrap gap-2 [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center [&>a]:rounded-pill [&>a]:bg-card-2 [&>a]:px-3.5 [&>a]:text-sm [&>a]:text-fg [&>a]:no-underline [&>a[aria-current=page]]:bg-fg [&>a[aria-current=page]]:font-strong [&>a[aria-current=page]]:text-bg [&>a[aria-current=page]]:outline-2 [&>a[aria-current=page]]:outline-offset-2 [&>a[aria-current=page]]:outline-fg" aria-label="Categories">
+	<a class="mr-4" href="/{data.decided ? '?tab=decided' : ''}" aria-current={data.category ? undefined : 'page'}>All</a>
 	{#each data.categories as c (c.key)}
 		<a href="?{data.decided ? 'tab=decided&' : ''}category={c.key}" aria-current={data.category === c.key ? 'page' : undefined} style:background={c.color} style:color={c.color ? textOn(c.color) : undefined}>{c.name}</a>
 	{/each}
 </nav>
 
 {#if data.category && !data.decided && data.canModerate && data.markets.length}
-	<form method="POST" action="?/setHeadliner" use:enhance class="pick">
+	<form method="POST" action="?/setHeadliner" use:enhance class="mb-5 flex flex-wrap items-end gap-2 text-sm">
 		<label>Headliner
-			<select name="marketId">
+			<select class="min-h-11 max-w-full" name="marketId">
 				{#each data.markets as m (m.id)}<option value={m.id} selected={m.id === data.headlinerId}>{m.question}</option>{/each}
 			</select>
 		</label>
 		<button class="quiet">Set headliner</button>
-		{#if form?.error}<span class="error" role="alert">{form.error}</span>{/if}
+		{#if form?.error}<span role="alert">{form.error}</span>{/if}
 	</form>
 {/if}
 
 {#if data.markets.length === 0}
-	<p class="empty">{data.decided ? 'No decided markets yet.' : 'No open markets yet.'}</p>
+	<p class={meta}>{data.decided ? 'No decided markets yet.' : 'No open markets yet.'}</p>
 {:else}
 	{#each groups as g (g.name)}
-		{#if !data.category && data.categories.length}<h2 class="group">{g.name}</h2>{/if}
-		<ul>
+		{#if !data.category && data.categories.length}<h2 class="mt-6 mb-0 text-lg">{g.name}</h2>{/if}
+		<ul class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,340px),1fr))] gap-4 p-0">
 		{#each entriesOf(g.list) as entry (entry[0].id)}
 			{#if entry[0].questionGroupId !== null}
-				<li class="question" style:border-top={entry[0].colorPrimary ? `4px solid ${entry[0].colorPrimary}` : undefined}>
+				<!-- A banner picture puts the title straight above the close time, so the two sit closer. -->
+				<li class="{card} [&>h2+p]:-mt-2.5" style:border-top={entry[0].colorPrimary ? `4px solid ${entry[0].colorPrimary}` : undefined}>
 					<MarketHeading src={questionPicture(entry)}>
-						<h2><a href="/questions/{entry[0].questionGroupId}">{entry[0].question}</a></h2>
+						<h2 class={title}><a href="/questions/{entry[0].questionGroupId}">{entry[0].question}</a></h2>
 					</MarketHeading>
 					{#if data.decided}
-						<p class="meta">{winnerText(entry)}{entry[0].resolvedAt ? `, ${closes(entry[0].resolvedAt)}` : ''}</p>
+						<p class={meta}>{winnerText(entry)}{entry[0].resolvedAt ? `, ${closes(entry[0].resolvedAt)}` : ''}</p>
 					{:else}
-						<p class="meta">{closes(entry[0].closeAt)}</p>
+						<p class={meta}>{closes(entry[0].closeAt)}</p>
 					{/if}
-					<p class="meta head" aria-hidden="true"><span>Option</span><span>Chance</span></p>
+					<p class={head} aria-hidden="true"><span>Option</span><span>Chance</span></p>
 					{#each entry as o (o.id)}
-						<div class="option">
-							<a class="option-name" href="/markets/{o.id}">{o.optionLabel}</a>
-							<span class="pill" aria-label="{pct(yesOf(o))}% chance">{pct(yesOf(o))}%</span>
+						<!-- One row per option, name and chance on the left, Yes and No on the right (like the Polymarket date market). -->
+						<div class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 border-t border-border pt-2.5">
+							<a class="text-sm font-strong text-fg no-underline" href="/markets/{o.id}">{o.optionLabel}</a>
+							<span class={pill} aria-label="{pct(yesOf(o))}% chance">{pct(yesOf(o))}%</span>
 							{#if data.decided}
-								<span class="meta">{o.status === 'cancelled' ? 'Cancelled' : o.winner === 'Yes' ? 'Won' : 'Lost'}</span>
+								<span class={meta}>{o.status === 'cancelled' ? 'Cancelled' : o.winner === 'Yes' ? 'Won' : 'Lost'}</span>
 							{:else}
-								<a class="choice yes" href="/markets/{o.id}">Yes {pct(yesOf(o))}%</a>
-								<a class="choice no" href="/markets/{o.id}">No {pct(1 - yesOf(o))}%</a>
+								<a class="{choice} text-yes-text" href="/markets/{o.id}">Yes {pct(yesOf(o))}%</a>
+								<a class="{choice} text-no-text" href="/markets/{o.id}">No {pct(1 - yesOf(o))}%</a>
 							{/if}
 						</div>
 					{/each}
 				</li>
 			{:else}
 				{@const m = entry[0]}
-				<li class:headliner={m.id === data.headlinerId} style:border-top={m.colorPrimary ? `4px solid ${m.colorPrimary}` : undefined}>
-					{#if m.id === data.headlinerId}<p class="tag">Headliner</p>{/if}
+				<li class={[card, '[&>h2+p]:-mt-2.5', m.id === data.headlinerId && 'col-span-full']} style:border-top={m.colorPrimary ? `4px solid ${m.colorPrimary}` : undefined}>
+					{#if m.id === data.headlinerId}<p class="m-0 text-xs font-strong tracking-[0.04em] text-muted uppercase">Headliner</p>{/if}
 					<MarketHeading large={m.id === data.headlinerId} src={m.imageFile ? `/market-images/${m.imageFile}` : null}>
-						<h2><a href="/markets/{m.id}">{m.question}</a></h2>
+						<h2 class={title}><a href="/markets/{m.id}">{m.question}</a></h2>
 					</MarketHeading>
 					{#if data.decided}
-						<p class="meta">{m.status === 'cancelled' ? 'Cancelled' : `Won by ${m.winner ?? '?'}`}{m.resolvedAt ? `, ${closes(m.resolvedAt)}` : ''}</p>
+						<p class={meta}>{m.status === 'cancelled' ? 'Cancelled' : `Won by ${m.winner ?? '?'}`}{m.resolvedAt ? `, ${closes(m.resolvedAt)}` : ''}</p>
 					{:else}
-						<p class="meta">{closes(m.closeAt)}</p>
+						<p class={meta}>{closes(m.closeAt)}</p>
 					{/if}
-					<p class="meta head" aria-hidden="true"><span>Outcome</span><span>Chance</span></p>
+					<p class={head} aria-hidden="true"><span>Outcome</span><span>Chance</span></p>
 					{#each topOf(m.outcomes) as o (o.label)}
-						<div class="outcome {side(o.label)}">
-							<span class="label">
+						<div class="flex items-center justify-between gap-3">
+							<span class="grid flex-1 gap-1">
 								{o.label}
-								<span class="bar" style:width="{pct(o.probability)}%"></span>
+								<!-- Bar length is the probability. -->
+								<span class="h-0.5 max-w-full rounded-full {sideBar[side(o.label)] ?? 'bg-fg-2'}" style:width="{pct(o.probability)}%"></span>
 							</span>
-							<span class="pill" aria-label="{pct(o.probability)}% chance">{pct(o.probability)}%</span>
+							<span class="{pill} {sideText[side(o.label)] ?? ''}" aria-label="{pct(o.probability)}% chance">{pct(o.probability)}%</span>
 						</div>
 					{/each}
 					{#if m.outcomes.length > 2}
-						<p class="meta">{m.outcomes.length} outcomes</p>
+						<p class={meta}>{m.outcomes.length} outcomes</p>
 					{/if}
 				</li>
 			{/if}
@@ -181,219 +199,3 @@
 		</ul>
 	{/each}
 {/if}
-
-<style>
-	/* Market card: vault examples/Design reference, "Market card". */
-	ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-		gap: 16px;
-	}
-	li {
-		background: var(--card);
-		border-radius: var(--radius-card);
-		box-shadow: var(--shadow-card);
-		padding: 16px;
-		display: grid;
-		gap: 12px;
-	}
-	h2 a {
-		color: inherit;
-		text-decoration: none;
-	}
-	h2 {
-		font-size: 0.9375rem;
-		line-height: 1.33;
-		font-weight: var(--weight-strong);
-		margin: 0;
-	}
-	p {
-		margin: 0;
-	}
-	.pic {
-		width: 100%;
-		aspect-ratio: 16 / 9;
-		object-fit: cover;
-		border-radius: 12px;
-	}
-	.status,
-	.chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-	}
-	.chips a {
-		min-height: 44px;
-		display: inline-flex;
-		align-items: center;
-		padding: 0 14px;
-		border-radius: var(--radius-pill);
-		background: var(--card-2);
-		color: var(--fg);
-		text-decoration: none;
-		font-size: 0.875rem;
-	}
-	.chips a[aria-current='page'] {
-		background: var(--fg);
-		color: var(--bg);
-		font-weight: var(--weight-strong);
-	}
-	/* Coloured tabs keep their colour when selected; the ring shows which one is open. */
-	.chips a[aria-current='page'] {
-		outline: 2px solid var(--fg);
-		outline-offset: 2px;
-	}
-	/* Status is text tabs on a divider line, so it doesn't read as category buttons. */
-	.status {
-		gap: 24px;
-		margin-bottom: 16px;
-		border-bottom: 1px solid var(--border);
-	}
-	.chips {
-		margin-bottom: 20px;
-	}
-	.pick {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: end;
-		gap: 8px;
-		margin-bottom: 20px;
-		font-size: 0.875rem;
-	}
-	.pick select {
-		min-height: 44px;
-		max-width: 100%;
-	}
-	.headliner {
-		grid-column: 1 / -1;
-	}
-	.tag {
-		color: var(--muted);
-		font-size: 0.75rem;
-		font-weight: var(--weight-strong);
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-	}
-	.status a {
-		min-height: 44px;
-		display: inline-flex;
-		align-items: center;
-		margin-bottom: -1px; /* the active underline sits on the divider */
-		padding: 0 2px;
-		color: var(--muted);
-		text-decoration: none;
-		border-bottom: 2px solid transparent;
-	}
-	.status a[aria-current='page'] {
-		color: var(--fg);
-		border-bottom-color: var(--fg);
-		font-weight: var(--weight-strong);
-	}
-	/* Space between All and the categories. */
-	.all {
-		margin-right: 16px;
-	}
-	.group {
-		margin: 24px 0 0;
-		font-size: 1.125rem;
-	}
-	.meta,
-	.empty {
-		color: var(--muted);
-		font-size: 0.875rem;
-		letter-spacing: -0.1px;
-	}
-	h2 + .meta {
-		margin-top: -10px;
-	}
-	.head {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.75rem;
-		margin-bottom: -6px;
-	}
-	.head span:last-child {
-		min-width: 60px;
-		text-align: center;
-	}
-	.outcome {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-	}
-	.label {
-		flex: 1;
-		display: grid;
-		gap: 4px;
-	}
-	/* Bar length is the probability. */
-	.bar {
-		height: 2px;
-		border-radius: 100px;
-		background: var(--fg-2);
-		max-width: 100%;
-	}
-	.yes .bar {
-		background: var(--yes);
-	}
-	.no .bar {
-		background: var(--no);
-	}
-	.yes .pill {
-		color: var(--yes-text);
-	}
-	.no .pill {
-		color: var(--no-text);
-	}
-	.pill {
-		min-width: 60px;
-		height: 44px;
-		display: grid;
-		place-items: center;
-		border-radius: var(--radius-pill);
-		background: var(--card-2);
-		/* The chance is the loudest thing on the card. */
-		font-family: var(--font-display);
-		font-stretch: var(--stretch-display);
-		font-size: 1.375rem;
-		font-weight: 650;
-		font-variant-numeric: tabular-nums;
-	}
-	/* A question card: one row per option, name and chance on the left, Yes and No on the right (like the Polymarket date market). */
-	.option {
-		display: grid;
-		grid-template-columns: 1fr auto auto auto;
-		align-items: center;
-		gap: 8px;
-		padding-top: 10px;
-		border-top: 1px solid var(--border);
-	}
-	.option-name {
-		color: var(--fg);
-		font-weight: var(--weight-strong);
-		font-size: 0.875rem;
-		text-decoration: none;
-	}
-	.choice {
-		min-height: 44px;
-		display: inline-flex;
-		align-items: center;
-		padding: 0 10px;
-		border-radius: 12px;
-		background: var(--card-2);
-		font-size: 0.8125rem;
-		font-weight: var(--weight-strong);
-		white-space: nowrap;
-		text-decoration: none;
-	}
-	.choice.yes {
-		color: var(--yes-text);
-	}
-	.choice.no {
-		color: var(--no-text);
-	}
-</style>

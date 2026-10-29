@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { coins } from '#lib/format.ts';
-	import '#lib/styles/tokens.css';
+	import '#lib/styles/app.css';
 	import type { LayoutProps } from './$types';
 	import VisitSummary from '#lib/VisitSummary.svelte';
 	import { onMount, tick } from 'svelte';
@@ -33,6 +33,7 @@
 		{ href: '/leaderboard', text: 'Leaderboard' },
 		{ href: '/history', text: 'History' },
 		{ href: '/activity', text: 'Activity' },
+		{ href: '/changelog', text: 'Changelog' },
 		...(data.canModerate ? [{ href: '/moderate', text: 'Manage markets' }, { href: '/markets/new', text: 'New market' }] : []),
 		...(data.canResolve ? [{ href: '/resolve', text: 'Resolve' }] : []),
 		...(data.isAdmin ? [{ href: '/admin', text: 'Admin' }] : [])
@@ -148,299 +149,24 @@
 {#if data.summary}
 	<VisitSummary summary={data.summary} />
 {/if}
-<main>{@render children()}</main>
-<footer>
-	<div class="foot">
-		<div class="notice">
-			<p>Copyright © {new Date().getFullYear()} John Mulligan Consulting. All Rights Reserved.</p>
-			<p class="build">Monoglmarket is an unofficial site, not affiliated with or endorsed by the <a href="https://sse.rit.edu/"><abbr title="Society of Software Engineering">SSE</abbr></a>, <a href="https://rit.edu/"><abbr title="Rochester Institute of Technology">RIT</abbr></a>, or <a href="https://polymarket.com/">Polymarket</a>.</p>
+<main class="mx-auto max-w-page p-4 pb-[calc(88px+env(safe-area-inset-bottom))] md:pb-4">{@render children()}</main>
+<!-- Modelled on jmulligan191.com's footer: centred on phones, copyright left and links right on desktop. The phone bottom nav sits over it, so it keeps main's clearance. -->
+<footer class="border-t border-border pb-[calc(88px+env(safe-area-inset-bottom))] text-sm text-muted md:pb-0 [&_a]:text-fg-2">
+	<div class="mx-auto flex max-w-page flex-col items-center gap-2 px-4 py-8 text-center md:flex-row md:items-start md:justify-between md:text-left">
+		<div class="flex flex-col gap-1">
+			<p class="m-0">Copyright © {new Date().getFullYear()} John Mulligan Consulting. All Rights Reserved.</p>
+			<p class="m-0 text-xs opacity-60">Monoglarket is an unofficial site, not affiliated with or endorsed by the <a href="https://sse.rit.edu/"><abbr title="Society of Software Engineering">SSE</abbr></a>, <a href="https://rit.edu/"><abbr title="Rochester Institute of Technology">RIT</abbr></a>, or <a href="https://polymarket.com/">Polymarket</a>.</p>
 		</div>
-		<div class="links">
-			<nav class="legal-links" aria-label="Footer">
-				<a href="/privacy">Privacy Policy</a>
-				<a href="/terms">Terms of Service</a>
-				<a href={REPO}>Source on GitHub</a>
+		<div class="flex flex-col items-center gap-3 md:items-end">
+			<nav class="flex flex-wrap justify-center gap-x-4 gap-y-1 md:justify-end" aria-label="Footer">
+				<a class="inline-flex min-h-11 items-center" href="/privacy">Privacy Policy</a>
+				<a class="inline-flex min-h-11 items-center" href="/terms">Terms of Service</a>
+				<a class="inline-flex min-h-11 items-center" href={REPO}>GitHub</a>
 			</nav>
-			<p class="build">
+			<p class="m-0 text-xs opacity-60">
 				Commit {#if __GIT_COMMIT__ === 'unknown'}<code>{__GIT_COMMIT__}</code>{:else}<a href="{REPO}/commit/{__GIT_COMMIT__.replace('-dirty', '')}"><code>{__GIT_COMMIT__}</code></a>{/if}
 			</p>
 		</div>
 	</div>
 </footer>
 
-<style>
-	/* Offline (FR-29): the banner shows, and every green action button is paused so nothing is attempted without a connection. */
-	.offline-note {
-		display: none;
-		flex-basis: 100%;
-		margin: 0;
-		font-weight: 600;
-	}
-	:global([data-offline]) .offline-note {
-		display: block;
-	}
-	:global([data-offline] .go) {
-		opacity: 0.5;
-		pointer-events: none;
-	}
-
-	/* Phone-first (vault: Mobile experience). Look follows vault: Design reference. */
-	:global(body) {
-		margin: 0;
-		background: var(--bg);
-		color: var(--fg);
-		font-family: var(--font);
-		font-weight: var(--weight);
-		line-height: 1.5;
-	}
-	/* Wraps on narrow phones so the name and Sign out button stay on screen instead of running off the right edge. */
-	header {
-		min-height: 56px;
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 8px 12px;
-		padding: 8px 16px;
-		padding-top: calc(8px + env(safe-area-inset-top));
-		border-bottom: 1px solid var(--border);
-		font-weight: var(--weight-strong);
-		font-size: 1.125rem;
-	}
-	header a {
-		color: inherit;
-		text-decoration: none;
-	}
-	header .brand img {
-		display: block;
-		height: 40px;
-		width: auto;
-	}
-	header .balance {
-		margin-left: auto;
-		margin-right: 16px;
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		font-variant-numeric: tabular-nums;
-		font-size: 1rem;
-	}
-	header .balance img {
-		width: 28px;
-		height: 28px;
-	}
-	header form {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-size: 0.875rem;
-		font-weight: var(--weight);
-		color: var(--fg-2);
-	}
-	header button {
-		height: 44px;
-		padding: 0 12px;
-		border: 0;
-		border-radius: var(--radius-pill);
-		background: var(--card-2);
-		color: var(--fg);
-		font: inherit;
-		cursor: pointer;
-	}
-	/* Dev site (APP_ENV=dev): a solid violet header with white text. The logo's light lettering stays readable on it. */
-	:global([data-env='dev']) header {
-		--fg: #fff;
-		--fg-2: #ede9fe;
-		--card-2: #ffffff33;
-		background: #6d28d9;
-		color: var(--fg);
-		border-bottom-color: #5b21b6;
-	}
-	main {
-		max-width: 1100px;
-		margin: 0 auto;
-		padding: 16px;
-		padding-bottom: calc(88px + env(safe-area-inset-bottom));
-	}
-	/* Bottom nav on phones; every item is a 44 px tap target (NFR-09). */
-	nav[aria-label='Main'] {
-		position: fixed;
-		inset: auto 0 0 0;
-		display: flex;
-		justify-content: space-around;
-		background: var(--card);
-		border-top: 1px solid var(--border);
-		padding-bottom: env(safe-area-inset-bottom);
-		z-index: 10;
-	}
-	nav[aria-label='Main'] > a,
-	nav[aria-label='Main'] summary {
-		flex: 1;
-		min-height: 44px;
-		display: grid;
-		place-items: center;
-		color: var(--fg-2);
-		font-size: 0.8125rem;
-		text-decoration: none;
-		cursor: pointer;
-		list-style: none;
-	}
-	/* While measuring, links take their natural width and the bar hides the overflow instead of scrolling the page. */
-	nav[data-measuring] {
-		overflow: hidden;
-	}
-	nav[data-measuring] > a,
-	nav[data-measuring] summary {
-		flex: none;
-		padding: 0 12px;
-		white-space: nowrap;
-	}
-	nav[aria-label='Main'] > a {
-		white-space: nowrap;
-	}
-	nav summary::-webkit-details-marker {
-		display: none;
-	}
-	.count {
-		display: inline-block;
-		min-width: 1.4em;
-		margin-left: 4px;
-		padding: 0 5px;
-		border-radius: var(--radius-pill);
-		background: var(--fg);
-		color: var(--bg);
-		font-size: 0.75rem;
-		font-weight: var(--weight-strong);
-		text-align: center;
-	}
-	.more {
-		flex: 1;
-		display: flex;
-		justify-content: center;
-	}
-	/* The More panel opens above the bar on phones, and below the bar on desktop. */
-	.panel {
-		position: absolute;
-		right: 8px;
-		bottom: calc(100% + 8px);
-		width: min(280px, calc(100vw - 16px));
-		max-height: 70vh;
-		overflow: auto;
-		background: var(--card);
-		border-radius: var(--radius-card);
-		box-shadow: var(--shadow-card);
-		padding: 8px 12px;
-		display: grid;
-		gap: 8px;
-	}
-	.panel a {
-		min-height: 44px;
-		display: flex;
-		align-items: center;
-		color: var(--fg);
-		text-decoration: none;
-	}
-	@media (min-width: 768px) {
-		nav[aria-label='Main'] {
-			position: static;
-			justify-content: flex-start;
-			gap: 8px;
-			max-width: 1100px;
-			margin: 0 auto;
-			border: 0;
-			padding: 0 16px;
-		}
-		nav[aria-label='Main'] > a,
-		nav[aria-label='Main'] summary {
-			flex: none;
-			padding: 0 12px;
-		}
-		.more {
-			flex: none;
-			position: relative;
-		}
-		.panel {
-			right: 0;
-			top: calc(100% + 4px);
-			bottom: auto;
-		}
-		main {
-			padding-bottom: 16px;
-		}
-	}
-	/* Modelled on jmulligan191.com's footer: centred on phones, copyright left and links right on desktop. */
-	/* The phone bottom nav sits over the footer, so it keeps the same clearance as main. */
-	footer {
-		border-top: 1px solid var(--border);
-		color: var(--muted);
-		font-size: 0.875rem;
-		padding-bottom: calc(88px + env(safe-area-inset-bottom));
-	}
-	.foot {
-		max-width: 1100px;
-		margin: 0 auto;
-		padding: 32px 16px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 8px;
-		text-align: center;
-	}
-	.notice {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-	}
-	.notice p,
-	.build {
-		margin: 0;
-	}
-	.build {
-		font-size: 0.75rem;
-		opacity: 0.6;
-	}
-	.links {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 12px;
-	}
-	footer a {
-		color: var(--fg-2);
-	}
-	.legal-links {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		gap: 4px 16px;
-	}
-	@media (min-width: 768px) {
-		footer {
-			padding-bottom: 0;
-		}
-		.foot {
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: flex-start;
-			text-align: left;
-		}
-		.links {
-			align-items: flex-end;
-		}
-		.legal-links {
-			justify-content: flex-end;
-		}
-	}
-	.legal-links a {
-		display: inline-flex;
-		align-items: center;
-		min-height: 44px;
-	}
-	:global(h1) {
-		font-family: var(--font-display);
-		font-stretch: var(--stretch-display);
-		font-size: 2.25rem;
-		line-height: 1.1;
-		font-weight: 650;
-		margin: 8px 0 16px;
-	}
-</style>

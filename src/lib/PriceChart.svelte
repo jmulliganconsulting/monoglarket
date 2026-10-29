@@ -46,155 +46,47 @@
 	};
 </script>
 
-<div class="chart">
-	<div class="ranges" role="group" aria-label="Time range">
+<div class="grid gap-2">
+	<div class="flex justify-end gap-1" role="group" aria-label="Time range">
 		{#each Object.keys(spans) as r (r)}
-			<button type="button" class:on={range === r} onclick={() => (range = r as Range)}>{r}</button>
+			<button type="button" class={['min-h-11 min-w-11 cursor-pointer rounded-xl border-0 text-[0.8125rem] [font-family:inherit]', range === r ? 'bg-card-2 font-strong text-fg' : 'bg-transparent text-muted']} onclick={() => (range = r as Range)}>{r}</button>
 		{/each}
 	</div>
-	<div class="plot">
-		<svg viewBox="0 0 {W} {H}" role="img" aria-label="Chance of each option over time" preserveAspectRatio="none" onpointermove={onHover} onpointerdown={onHover} onpointerleave={() => (hoverT = null)}>
+	<div class="relative">
+		<svg class="block h-[200px] w-full touch-none" viewBox="0 0 {W} {H}" role="img" aria-label="Chance of each option over time" preserveAspectRatio="none" onpointermove={onHover} onpointerdown={onHover} onpointerleave={() => (hoverT = null)}>
 		{#each [0.25, 0.5, 0.75] as g (g)}
-			<line x1="0" x2={W} y1={y(g)} y2={y(g)} class="grid" />
+			<line x1="0" x2={W} y1={y(g)} y2={y(g)} class="stroke-border [stroke-dasharray:2_4] [vector-effect:non-scaling-stroke]" />
 		{/each}
 		{#each paths as d, i (i)}
 			<path {d} fill="none" stroke={visible[i].color} stroke-width="2.5" vector-effect="non-scaling-stroke" />
 		{/each}
 		{#if hoverT !== null}
-			<line x1={x(hoverT)} x2={x(hoverT)} y1="0" y2={H} class="cursor" />
+			<line x1={x(hoverT)} x2={x(hoverT)} y1="0" y2={H} class="stroke-muted [vector-effect:non-scaling-stroke]" />
 			{#each series as s (s.label)}
 				<circle cx={x(hoverT)} cy={y(probAt(s, hoverT))} r="4" fill={s.color} />
 			{/each}
 		{/if}
 	</svg>
 		{#if hoverT !== null}
-			<div class="tip" class:flip={x(hoverT) / W > 0.6} style:left="{(x(hoverT) / W) * 100}%">
-				<p class="meta">{when(hoverT)}</p>
-				<ul>
+			<!-- Floats over the chart at the hovered moment: the time and every option's chance then. -->
+			<div class={['pointer-events-none absolute top-2 min-w-[180px] rounded-xl border border-border bg-card px-3 py-2 text-[0.8125rem] shadow-card', x(hoverT) / W > 0.6 ? '-translate-x-[calc(100%+12px)]' : 'translate-x-3']} style:left="{(x(hoverT) / W) * 100}%">
+				<p class="mt-0 mb-1 text-muted">{when(hoverT)}</p>
+				<ul class="m-0 grid list-none gap-1 p-0">
 					{#each series as s (s.label)}
-						<li><span class="swatch" style:background={s.color}></span>{s.label}<strong>{pct(probAt(s, hoverT))}</strong></li>
+						<li class="flex items-center gap-1.5"><span class="inline-block size-2.5 rounded-full" style:background={s.color}></span>{s.label}<strong class="ml-auto pl-3 tabular-nums">{pct(probAt(s, hoverT))}</strong></li>
 					{/each}
 				</ul>
 			</div>
 		{/if}
 	</div>
-	<p class="meta readout" aria-live="polite">{hoverT === null ? 'Move across the chart to see the chance at any time.' : when(hoverT)}</p>
-	<ul class="legend">
+	<p class="m-0 text-[0.8125rem] text-muted" aria-live="polite">{hoverT === null ? 'Move across the chart to see the chance at any time.' : when(hoverT)}</p>
+	<ul class="m-0 flex list-none flex-wrap gap-x-4 gap-y-1 p-0 text-sm">
 		{#each series as s (s.label)}
-			<li>
-				<span class="swatch" style:background={s.color}></span>
+			<li class="inline-flex items-center gap-1.5">
+				<span class="inline-block size-2.5 rounded-full" style:background={s.color}></span>
 				{s.label} <strong>{pct(hoverT === null ? s.points[s.points.length - 1].p : probAt(s, hoverT))}</strong>
 			</li>
 		{/each}
 	</ul>
 </div>
 
-<style>
-	.chart {
-		display: grid;
-		gap: 8px;
-	}
-	.ranges {
-		display: flex;
-		gap: 4px;
-		justify-content: flex-end;
-	}
-	.ranges button {
-		min-height: 44px;
-		min-width: 44px;
-		border: 0;
-		border-radius: 12px;
-		background: transparent;
-		color: var(--muted);
-		font: inherit;
-		font-size: 0.8125rem;
-		cursor: pointer;
-	}
-	.ranges button.on {
-		color: var(--fg);
-		font-weight: var(--weight-strong);
-		background: var(--card-2);
-	}
-	svg {
-		width: 100%;
-		height: 200px;
-		display: block;
-		touch-action: none;
-	}
-	.plot {
-		position: relative;
-	}
-	/* Floats over the chart at the hovered moment: the time and every option's chance then. */
-	.tip {
-		position: absolute;
-		top: 8px;
-		transform: translateX(12px);
-		min-width: 180px;
-		padding: 8px 12px;
-		background: var(--card);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		box-shadow: var(--shadow-card);
-		font-size: 0.8125rem;
-		pointer-events: none;
-	}
-	.tip.flip {
-		transform: translateX(calc(-100% - 12px));
-	}
-	.tip p {
-		margin: 0 0 4px;
-	}
-	.tip ul {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-		gap: 4px;
-	}
-	.tip li {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-	}
-	.tip strong {
-		margin-left: auto;
-		padding-left: 12px;
-		font-variant-numeric: tabular-nums;
-	}
-	.grid {
-		stroke: var(--border);
-		stroke-dasharray: 2 4;
-		vector-effect: non-scaling-stroke;
-	}
-	.cursor {
-		stroke: var(--muted);
-		vector-effect: non-scaling-stroke;
-	}
-	.readout {
-		margin: 0;
-		font-size: 0.8125rem;
-	}
-	.legend {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 4px 16px;
-		font-size: 0.875rem;
-	}
-	.legend li {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-	}
-	.swatch {
-		width: 10px;
-		height: 10px;
-		border-radius: 50%;
-		display: inline-block;
-	}
-	.meta {
-		color: var(--muted);
-	}
-</style>
