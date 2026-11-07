@@ -23,3 +23,5 @@ vite.config.ts.timestamp-*
 
 # Local tooling metadata
 /.boost/
+.claude/
+.vscode/

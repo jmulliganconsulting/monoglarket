@@ -1,4 +1,5 @@
 import { error, fail } from '@sveltejs/kit';
+import { optionLabelIn, ZONE_COOKIE } from '../markets/when.ts';
 import { prisma } from '#lib/server/db.ts';
 import { prices } from '../engine/lmsr.ts';
 import { isModerator } from '../auth/roles.ts';
@@ -9,7 +10,7 @@ import { listable, viewerOf } from '../markets/visibility.ts';
 import { getNumberSetting } from '../settings/settings.ts';
 
 // Open markets (closing soon first), or decided ones (newest first). Decided markets stay here; a history page comes later (vault "Market history").
-export async function load({ url, locals }) {
+export async function load({ url, locals, cookies }) {
 	const decided = url.searchParams.get('tab') === 'decided';
 	const categoryKey = url.searchParams.get('category');
 	const viewer = await viewerOf(prisma, locals.user!);
@@ -54,7 +55,7 @@ export async function load({ url, locals }) {
 				category: m.category?.name ?? null,
 				categoryKey: m.category?.key ?? null,
 				questionGroupId: m.questionGroupId,
-				optionLabel: m.optionLabel,
+				optionLabel: optionLabelIn(m.optionLabel, m.optionRange, cookies.get(ZONE_COOKIE)),
 				optionDate: m.optionDate,
 				colorPrimary: m.colorPrimary,
 				imageFile: m.imageFile,

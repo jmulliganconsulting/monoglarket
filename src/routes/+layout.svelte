@@ -23,6 +23,10 @@
 	};
 
 	// Service worker for installing the app (FR-28). Registered once in the browser; it doesn't cache pages.
+	// Remember this browser's time zone, so pages show option times in it (src/markets/when.ts).
+	onMount(() => {
+		document.cookie = `tz=${encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone)}; path=/; max-age=31536000; samesite=lax`;
+	});
 	onMount(() => {
 		if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 		// Offline: show the banner and pause the trade and send buttons (vault "Mobile experience").

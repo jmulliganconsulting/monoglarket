@@ -55,7 +55,7 @@
 			close();
 		};
 	});
-	const closes = (d: Date | null) => (d ? `Closes ${dateTime(d)}` : 'No set close date');
+	const closes = (d: Date | null) => (d ? `Trading ends ${dateTime(d)}` : 'No end time');
 	const pct = (p: number) => Math.round(p * 100);
 	// Yes/No outcomes get green/red; others stay neutral (vault: Kalshi design reference).
 	const side = (label: string) => ({ yes: 'yes', no: 'no' })[label.trim().toLowerCase()] ?? '';
@@ -150,7 +150,7 @@
 						<h2 class={title}><a href="/questions/{entry[0].questionGroupId}">{entry[0].question}</a></h2>
 					</MarketHeading>
 					{#if data.decided}
-						<p class={meta}>{winnerText(entry)}{entry[0].resolvedAt ? `, ${closes(entry[0].resolvedAt)}` : ''}</p>
+						<p class={meta}>{winnerText(entry)}{entry[0].resolvedAt ? `, resolved ${dateTime(entry[0].resolvedAt)}` : ''}</p>
 					{:else}
 						<p class={meta}>{closes(entry[0].closeAt)}</p>
 					{/if}
@@ -180,7 +180,7 @@
 						<h2 class={title}><a href="/markets/{m.id}">{m.question}</a></h2>
 					</MarketHeading>
 					{#if data.decided}
-						<p class={meta}>{m.status === 'cancelled' ? 'Cancelled' : `Won by ${m.winner ?? '?'}`}{m.resolvedAt ? `, ${closes(m.resolvedAt)}` : ''}</p>
+						<p class={meta}>{m.status === 'cancelled' ? 'Cancelled' : `Won by ${m.winner ?? '?'}`}{m.resolvedAt ? `, resolved ${dateTime(m.resolvedAt)}` : ''}</p>
 					{:else}
 						<p class={meta}>{closes(m.closeAt)}</p>
 					{/if}

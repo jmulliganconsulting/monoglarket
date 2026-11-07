@@ -6,7 +6,7 @@ import { account, balance } from '../ledger/ledger.ts';
 import { testPrisma } from '../test-db.ts';
 import { SOURCES } from '../resolvers/sources.ts';
 import { runResolvers } from '../resolvers/resolvers.ts';
-import { acceptProposal, approveMarket, buy, createMarket, grant, grantResolver, lockMarket, propose, resolve, revokeResolver, runMarketJobs, scheduleLock } from './markets.ts';
+import { acceptProposal, approveMarket, buy, createMarket, grant, grantResolver, lockMarket, propose, resolve, revokeResolver, runMarketJobs } from './markets.ts';
 import { endBreak, startBreak } from '../users/users.ts';
 
 let pool: PrismaClient;
@@ -135,22 +135,4 @@ test('a moderator locks trading by hand; it stays locked until the market is res
   await assert.rejects(buy(pool, { userId: ana, marketId: m.marketId, outcomeId: m.yes, spend: 10, minShares: 0, idempotencyKey: 'lock1' }), { code: 'market_locked' });
   await resolve(pool, { marketId: m.marketId, outcomeId: m.yes, moderatorId: mod });
   assert.equal(await status(m.marketId), 'resolved');
-});
-
-test('a scheduled lock fires once in the job and then stays locked', async () => {
-  const m = await openMarket();
-  const lockAt = new Date(Date.now() + 3_600_000);
-  await scheduleLock(pool, { marketId: m.marketId, moderatorId: mod, lockAt });
-  await runMarketJobs(pool, new Date(Date.now() + 7_200_000));
-  const row = await pool.market.findUniqueOrThrow({ where: { id: m.marketId } });
-  assert.ok(row.lockedAt);
-  assert.equal(row.lockAt, null);
-  await assert.rejects(buy(pool, { userId: ana, marketId: m.marketId, outcomeId: m.yes, spend: 10, minShares: 0, idempotencyKey: 'sched1' }), { code: 'market_locked' });
-  assert.ok((await pool.market.findUniqueOrThrow({ where: { id: m.marketId } })).lockedAt);
-});
-
-test('a lock time must be in the future and before the market closes', async () => {
-  const m = await openMarket();
-  await assert.rejects(scheduleLock(pool, { marketId: m.marketId, moderatorId: mod, lockAt: new Date(Date.now() - 1000) }), { code: 'bad_lock_time' });
-  await assert.rejects(scheduleLock(pool, { marketId: m.marketId, moderatorId: mod, lockAt: new Date(Date.now() + 2 * 86_400_000) }), { code: 'bad_lock_time' });
 });

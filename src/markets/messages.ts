@@ -29,7 +29,7 @@ const messages: Record<string, string> = {
 	too_small: 'That sale is too small to pay out a whole unit.',
 	bad_amount: 'Enter a positive amount.',
 	conflict_of_interest: 'A moderator with a position in a market can’t resolve it.',
-	market_locked: 'Trading is locked while this is happening, until it is resolved.',
+	market_locked: 'A moderator locked trading on this market. It stays locked until it is resolved.',
 	already_locked: 'This market is already locked.',
 	reason_required: 'Give a reason of at least 5 characters. Members see it.',
 	not_editable: 'This market can no longer be changed in that way.',
@@ -38,11 +38,15 @@ const messages: Record<string, string> = {
 	dispute_closed: 'The dispute window for this result has closed.',
 	same_outcome: 'That is already the result.',
 	bad_colour: 'Colours must be a # and six hex digits.',
-	bad_lock_time: 'The lock time must be in the future and before the market closes.',
 	not_lockable: 'Only open markets can be locked.',
 	on_break: 'You’re on a break from trading. Payouts still arrive.',
 	bad_resolver: 'That automatic source isn’t set up.',
-	bad_date: 'Enter real days like 2027-06-01. The day it happened can’t be in the future.',
+	bad_range: 'Write each option as a range: 20-21, 32+, ≤19, or Above 4.60.',
+	bad_range_count: 'A numeric question needs 2 to 20 ranges.',
+	bad_answer: 'Enter the result as a number, like 27, or a range, like 20-21.',
+	bad_date: 'Write each option as a day or time: 11/21, Before 11/15, After 12/1, 11/15-11/20, Before 3pm or Sunday at 3pm. When it happened can’t be in the future.',
+	bad_zone: 'Pick a time zone from the list.',
+	bad_date_count: 'A date question needs 1 to 20 days or ranges.',
 };
 
 export function marketMessage(e: unknown): string {

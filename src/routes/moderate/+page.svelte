@@ -6,12 +6,6 @@
 
 	let { data, form }: PageProps = $props();
 	const when = dateTime;
-	// The time picker gives local time; the hidden field carries it as ISO, the same as the server reads elsewhere.
-	const localToIso = (e: Event) => {
-		const input = e.currentTarget as HTMLInputElement;
-		const hidden = input.nextElementSibling as HTMLInputElement;
-		hidden.value = input.value ? new Date(input.value).toISOString() : '';
-	};
 	// Stops the submit before it is sent when the moderator backs out.
 	const confirmFirst = (message: string): SubmitFunction => ({ cancel }) => {
 		if (!confirm(message)) cancel();
@@ -33,7 +27,7 @@
 	{#each data.pending as m (m.id)}
 		<article class="card">
 			<h3>{m.question}</h3>
-			<p class="meta">Proposed by {m.creator ?? 'someone'} · {m.closeAt ? `closes ${when(m.closeAt)}` : 'no set close date'} · subsidy {coins(m.subsidy)} · {m.outcomes.join(', ')}</p>
+			<p class="meta">Proposed by {m.creator ?? 'someone'} · {m.closeAt ? `trading ends ${when(m.closeAt)}` : 'no end time'} · subsidy {coins(m.subsidy)} · {m.outcomes.join(', ')}</p>
 			<p>{m.criteria}</p>
 			<div class="row">
 				<form method="POST" action="?/approve" use:enhance>
@@ -155,19 +149,13 @@
 	{#each data.live as m (m.id)}
 		<div class="live">
 			<a href="/markets/{m.id}">{m.question}</a>
-			<span class="meta">{m.locked ? 'locked until resolved' : m.status}{#if m.lockAt && !m.locked} · locks {when(m.lockAt)}{/if}</span>
+			<span class="meta">{m.lockedAt ? `Locked ${when(m.lockedAt)}, until resolved` : m.status === 'closed' ? 'Trading ended, waiting to be resolved' : m.closeAt ? `Trading ends ${when(m.closeAt)}` : 'No end time'}</span>
 			<div class="lock-row">
 				{#if m.status === 'open'}
-					{#if !m.locked}
-						<form method="POST" action="?/lock" use:enhance>
+					{#if !m.lockedAt}
+						<form method="POST" action="?/lock" use:enhance={confirmFirst('Lock trading now? Use this only when something has happened that makes further trading unfair, before trading ends on its own. It can’t be undone: the market stays locked until it is resolved.')}>
 							<input type="hidden" name="marketId" value={m.id} />
-							<button class="quiet">Lock trading now</button>
-						</form>
-						<form method="POST" action="?/scheduleLock" use:enhance class="schedule">
-							<input type="hidden" name="marketId" value={m.id} />
-							<input type="datetime-local" aria-label="Lock trading at" onchange={localToIso} />
-							<input type="hidden" name="lockAt" />
-							<button class="quiet">{m.lockAt ? 'Change lock time' : 'Lock at time'}</button>
+							<button class="quiet">Emergency lock</button>
 						</form>
 					{/if}
 				{/if}
@@ -295,10 +283,6 @@
 		flex-wrap: wrap;
 		gap: 8px;
 		align-items: center;
-	}
-	.schedule {
-		display: flex;
-		gap: 8px;
 	}
 	.error {
 		color: var(--no-text);

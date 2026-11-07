@@ -10,6 +10,8 @@ import { isResolverSource } from '../resolvers/sources.ts';
 import { onBreak } from '../users/users.ts';
 import { notifyHolders, notifyInvolved } from '../notifications/notify.ts';
 import { isHttpsUrl, MAX_PROOFS, type ProofInput } from '../proofs/proofs.ts';
+import { parseRange, rangeHolds } from './ranges.ts';
+import { describeWhen, parseWhen, readWhen, validZone, whenEdge, whenHolds } from './when.ts';
 
 export class MarketError extends LedgerError {}
 
@@ -44,8 +46,6 @@ type NewMarket = {
   creatorId?: number;
   spendCap?: number;
   categoryId?: number;
-  /** Trading locks at this time and stays locked until the market is resolved (vault "Market lock"). */
-  lockAt?: Date;
   colorPrimary?: string;
   colorSecondary?: string;
   /** Set for each option of a several-winner question (ADR-020). */
@@ -53,7 +53,9 @@ type NewMarket = {
   optionLabel?: string;
   optionDate?: Date;
   /** Set with optionDate on a date question: 'on' = the event happened on that day, 'by' = on or before it. */
-  dateMatch?: 'on' | 'by';
+  dateMatch?: 'on' | 'by' | 'range';
+  /** Set on each option of a numeric question: the range it covers (src/markets/ranges.ts). */
+  optionRange?: string;
 };
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -69,7 +71,6 @@ async function createMarketIn(db: Db, m: NewMarket): Promise<number> {
   if (!Number.isSafeInteger(m.subsidy) || m.subsidy <= 0) throw new MarketError('bad_subsidy');
   if (m.closeAt && !(m.closeAt > new Date())) throw new MarketError('bad_close');
   if (m.spendCap !== undefined && !(Number.isSafeInteger(m.spendCap) && m.spendCap > 0)) throw new MarketError('bad_spend_cap');
-  if (m.lockAt && !(m.lockAt > new Date() && (!m.closeAt || m.lockAt < m.closeAt))) throw new MarketError('bad_lock_time');
   for (const c of [m.colorPrimary, m.colorSecondary]) if (c !== undefined && !HEX.test(c)) throw new MarketError('bad_colour');
   if (m.creatorId) {
     const creator = await db.user.findUnique({ where: { id: m.creatorId }, select: { breakUntil: true } });
@@ -87,7 +88,6 @@ async function createMarketIn(db: Db, m: NewMarket): Promise<number> {
       closeAt: m.closeAt,
       creatorId: m.creatorId,
       categoryId: m.categoryId ?? null,
-      lockAt: m.lockAt ?? null,
       colorPrimary: m.colorPrimary ?? null,
       colorSecondary: m.colorSecondary ?? null,
       outcomes: { create: m.outcomes.map((label, sort) => ({ label: label.trim(), sort, sseMemberId: m.outcomeSseMemberIds?.[sort] ?? null })) },
@@ -95,6 +95,7 @@ async function createMarketIn(db: Db, m: NewMarket): Promise<number> {
       optionLabel: m.optionLabel ?? null,
       optionDate: m.optionDate ?? null,
       dateMatch: m.dateMatch ?? null,
+      optionRange: m.optionRange ?? null,
     },
   });
   await audit(db, m.creatorId ?? null, 'create_market', market.id, m.question.trim().slice(0, 100));
@@ -116,28 +117,56 @@ export async function createQuestionGroup(
 }
 
 /**
- * A date question: one yes/no option per day, "On or before this day", which wins if the event happened by the end of that day.
- * Settled by resolveDateQuestion. (Older questions may still have an "On" option for a day; dateOptionWins handles both.)
+ * A date question: each option is a span of time ("Before 11/15", "11/2", "After 11/3", "Sunday at 3pm", "Sat 9am-5pm"), its own
+ * yes/no market, worked out in the creator's time zone `tz` (src/markets/when.ts). Settled by resolveDateQuestion from when it
+ * happened: every option whose span holds that moment wins. Each option keeps its span as instants, so it settles the same whenever
+ * and wherever it is resolved. (Older questions have "on"/"by" options with only optionDate; dateOptionWins handles those.)
  */
 export async function createDateQuestion(
   prisma: PrismaClient,
-  g: Omit<NewMarket, 'outcomes' | 'questionGroupId' | 'optionLabel' | 'optionDate' | 'dateMatch'> & { days: { day: Date; text: string }[] },
+  g: Omit<NewMarket, 'outcomes' | 'questionGroupId' | 'optionLabel' | 'optionDate' | 'dateMatch' | 'optionRange'> & { days: string[]; tz: string; now?: number },
 ): Promise<number> {
-  const { days, ...shared } = g;
-  if (days.length < 1 || days.length > 10) throw new MarketError('bad_outcome_count');
-  if (days.some((d) => Number.isNaN(d.day.getTime()))) throw new MarketError('bad_date');
-  const options = days.map(({ day, text }) => ({ label: `On or before ${text}`, optionDate: day, dateMatch: 'by' as const }));
-  if (new Set(options.map((o) => o.label)).size !== options.length) throw new MarketError('duplicate_option');
-  return createGroupIn(prisma, shared, options);
+  const { days, tz, now = Date.now(), ...shared } = g;
+  if (!validZone(tz)) throw new MarketError('bad_zone');
+  if (days.length < 1 || days.length > 20) throw new MarketError('bad_date_count');
+  const spans = days.map((d) => parseWhen(d, tz, now));
+  if (spans.some((w) => !w)) throw new MarketError('bad_date');
+  if (new Set(days.map((d) => d.trim().toLowerCase())).size !== days.length) throw new MarketError('duplicate_option');
+  return createGroupIn(
+    prisma,
+    shared,
+    // The label spells out what was understood ("By Sat, Oct 31", "Before 3:00 PM EST"), in the creator's zone; pages show times in
+    // the viewer's. optionDate is the span's end (its start, if open-ended), for ordering.
+    spans.map((w) => ({ label: describeWhen(w!, tz), optionRange: JSON.stringify(w), dateMatch: 'range' as const, optionDate: new Date(whenEdge(w!)) })),
+  );
 }
 
-async function createGroupIn(prisma: PrismaClient, shared: Omit<NewMarket, 'outcomes' | 'questionGroupId' | 'optionLabel'>, options: { label: string; optionDate?: Date; dateMatch?: 'on' | 'by' }[]) {
+/**
+ * A numeric question: each option is a range ("≤19", "20-21", "32+", "Above 4.60"), its own yes/no market.
+ * Settled by resolveNumericQuestion from one number: every option whose range holds it wins. Ranges may overlap ("Above 4.60", "Above 4.80").
+ */
+export async function createNumericQuestion(
+  prisma: PrismaClient,
+  g: Omit<NewMarket, 'outcomes' | 'questionGroupId' | 'optionLabel' | 'optionDate' | 'dateMatch' | 'optionRange'> & { ranges: string[] },
+): Promise<number> {
+  const { ranges, ...shared } = g;
+  if (ranges.length < 2 || ranges.length > 20) throw new MarketError('bad_range_count');
+  if (ranges.some((r) => !parseRange(r))) throw new MarketError('bad_range');
+  if (new Set(ranges.map((r) => r.trim().toLowerCase())).size !== ranges.length) throw new MarketError('duplicate_option');
+  return createGroupIn(prisma, shared, ranges.map((r) => ({ label: r, optionRange: r.trim() })));
+}
+
+async function createGroupIn(
+  prisma: PrismaClient,
+  shared: Omit<NewMarket, 'outcomes' | 'questionGroupId' | 'optionLabel'>,
+  options: { label: string; optionDate?: Date; dateMatch?: 'on' | 'by' | 'range'; optionRange?: string }[],
+) {
   return withTx(prisma, async (db) => {
     const group = await db.questionGroup.create({
       data: { question: shared.question.trim(), resolutionCriteria: shared.criteria.trim(), closeAt: shared.closeAt, creatorId: shared.creatorId ?? null },
     });
     for (const o of options)
-      await createMarketIn(db, { ...shared, outcomes: ['Yes', 'No'], questionGroupId: group.id, optionLabel: o.label.trim(), optionDate: o.optionDate, dateMatch: o.dateMatch });
+      await createMarketIn(db, { ...shared, outcomes: ['Yes', 'No'], questionGroupId: group.id, optionLabel: o.label.trim(), optionDate: o.optionDate, dateMatch: o.dateMatch, optionRange: o.optionRange });
     await audit(db, shared.creatorId ?? null, 'create_question', null, `${options.length} options: ${shared.question.trim().slice(0, 80)}`);
     return group.id;
   });
@@ -227,7 +256,8 @@ function assertOpen(market: Market) {
 }
 
 /**
- * Lock trading now (vault "Market lock"). There is no unlock: the lock stays until the market is resolved or cancelled.
+ * Emergency stop: lock trading now, before the close time, when something happens that would make trading unfair (vault "Market lock").
+ * Not part of a normal market: that is what the close time is for. lockedAt records when. There is no unlock: the lock stays until the market is resolved or cancelled.
  * The version bump makes a trade already in flight retry and see the lock.
  */
 export async function lockMarket(prisma: PrismaClient, r: { marketId: number; moderatorId: number }) {
@@ -235,23 +265,11 @@ export async function lockMarket(prisma: PrismaClient, r: { marketId: number; mo
     const { market } = await claimMarket(db, r.marketId);
     if (market.status !== 'open') throw new MarketError('not_lockable');
     if (market.lockedAt) throw new MarketError('already_locked');
-    await db.market.update({ where: { id: market.id }, data: { lockedAt: new Date(), lockAt: null } });
+    await db.market.update({ where: { id: market.id }, data: { lockedAt: new Date() } });
     await audit(db, r.moderatorId, 'lock', market.id, '');
   });
 }
 
-/** Lock trading automatically at `lockAt` (checked by runMarketJobs). Pass null to cancel a scheduled lock. */
-export async function scheduleLock(prisma: PrismaClient, r: { marketId: number; moderatorId: number; lockAt: Date | null }) {
-  return withTx(prisma, async (db) => {
-    const { market } = await claimMarket(db, r.marketId);
-    if (market.status !== 'open') throw new MarketError('not_lockable');
-    if (r.lockAt && (!(r.lockAt > new Date()) || (market.closeAt && r.lockAt >= market.closeAt))) throw new MarketError('bad_lock_time');
-    await db.market.update({ where: { id: market.id }, data: { lockAt: r.lockAt } });
-    await audit(db, r.moderatorId, 'schedule_lock', market.id, r.lockAt ? r.lockAt.toISOString() : 'cancelled');
-  });
-}
-
-/** Members on a break can't trade or request resolution (vault "Take a break"). Payouts and refunds still arrive. */
 async function assertNoBreak(db: Db, userId: number) {
   const u = await db.user.findUniqueOrThrow({ where: { id: userId }, select: { breakUntil: true } });
   if (onBreak(u)) throw new MarketError('on_break');
@@ -513,28 +531,63 @@ export function dateOptionWins(match: 'on' | 'by', day: Date, at: Date) {
   return match === 'on' ? at.getTime() >= start && at.getTime() < start + DAY_MS : at.getTime() < start + DAY_MS;
 }
 
-/**
- * A date question: the event happened at `at`. Every open option is settled from that one time (see dateOptionWins), in one transaction.
- * A pending option stops the whole thing.
- */
+/** A date question: the event happened at `at`. Every open option is settled from that one time (see dateOptionWins). */
 export async function resolveDateQuestion(prisma: PrismaClient, r: { groupId: number; moderatorId: number; at: Date }) {
   if (Number.isNaN(r.at.getTime())) throw new MarketError('bad_date');
   return withTx(prisma, async (db) => {
     // A future time is refused, except for admins testing (they may resolve as if the event already happened).
     if (r.at > new Date() && (await db.user.findUniqueOrThrow({ where: { id: r.moderatorId }, select: { role: true } })).role !== 'admin') throw new MarketError('bad_date');
-    const options = await db.market.findMany({
-      where: { questionGroupId: r.groupId, deletedAt: null },
-      orderBy: { id: 'asc' },
-      select: { id: true, status: true, optionDate: true, dateMatch: true, outcomes: { where: { removedAt: null }, select: { id: true, label: true } } },
+    await resolveGroupIn(db, r.groupId, r.moderatorId, (o) => {
+      if (o.dateMatch === 'range') {
+        const span = readWhen(o.optionRange);
+        if (!span) throw new MarketError('not_resolvable');
+        return whenHolds(span, r.at);
+      }
+      if (o.optionDate === null || o.dateMatch === null) throw new MarketError('not_resolvable');
+      return dateOptionWins(o.dateMatch as 'on' | 'by', o.optionDate, r.at);
     });
-    if (options.some((o) => o.status === 'pending_review')) throw new MarketError('not_resolvable');
-    const open = options.filter((o) => o.status === 'open' || o.status === 'closed');
-    if (open.length === 0 || open.some((o) => o.optionDate === null || o.dateMatch === null)) throw new MarketError('not_resolvable');
-    for (const o of open) {
-      const label = dateOptionWins(o.dateMatch as 'on' | 'by', o.optionDate!, r.at) ? 'Yes' : 'No';
-      await resolveIn(db, { marketId: o.id, outcomeId: o.outcomes.find((x) => x.label === label)!.id, moderatorId: r.moderatorId });
-    }
+    await db.questionGroup.update({ where: { id: r.groupId }, data: { answer: r.at.toISOString() } });
   });
+}
+
+/** A numeric question: the answer is a number (or a range, "20-21"). Every option whose range holds all of it wins; the rest lose. */
+export async function resolveNumericQuestion(prisma: PrismaClient, r: { groupId: number; moderatorId: number; answer: string }) {
+  const answer = parseRange(r.answer);
+  if (!answer || !Number.isFinite(answer.lo) || !Number.isFinite(answer.hi)) throw new MarketError('bad_answer');
+  return withTx(prisma, async (db) => {
+    await resolveGroupIn(db, r.groupId, r.moderatorId, (o) => {
+      const range = o.optionRange ? parseRange(o.optionRange) : null;
+      if (!range) throw new MarketError('not_resolvable');
+      return rangeHolds(range, answer);
+    });
+    await db.questionGroup.update({ where: { id: r.groupId }, data: { answer: r.answer.trim() } });
+  });
+}
+
+/** A several-winner question: the moderator ticks the options that won. Every open option is settled together: ticked ones Yes, the rest No. */
+export async function resolveQuestionOptions(prisma: PrismaClient, r: { groupId: number; moderatorId: number; winners: number[] }) {
+  return withTx(prisma, async (db) => {
+    const settled = await resolveGroupIn(db, r.groupId, r.moderatorId, (o) => r.winners.includes(o.id));
+    // A ticked option that wasn't open (already settled, or not in this question) would silently be ignored.
+    if (r.winners.some((id) => !settled.includes(id))) throw new MarketError('bad_outcome');
+  });
+}
+
+/** Settle every open option of a question in one go. A pending option stops the whole thing. Returns the settled market ids. */
+async function resolveGroupIn(db: Db, groupId: number, moderatorId: number, wins: (o: { id: number; optionDate: Date | null; dateMatch: string | null; optionRange: string | null }) => boolean) {
+  const options = await db.market.findMany({
+    where: { questionGroupId: groupId, deletedAt: null },
+    orderBy: { id: 'asc' },
+    select: { id: true, status: true, optionDate: true, dateMatch: true, optionRange: true, outcomes: { where: { removedAt: null }, select: { id: true, label: true } } },
+  });
+  if (options.some((o) => o.status === 'pending_review')) throw new MarketError('not_resolvable');
+  const open = options.filter((o) => o.status === 'open' || o.status === 'closed');
+  if (open.length === 0) throw new MarketError('not_resolvable');
+  for (const o of open) {
+    const label = wins(o) ? 'Yes' : 'No';
+    await resolveIn(db, { marketId: o.id, outcomeId: o.outcomes.find((x) => x.label === label)!.id, moderatorId });
+  }
+  return open.map((o) => o.id);
 }
 
 async function winnerLabel(db: Db, outcomeId: number) {
@@ -591,13 +644,6 @@ export async function runMarketJobs(prisma: PrismaClient, now = new Date()) {
       // version bump makes any trade already in flight on this market retry and see it closed
       const r = await db.market.updateMany({ where: { id, status: 'open' }, data: { status: 'closed', version: { increment: 1 } } });
       if (r.count === 1) await audit(db, null, 'close', id, '');
-    });
-  // Scheduled locks: once per market, the lockAt is cleared when it fires.
-  const lockDue = await prisma.market.findMany({ where: { status: 'open', lockedAt: null, lockAt: { lte: now } }, select: { id: true } });
-  for (const { id } of lockDue)
-    await withTx(prisma, async (db) => {
-      const r = await db.market.updateMany({ where: { id, status: 'open', lockedAt: null, lockAt: { lte: now } }, data: { lockedAt: now, lockAt: null, version: { increment: 1 } } });
-      if (r.count === 1) await audit(db, null, 'auto_lock', id, '');
     });
   const finished = await prisma.market.findMany({ where: { status: 'resolved', disputeUntil: { lte: now } }, select: { id: true } });
   for (const { id } of finished) await finalise(prisma, id);

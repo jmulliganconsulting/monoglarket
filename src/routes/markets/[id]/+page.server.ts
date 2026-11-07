@@ -1,4 +1,5 @@
 import { error, fail } from '@sveltejs/kit';
+import { optionLabelIn, ZONE_COOKIE } from '../../../markets/when.ts';
 import { join } from 'node:path';
 import { DATA_DIR } from '$app/env/private';
 import { prisma } from '#lib/server/db.ts';
@@ -16,7 +17,7 @@ import { onBreak } from '../../../users/users.ts';
 import { tradeAllowed } from '../../../markets/limits.ts';
 import { discardProofs, proofsFromForm, type ProofInput } from '../../../proofs/proofs.ts';
 
-export async function load({ params, locals }) {
+export async function load({ params, locals, cookies }) {
 	const id = Number(params.id);
 	const m = await prisma.market.findUnique({
 		where: { id },
@@ -79,7 +80,7 @@ export async function load({ params, locals }) {
 			currency: m.currency.code,
 			creator: m.creator?.displayName ?? null,
 			questionGroupId: m.questionGroupId,
-			optionLabel: m.optionLabel,
+			optionLabel: optionLabelIn(m.optionLabel, m.optionRange, cookies.get(ZONE_COOKIE)),
 			b: m.b,
 			spendCap: m.spendCap,
 			resolvedOutcomeId: m.resolvedOutcomeId,
@@ -92,10 +93,12 @@ export async function load({ params, locals }) {
 			imageFile: m.imageFile,
 			resolvedAt: m.resolvedAt,
 			disputeUntil: m.disputeUntil,
+			createdAt: m.createdAt,
 			tradable: m.status === 'open' && (!m.closeAt || m.closeAt > new Date()) && !m.lockedAt && !onBreak(locals.user!),
 			// Once closed, the chart stops at the close (or the resolution, if it had no set close time) rather than today.
 			chartEnd: m.status === 'open' || m.status === 'pending_review' ? null : (m.closeAt ?? m.resolvedAt),
 			locked: !!m.lockedAt,
+			lockedAt: m.lockedAt,
 			onBreak: onBreak(locals.user!) ? locals.user!.breakUntil : null,
 			resolution: m.resolverSource ? (SOURCES[m.resolverSource]?.label ?? null) : null,
 		},

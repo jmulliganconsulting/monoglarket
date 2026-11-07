@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance, type SubmitFunction } from '$app/forms';
 	import type { ActionData, PageProps } from './$types';
+	import ZoneSelect from '#lib/ZoneSelect.svelte';
+	import { fromInput } from '../../../../markets/when.ts';
 
 	let { data, form }: PageProps = $props();
 	const act = $derived(form as ActionData | undefined);
@@ -11,7 +13,12 @@
 	let noClose = $state(data.market.closeAt === null);
 	// svelte-ignore state_referenced_locally
 	let closeLocal = $state(local(new Date(data.market.closeAt ?? Date.now() + 7 * 86_400_000)));
-	const closeAt = $derived(!noClose && closeLocal && !Number.isNaN(Date.parse(closeLocal)) ? new Date(closeLocal).toISOString() : '');
+	const closeAt = $derived.by(() => {
+		const t = noClose || !closeTz ? NaN : fromInput(closeLocal, closeTz);
+		return Number.isNaN(t) ? '' : new Date(t).toISOString();
+	});
+	// The zone the close time is typed in: the browser's own unless changed.
+	let closeTz = $state('');
 	let removeReason = $state('');
 	const confirmFirst = (message: string): SubmitFunction => ({ cancel }) => {
 		if (!confirm(message)) cancel();
@@ -32,9 +39,10 @@
 		<form method="POST" action="?/details" use:enhance class="stack">
 			<label class="field">Question<input name="question" required maxlength="200" value={data.market.question} /></label>
 			<label class="field">How it resolves<textarea name="criteria" required rows="3" maxlength="1000">{data.market.criteria}</textarea></label>
-			<label class="field">Closes at<input type="datetime-local" bind:value={closeLocal} required /></label>
+			<label class="field">Trading ends<input type="datetime-local" bind:value={closeLocal} required /></label>
+			<ZoneSelect bind:value={closeTz} name="" />
 			<input type="hidden" name="closeAt" value={closeAt} />
-			<label class="choice"><input type="checkbox" bind:checked={noClose} /> No set close date</label>
+			<label class="choice"><input type="checkbox" bind:checked={noClose} /> No end time (runs until a moderator resolves it)</label>
 			<label class="field">Category
 				<select name="categoryId">
 					<option value="">None</option>

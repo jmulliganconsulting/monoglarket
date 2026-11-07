@@ -1,7 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import { prisma } from '#lib/server/db.ts';
 import { isModerator } from '../../auth/roles.ts';
-import { acceptProposal, approveMarket, cancel, lockMarket, reResolve, rejectMarket, rejectProposal, scheduleLock } from '../../markets/markets.ts';
+import { acceptProposal, approveMarket, cancel, lockMarket, reResolve, rejectMarket, rejectProposal } from '../../markets/markets.ts';
 import { marketMessage } from '../../markets/messages.ts';
 import { handleReport, reportMessage } from '../../reports/reports.ts';
 import { SOURCES } from '../../resolvers/sources.ts';
@@ -26,7 +26,7 @@ export async function load({ locals }) {
 			orderBy: { createdAt: 'asc' },
 			include: { market: { select: { id: true, question: true } }, outcome: { select: { label: true } }, proposer: { select: { displayName: true } }, attachments: { orderBy: { id: 'asc' } } },
 		}),
-		prisma.market.findMany({ where: { status: { in: ['open', 'closed'] }, deletedAt: null }, orderBy: { closeAt: 'asc' }, select: { id: true, question: true, status: true, lockedAt: true, lockAt: true, resolverSource: true } }),
+		prisma.market.findMany({ where: { status: { in: ['open', 'closed'] }, deletedAt: null }, orderBy: { closeAt: 'asc' }, select: { id: true, question: true, status: true, lockedAt: true, closeAt: true, resolverSource: true } }),
 		prisma.market.findMany({ where: { status: 'closed', deletedAt: null, closeAt: { lte: new Date(Date.now() - 24 * 3600_000) } }, orderBy: { closeAt: 'asc' }, select: { id: true, question: true, closeAt: true } }),
 		prisma.report.findMany({
 			where: { status: 'open' },
@@ -37,7 +37,7 @@ export async function load({ locals }) {
 	return {
 		pending: pending.map((m) => ({ id: m.id, question: m.question, criteria: m.resolutionCriteria, closeAt: m.closeAt, outcomes: m.outcomes.map((o) => o.label), creator: m.creator?.displayName ?? null, subsidy: m.subsidy })),
 		proposals: proposals.map((p) => ({ id: p.id, marketId: p.market.id, question: p.market.question, outcome: p.outcome.label, evidence: p.evidence, proposer: p.proposer?.displayName ?? 'an automatic source', createdAt: p.createdAt, proofs: p.attachments.map((a) => ({ id: a.id, kind: a.kind, label: a.label, url: a.url })) })),
-		live: live.map((m) => ({ ...m, locked: !!m.lockedAt })),
+		live,
 		overdue: overdue.map((m) => ({ id: m.id, question: m.question, closeAt: m.closeAt })),
 		disputes: (
 			await prisma.market.findMany({
@@ -108,14 +108,6 @@ export const actions = {
 		const moderator = moderatorId(locals);
 		const marketId = Number((await request.formData()).get('marketId'));
 		return run(() => lockMarket(prisma, { marketId, moderatorId: moderator }), 'Trading locked until it is resolved.');
-	},
-	scheduleLock: async ({ request, locals }) => {
-		const moderator = moderatorId(locals);
-		const form = await request.formData();
-		const marketId = Number(form.get('marketId'));
-		const raw = String(form.get('lockAt') ?? '');
-		const lockAt = raw ? new Date(raw) : null;
-		return run(() => scheduleLock(prisma, { marketId, moderatorId: moderator, lockAt }), lockAt ? 'Lock scheduled.' : 'Scheduled lock cleared.');
 	},
 	reResolve: async ({ request, locals }) => {
 		const moderator = moderatorId(locals);

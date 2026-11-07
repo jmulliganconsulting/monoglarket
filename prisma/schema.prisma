@@ -220,8 +220,6 @@ model Market {
   /// Null = no set close date: trading stays open until a moderator closes or resolves the market.
   closeAt            DateTime? @map("close_at")
   creatorId          Int?      @map("creator_id")
-  /// Scheduled automatic lock: trading pauses at this time (vault "Market lock"). Cleared once it fires.
-  lockAt             DateTime? @map("lock_at")
   /// Market category (vault "Categories"). Optional: uncategorised markets show under All.
   categoryId         Int?      @map("category_id")
   /// The category tab's headliner, set by a moderator (vault "Categories and visuals"). Null/false = the most active market.
@@ -230,7 +228,7 @@ model Market {
   colorPrimary       String?   @map("color_primary")
   colorSecondary     String?   @map("color_secondary")
   imageFile          String?   @map("image_file")
-  /// Trading is paused while this is set. Set by a moderator, or by lockAt.
+  /// When a moderator locked trading by hand (an emergency stop before the close time). Stays until resolved or cancelled.
   lockedAt           DateTime? @map("locked_at")
   resolvedOutcomeId  Int?      @map("resolved_outcome_id")
   /// Who set the current result; a re-resolution must come from someone else (vault "Resolution and payouts").
@@ -245,6 +243,8 @@ model Market {
   optionDate         DateTime? @map("option_date")
   /// Set with optionDate: 'on' wins if the event happened on that day, 'by' if it happened on or before it (UTC).
   dateMatch          String?   @map("date_match")
+  /// Set on each option of a numeric question: the range it covers, as written ("20-21", "32+", "≤19"). See src/markets/ranges.ts.
+  optionRange        String?   @map("option_range")
   /// Public reason shown on a cancelled market.
   cancelReason       String?   @map("cancel_reason")
   /// Soft delete (the ledger keeps every transaction). deleteReason is internal: admins only.
@@ -288,6 +288,8 @@ model QuestionGroup {
   /// Null = no set close date (see Market.closeAt).
   closeAt            DateTime? @map("close_at")
   creatorId          Int?      @map("creator_id")
+  /// The number (or range) a numeric question was resolved with, shown on the question.
+  answer             String?
   createdAt          DateTime  @default(now()) @map("created_at")
 
   creator User?    @relation(fields: [creatorId], references: [id])

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { coins, dateTime } from '#lib/format.ts';
 	import MarketHeading from '#lib/MarketHeading.svelte';
+	import MarketInfo from '#lib/MarketInfo.svelte';
 	import { onMount } from 'svelte';
 	import { enhance, type SubmitFunction } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -143,7 +144,7 @@
 	const statusText = $derived(
 		({
 			pending_review: 'Waiting for a moderator to approve this market. Trading opens once it is approved.',
-			open: data.market.closeAt ? `Trading open until ${when(data.market.closeAt)}.` : 'Trading open. No set close date.',
+			open: data.market.closeAt ? `Trading ends ${when(data.market.closeAt)}.` : 'Trading open. No end time: it runs until a moderator resolves it.',
 			closed: 'Trading has closed. Waiting for a moderator to resolve it.',
 			resolved: 'Resolved. The dispute window is open.',
 			final: 'Final.',
@@ -203,7 +204,7 @@
 		{#if data.market.onBreak}
 			<p class={notice} role="status">You're on a break from trading until {when(data.market.onBreak)}. You can still look around, and payouts still arrive.</p>
 		{:else if data.market.locked}
-			<p class={notice} role="status">Trading is paused while this is happening. A moderator will reopen it.</p>
+			<p class={notice} role="status">A moderator locked trading on {when(data.market.lockedAt!)}, before it was due to end. It stays locked until the market is resolved.</p>
 		{:else if data.market.tradable}
 			<div class="grid grid-cols-2 rounded-pill bg-card-2 p-1" role="tablist">
 				<button type="button" role="tab" aria-selected={mode === 'buy'} class={[pill, 'text-fg', mode === 'buy' ? 'bg-card font-strong' : 'bg-card-2']} onclick={() => (mode = 'buy')}>Buy</button>
@@ -324,12 +325,13 @@
 			</ul>
 		</section>
 
+		<MarketInfo question={data.market.question} criteria={data.market.criteria} currency={data.market.currency} createdAt={data.market.createdAt} closeAt={data.market.closeAt} resolvedAt={data.market.resolvedAt} disputeUntil={data.market.disputeUntil} />
+
 		<section class="{card} {rest}">
 			<h2 class={h2}>Resolution</h2>
 				{#if data.canModerate && !resolving}
 					<button class={go} onclick={() => (resolving = true)}>Resolve market</button>
 				{:else}
-			<p>{data.market.criteria}</p>
 			{#if data.market.disputeOpen}
 				<p class={notice} role="status">Dispute window open until {when(data.market.disputeUntil!)}. Anyone can dispute this result under Report a problem, and a moderator can change it until then.</p>
 			{/if}
