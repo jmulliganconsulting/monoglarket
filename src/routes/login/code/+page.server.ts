@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { requestLogin, verifyCode } from '../../../auth/auth.ts';
 import { prisma } from '#lib/server/db.ts';
 import { sendLoginEmail } from '#lib/server/email.ts';
-import { allowlist, PENDING_EMAIL_COOKIE, setPendingEmail, setSessionCookie } from '#lib/server/session.ts';
+import { allowlist, PENDING_EMAIL_COOKIE, setPendingEmail, setSessionCookie, takeLoginNext } from '#lib/server/session.ts';
 import { messageFor } from '../messages.ts';
 
 export function load({ cookies, locals }) {
@@ -25,7 +25,7 @@ export const actions = {
 		}
 		setSessionCookie(cookies, result.session);
 		cookies.delete(PENDING_EMAIL_COOKIE, { path: '/' });
-		redirect(303, '/');
+		redirect(303, takeLoginNext(cookies));
 	},
 	resend: async ({ cookies, url }) => {
 		const email = cookies.get(PENDING_EMAIL_COOKIE);

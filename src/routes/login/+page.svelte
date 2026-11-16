@@ -6,9 +6,14 @@
 	const showEmail = $derived(data.showEmail || !!form);
 </script>
 
-<svelte:head><title>Sign in · Monoglarket</title></svelte:head>
+<svelte:head><title>Sign in · {data.longTail ? 'Long Tail' : 'Monoglarket'}</title></svelte:head>
 
-<h1>Sign in</h1>
+{#if data.longTail}
+	<h1>Sign in to Long Tail</h1>
+	<p>Long Tail uses your SSE Monoglarket account. You don't need to use the markets to play.</p>
+{:else}
+	<h1>Sign in</h1>
+{/if}
 
 {#if !showEmail}
 	<a class="google" href="/login/google" data-sveltekit-reload>Sign in with Google</a>

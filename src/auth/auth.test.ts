@@ -2,7 +2,7 @@ import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { PrismaClient } from '../db/db.ts';
 import { testPrisma } from '../test-db.ts';
-import { CODE_TTL_MS, getSession, googleSignIn, passwordLogin, requestLogin, setPassword, signOut, verifyCode, verifyLink, type Allowlist } from './auth.ts';
+import { CODE_TTL_MS, getSession, googleSignIn, passwordLogin, requestLogin, safeNext, setPassword, signOut, verifyCode, verifyLink, type Allowlist } from './auth.ts';
 
 let prisma: PrismaClient;
 let drop: () => Promise<void>;
@@ -110,4 +110,9 @@ test('the primary officer badge is given on sign-in and kept after the role ends
 	await prisma.sseOfficer.update({ where: { sseOfficerId: 900 }, data: { isActive: false, removedAt: new Date() } });
 	const kept = await verifyCode(prisma, 'pat@school.test', (await requestLogin(prisma, 'pat@school.test', allow)).code);
 	assert.equal(kept.user.primaryOfficerSince?.getTime(), given.user.primaryOfficerSince?.getTime());
+});
+
+test('safeNext keeps paths on this site only', () => {
+	assert.equal(safeNext('/longtail/authorize?state=x'), '/longtail/authorize?state=x');
+	for (const bad of [null, undefined, '', 'https://evil.test', '//evil.test', '/\\evil.test', 'javascript:alert(1)']) assert.equal(safeNext(bad), null);
 });

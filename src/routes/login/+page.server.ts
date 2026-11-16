@@ -1,13 +1,17 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { passwordLogin, requestLogin } from '../../auth/auth.ts';
+import { passwordLogin, requestLogin, safeNext } from '../../auth/auth.ts';
 import { prisma } from '#lib/server/db.ts';
 import { sendLoginEmail } from '#lib/server/email.ts';
-import { allowlist, googleEnabled, setPendingEmail, setSessionCookie } from '#lib/server/session.ts';
+import { allowlist, googleEnabled, LOGIN_NEXT_COOKIE, setLoginNext, setPendingEmail, setSessionCookie, takeLoginNext } from '#lib/server/session.ts';
 import { authMessages, messageFor } from './messages.ts';
 
-export function load({ locals, url }) {
-	if (locals.user) redirect(303, '/');
-	return { google: googleEnabled, showEmail: !googleEnabled || url.searchParams.has('email'), error: authMessages[url.searchParams.get('error') ?? ''] };
+export function load({ locals, url, cookies }) {
+	const next = safeNext(url.searchParams.get('next'));
+	if (locals.user) redirect(303, next ?? '/');
+	if (next) setLoginNext(cookies, next);
+	// The form actions drop ?next=, so after a failed attempt the cookie still says where this sign-in is headed.
+	const longTail = (next ?? safeNext(cookies.get(LOGIN_NEXT_COOKIE)))?.startsWith('/longtail/') ?? false;
+	return { google: googleEnabled, showEmail: !googleEnabled || url.searchParams.has('email'), error: authMessages[url.searchParams.get('error') ?? ''], longTail };
 }
 
 export const actions = {
@@ -33,6 +37,6 @@ export const actions = {
 			return fail(400, { email, passwordError: messageFor(e) });
 		}
 		setSessionCookie(cookies, result.session);
-		redirect(303, '/');
+		redirect(303, takeLoginNext(cookies));
 	},
 };

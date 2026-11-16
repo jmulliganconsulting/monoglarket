@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { verifyLink } from '../../../auth/auth.ts';
 import { prisma } from '#lib/server/db.ts';
-import { setSessionCookie } from '#lib/server/session.ts';
+import { setSessionCookie, takeLoginNext } from '#lib/server/session.ts';
 import { messageFor } from '../messages.ts';
 
 // GET only shows a button: mail scanners that pre-open links must not use up the token.
@@ -19,6 +19,6 @@ export const actions = {
 			return fail(400, { error: messageFor(e) });
 		}
 		setSessionCookie(cookies, result.session);
-		redirect(303, '/');
+		redirect(303, takeLoginNext(cookies));
 	},
 };

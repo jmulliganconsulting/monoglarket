@@ -32,6 +32,9 @@ export function normaliseEmail(raw: string): string {
 	return email;
 }
 
+/** A path on this site, or null: a crafted ?next= must not send a freshly signed-in member to another site. */
+export const safeNext = (v: string | null | undefined) => (v && v.startsWith('/') && !v.startsWith('//') && !v.startsWith('/\\') ? v : null);
+
 /** Domains/emails from config; a domain of "*" allows anyone (dev only). */
 export function isAllowed(email: string, allow: Allowlist): boolean {
 	const domain = email.split('@')[1];

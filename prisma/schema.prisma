@@ -115,6 +115,7 @@ model User {
   trades           Trade[]
   markets          Market[]
   sessions         Session[]
+  handoffCodes     HandoffCode[]
   discordAccounts  DiscordAccount[]
   earnAwards       EarnAward[]
   siteCheckins     SiteEventCheckin[]   @relation("checkedIn")
@@ -159,6 +160,22 @@ model Session {
 
   @@index([userId])
   @@map("sessions")
+}
+
+/// One-time code that signs a member in to Long Tail, the puzzle game on its own subdomain (src/longtail/handoff.ts).
+/// The game's callback swaps it, with the shared secret, for the member's id and name. Only the hash is stored.
+model HandoffCode {
+  id        Int       @id @default(autoincrement())
+  codeHash  String    @unique @map("code_hash")
+  userId    Int       @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("handoff_codes")
 }
 
 /// Balance is a cache of the sum of ledger entries; only ledger.postTransaction changes it.

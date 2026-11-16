@@ -30,5 +30,8 @@ export const variables = defineEnvVars({
 	VAPID_PRIVATE_KEY: { schema: optional, description: 'Web push private key, kept secret' },
 	VAPID_SUBJECT: { schema: optional, description: 'mailto: or https: contact for the push service, e.g. mailto:club@example.edu' },
 	SSE_SYNC_MINUTES:{ schema: (v) => Math.max(1, Number(v) || 15), description: 'Minutes between SSE roster syncs (default 15)' },
+	LONGTAIL_CLIENT_ID: { schema: optional, description: 'Client ID Long Tail (the puzzle game) sends to /longtail/authorize; unset = Long Tail sign-in off' },
+	LONGTAIL_SECRET: { schema: optional, description: 'Secret shared with Long Tail, at least 32 characters (openssl rand -base64 32)' },
+	LONGTAIL_URL: { schema: optional, description: 'Long Tail origin, e.g. https://tail.example.edu; codes only ever go to <this>/auth/callback' },
 	APP_ENV: { schema: (v) => (v === 'dev' ? 'dev' : 'prod'), description: '"dev" marks the site as a development site (banner, tinted colours, dev favicon); anything else is prod' },
 });

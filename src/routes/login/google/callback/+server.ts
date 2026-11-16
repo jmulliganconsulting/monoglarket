@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '$app/env/private';
 import { AuthError, googleSignIn } from '../../../../auth/auth.ts';
 import { prisma } from '#lib/server/db.ts';
-import { allowlist, googleEnabled, GOOGLE_STATE_COOKIE, setSessionCookie } from '#lib/server/session.ts';
+import { allowlist, googleEnabled, GOOGLE_STATE_COOKIE, setSessionCookie, takeLoginNext } from '#lib/server/session.ts';
 
 export async function GET({ cookies, url }) {
 	const state = cookies.get(GOOGLE_STATE_COOKIE);
@@ -29,5 +29,5 @@ export async function GET({ cookies, url }) {
 		redirect(303, `/login?error=${e instanceof AuthError ? e.code : 'google_failed'}`);
 	}
 	setSessionCookie(cookies, result.session);
-	redirect(303, '/');
+	redirect(303, takeLoginNext(cookies));
 }
